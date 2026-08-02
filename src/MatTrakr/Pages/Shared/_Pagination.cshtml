@@ -1,0 +1,64 @@
+@model MatTrakr.ViewComponents.PaginationModel
+
+@functions {
+    private string PageUrl(int page)
+    {
+        var query = new List<string>();
+        foreach (var kv in Model.Query)
+        {
+            if (!string.IsNullOrEmpty(kv.Value) && kv.Key != Model.PageParam)
+                query.Add($"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}");
+        }
+        query.Add($"{Model.PageParam}={page}");
+        return "?" + string.Join("&", query);
+    }
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Seiten" class="table-pagination" id="@Model.Id">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(Model.Page <= 1 ? "disabled" : null)">
+                <a class="page-link" href="@PageUrl(Model.Page - 1)" aria-label="Zurück">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+
+            @{
+                var start = Math.Max(1, Model.Page - 2);
+                var end = Math.Min(Model.TotalPages, Model.Page + 2);
+            }
+            @if (start > 1)
+            {
+                <li class="page-item"><a class="page-link" href="@PageUrl(1)">1</a></li>
+                @if (start > 2)
+                {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+            }
+            @for (var p = start; p <= end; p++)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : null)">
+                    <a class="page-link" href="@PageUrl(p)">@p</a>
+                </li>
+            }
+            @if (end < Model.TotalPages)
+            {
+                @if (end < Model.TotalPages - 1)
+                {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+                <li class="page-item"><a class="page-link" href="@PageUrl(Model.TotalPages)">@Model.TotalPages</a></li>
+            }
+
+            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : null)">
+                <a class="page-link" href="@PageUrl(Model.Page + 1)" aria-label="Weiter">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+        <span class="table-pagination-info text-muted small">
+            @Model.TotalCount Einträge
+        </span>
+    </nav>
+}

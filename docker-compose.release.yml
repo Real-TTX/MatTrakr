@@ -1,0 +1,19 @@
+# Release stack:
+#   docker compose -f docker-compose.release.yml up --build -d
+services:
+  mattrakr:
+    build: .
+    image: mattrakr:latest
+    container_name: mattrakr
+    ports:
+      - "9242:9242"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # - MATTRAKR_ADMIN_PASSWORD=changeme     # initial admin password (default: admin)
+      # - Tmdb__ApiKey=<your-tmdb-api-key>     # or set it in the mounted data/config/settings.json
+    volumes:
+      - mattrakr-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  mattrakr-data:

@@ -1,0 +1,158 @@
+@page "/Lists/{id:long}/Add"
+@using MatTrakr.Data
+@model MatTrakr.Pages.Lists.AddModel
+@{
+    ViewData["Title"] = $"Hinzufügen · {Model.List.Name}";
+    var searchLabel = Model.List.Type switch
+    {
+        MediaType.Movies => "Film suchen (TMDb)",
+        MediaType.Series => "Serie suchen (TMDb)",
+        MediaType.Books => "Buch suchen (Google Books)",
+        _ => "Suchen",
+    };
+}
+
+<h1 class="page-title"><i class="bi bi-plus-circle"></i>Hinzufügen zu „@Model.List.Name“</h1>
+
+@if (!string.IsNullOrEmpty(Model.Warning))
+{
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i>@Model.Warning
+    </div>
+}
+
+<div class="content-card p-3 mb-3">
+    <label class="form-label" for="mediaSearchInput">@searchLabel</label>
+    <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="search" class="form-control form-control-lg" id="mediaSearchInput"
+               placeholder="Tippen zum Suchen …" autocomplete="off" autofocus
+               @(Model.SearchAvailable ? null : "disabled") />
+    </div>
+    <div class="form-text">Die Suche startet automatisch während der Eingabe.</div>
+</div>
+
+<div id="searchStatus" class="text-muted small mb-2 d-none"></div>
+<div id="searchResults" class="search-results"></div>
+
+<div class="list-actions">
+    <a href="/Lists/@Model.List.Id" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Zurück zur Liste
+    </a>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    const input = document.getElementById('mediaSearchInput');
+    const resultsEl = document.getElementById('searchResults');
+    const statusEl = document.getElementById('searchStatus');
+    const listId = @Model.List.Id;
+    const token = '@Html.Raw(Xsrf.GetAndStoreTokens(HttpContext).RequestToken)';
+
+    let timer = null;
+    let controller = null;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        const q = input.value.trim();
+        if (q.length < 2) {
+            resultsEl.innerHTML = '';
+            statusEl.classList.add('d-none');
+            return;
+        }
+        timer = setTimeout(() => search(q), 350);
+    });
+
+    async function search(q) {
+        if (controller) controller.abort();
+        controller = new AbortController();
+
+        statusEl.textContent = 'Suche läuft …';
+        statusEl.classList.remove('d-none');
+
+        try {
+            const res = await fetch(`/Lists/${listId}/Add?handler=Search&q=${encodeURIComponent(q)}`,
+                { signal: controller.signal });
+            if (!res.ok) throw new Error(res.status);
+            const hits = await res.json();
+            render(hits);
+            statusEl.textContent = hits.length === 0 ? 'Keine Treffer.' : `${hits.length} Treffer`;
+        } catch (e) {
+            if (e.name !== 'AbortError') {
+                statusEl.textContent = 'Suche fehlgeschlagen.';
+            }
+        }
+    }
+
+    function render(hits) {
+        resultsEl.innerHTML = '';
+        for (const hit of hits) {
+            const card = document.createElement('div');
+            card.className = 'search-hit' + (hit.alreadyAdded ? ' is-added' : '');
+
+            const cover = hit.coverUrl
+                ? `<img src="${escapeHtml(hit.coverUrl)}" alt="" class="search-hit-cover" loading="lazy">`
+                : `<div class="search-hit-cover search-hit-cover-placeholder"><i class="bi bi-image"></i></div>`;
+
+            card.innerHTML = `
+                ${cover}
+                <div class="search-hit-body">
+                    <div class="search-hit-title">${escapeHtml(hit.title)}${hit.year ? ` <span class="text-muted">(${hit.year})</span>` : ''}</div>
+                    ${hit.subtitle ? `<div class="search-hit-subtitle">${escapeHtml(hit.subtitle)}</div>` : ''}
+                    ${hit.overview ? `<div class="search-hit-overview">${escapeHtml(hit.overview)}</div>` : ''}
+                </div>
+                <div class="search-hit-action"></div>`;
+
+            const action = card.querySelector('.search-hit-action');
+            if (hit.alreadyAdded) {
+                action.innerHTML = '<span class="badge text-bg-success"><i class="bi bi-check-lg"></i> In Liste</span>';
+            } else {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-primary btn-sm';
+                btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Hinzufügen';
+                btn.addEventListener('click', () => add(hit, btn));
+                action.appendChild(btn);
+            }
+            resultsEl.appendChild(card);
+        }
+    }
+
+    async function add(hit, btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        const form = new URLSearchParams();
+        form.set('externalId', hit.externalId);
+        form.set('title', hit.title);
+        if (hit.year) form.set('year', hit.year);
+        if (hit.coverUrl) form.set('coverUrl', hit.coverUrl);
+        if (hit.overview) form.set('overview', hit.overview);
+        if (hit.subtitle) form.set('subtitle', hit.subtitle);
+
+        try {
+            const res = await fetch(`/Lists/${listId}/Add?handler=Add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token,
+                },
+                body: form.toString(),
+            });
+            if (!res.ok) throw new Error(res.status);
+            btn.outerHTML = '<span class="badge text-bg-success"><i class="bi bi-check-lg"></i> In Liste</span>';
+        } catch {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Hinzufügen';
+            alert('Hinzufügen fehlgeschlagen.');
+        }
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        })[c]);
+    }
+})();
+</script>
+}

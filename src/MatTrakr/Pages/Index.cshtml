@@ -1,10 +1,60 @@
-﻿@page
+@page
+@using MatTrakr.Data
+@using MatTrakr.Services
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Meine Listen";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@functions {
+    private static string TypeIcon(MediaType type) => type switch
+    {
+        MediaType.Movies => "bi-film",
+        MediaType.Series => "bi-tv",
+        MediaType.Books => "bi-book",
+        _ => "bi-collection",
+    };
+
+    private static string DoneLabel(MediaType type) =>
+        type == MediaType.Books ? "gelesen" : "gesehen";
+}
+
+<h1 class="page-title"><i class="bi bi-collection-play"></i>Meine Listen</h1>
+
+<div class="row g-3">
+    @foreach (var card in Model.Cards)
+    {
+        <div class="col-12 col-sm-6 col-xl-4">
+            <a href="/Lists/@card.List.Id" class="home-card">
+                <div class="home-card-icon"><i class="bi @TypeIcon(card.List.Type)"></i></div>
+                <div class="home-card-body">
+                    <div class="home-card-title">@card.List.Name</div>
+                    <div class="home-card-meta">
+                        @card.Done von @card.Total @DoneLabel(card.List.Type)
+                        @if (card.Access == ListAccess.ReadOnly)
+                        {
+                            <span class="badge text-bg-secondary ms-1">Nur Lesen</span>
+                        }
+                        else if (card.Access != ListAccess.Owner)
+                        {
+                            <span class="badge text-bg-info ms-1">Geteilt</span>
+                        }
+                    </div>
+                    @if (card.Total > 0)
+                    {
+                        <div class="progress home-card-progress">
+                            <div class="progress-bar" role="progressbar"
+                                 style="width: @(card.Total == 0 ? 0 : card.Done * 100 / card.Total)%"></div>
+                        </div>
+                    }
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<div class="list-actions">
+    <a href="/Lists/Edit" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Neue Liste
+    </a>
 </div>

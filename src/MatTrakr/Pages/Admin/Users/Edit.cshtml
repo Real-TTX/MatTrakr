@@ -1,0 +1,87 @@
+@page "{id:long?}"
+@using MatTrakr.Data
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Admin.Users.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Neuer Benutzer" : "Benutzer bearbeiten";
+}
+
+<h1 class="page-title">
+    <i class="bi @(Model.IsNew ? "bi-person-plus" : "bi-person-gear")"></i>@ViewData["Title"]
+</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="content-card p-3" style="max-width: 640px;">
+    <form method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Username" class="form-label">Benutzername *</label>
+            <input asp-for="Username" class="form-control" autocomplete="off" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="DisplayName" class="form-label">Anzeigename</label>
+            <input asp-for="DisplayName" class="form-control" autocomplete="off" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Role" class="form-label">Rolle</label>
+                <select asp-for="Role" class="form-select">
+                    <option value="@UserRole.User">User</option>
+                    <option value="@UserRole.Verwalter">Verwalter</option>
+                    <option value="@UserRole.Admin">Admin</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3 d-flex align-items-end">
+                <div class="form-check form-switch mb-2">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label">Aktiv</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">
+                @(Model.IsNew ? "Initialpasswort *" : "Neues Passwort (leer = unverändert)")
+            </label>
+            <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" />
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="MustChangePassword" class="form-check-input" />
+            <label asp-for="MustChangePassword" class="form-check-label">
+                Passwortänderung beim nächsten Login erzwingen
+            </label>
+        </div>
+
+        @if (Model.IsNew)
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-1"></i>
+                Beim Anlegen werden automatisch die Listen <strong>Movies</strong>,
+                <strong>Series</strong> und <strong>Books</strong> erstellt.
+            </div>
+        }
+
+        <partial name="_FormActionsBar" model="@(new FormActionsModel
+        {
+            BackUrl = "/Admin/Users",
+            DeleteHandler = Model.IsNew ? null : "Delete",
+            DeleteConfirm = "Benutzer inklusive aller Listen wirklich löschen?",
+        })" />
+    </form>
+
+    <partial name="_DeleteForm" model="@(new FormActionsModel
+    {
+        DeleteHandler = Model.IsNew ? null : "Delete",
+        DeleteRouteValues = { ["id"] = Model.Id.ToString() },
+    })" />
+</div>

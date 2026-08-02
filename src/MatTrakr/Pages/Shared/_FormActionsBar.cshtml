@@ -1,0 +1,33 @@
+@model MatTrakr.ViewComponents.FormActionsModel
+
+@*
+    Buttons in one row, positive → negative: Save, Back, <SPACE> Delete.
+    Save submits the surrounding form; Delete is its own small form so it can
+    live in the same row without nesting (rendered right-aligned via CSS).
+*@
+<div class="form-actions">
+    <div class="form-actions-main">
+        <button type="submit" class="btn btn-primary">
+            @if (!string.IsNullOrEmpty(Model.SaveIcon))
+            {
+                <i class="bi @Model.SaveIcon me-1"></i>
+            }
+            @Model.SaveText
+        </button>
+        @if (!string.IsNullOrEmpty(Model.BackUrl))
+        {
+            <a href="@Model.BackUrl" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>@Model.BackText
+            </a>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.DeleteHandler))
+    {
+        <button type="submit" class="btn btn-outline-danger form-actions-delete"
+                form="@($"deleteForm_{Model.DeleteHandler}")"
+                onclick="return confirm('@Html.Raw(Html.Encode(Model.DeleteConfirm ?? "Wirklich löschen?"))');">
+            <i class="bi bi-trash me-1"></i>@Model.DeleteText
+        </button>
+    }
+</div>

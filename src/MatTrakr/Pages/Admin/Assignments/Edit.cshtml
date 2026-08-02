@@ -1,0 +1,57 @@
+@page "{id:long?}"
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Admin.Assignments.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Neue Zuweisung" : "Zuweisung bearbeiten";
+}
+
+<h1 class="page-title"><i class="bi bi-person-check"></i>@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="content-card p-3" style="max-width: 640px;">
+    <form method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="ListId" class="form-label">Liste *</label>
+            <select asp-for="ListId" class="form-select">
+                <option value="0">– Liste wählen –</option>
+                @foreach (var list in Model.AllLists)
+                {
+                    <option value="@list.Id">@list.Owner?.Username / @list.Name (@list.Type)</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="AssignedUserId" class="form-label">Verwalter *</label>
+            <select asp-for="AssignedUserId" class="form-select">
+                <option value="0">– Verwalter wählen –</option>
+                @foreach (var user in Model.Verwalter)
+                {
+                    <option value="@user.Id">@user.DisplayName (@user.Role)</option>
+                }
+            </select>
+            <div class="form-text">Nur aktive Benutzer mit Rolle Verwalter oder Admin.</div>
+        </div>
+
+        <partial name="_FormActionsBar" model="@(new FormActionsModel
+        {
+            BackUrl = "/Admin/Assignments",
+            DeleteHandler = Model.IsNew ? null : "Delete",
+            DeleteConfirm = "Zuweisung wirklich löschen?",
+        })" />
+    </form>
+
+    <partial name="_DeleteForm" model="@(new FormActionsModel
+    {
+        DeleteHandler = Model.IsNew ? null : "Delete",
+        DeleteRouteValues = { ["id"] = Model.Id.ToString() },
+    })" />
+</div>

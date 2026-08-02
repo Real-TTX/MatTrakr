@@ -1,0 +1,19 @@
+# Development stack — rebuild & redeploy on every change:
+#   docker compose -f docker-compose.dev.yml up --build -d
+services:
+  mattrakr:
+    build: .
+    image: mattrakr:nightly-local
+    container_name: mattrakr-dev
+    ports:
+      - "9242:9242"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # - MATTRAKR_ADMIN_PASSWORD=changeme     # initial admin password (default: admin)
+      # - Tmdb__ApiKey=<your-tmdb-api-key>     # or set it in the mounted data/config/settings.json
+    volumes:
+      - mattrakr-data-dev:/app/data
+    restart: unless-stopped
+
+volumes:
+  mattrakr-data-dev:

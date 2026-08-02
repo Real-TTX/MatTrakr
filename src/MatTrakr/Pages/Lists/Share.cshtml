@@ -1,0 +1,137 @@
+@page "/Lists/{id:long}/Share"
+@using MatTrakr.Data
+@model MatTrakr.Pages.Lists.ShareModel
+@{
+    ViewData["Title"] = $"Teilen · {Model.List.Name}";
+}
+
+<h1 class="page-title"><i class="bi bi-share"></i>„@Model.List.Name“ teilen</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-12 col-lg-6">
+        <div class="content-card p-3 h-100">
+            <h2 class="fs-5 mb-3"><i class="bi bi-people me-1"></i>Mit Benutzern teilen</h2>
+
+            @if (Model.UserShares.Count > 0)
+            {
+                <div class="table-responsive mb-3">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Benutzer</th>
+                                <th>Berechtigung</th>
+                                <th class="text-end">Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var share in Model.UserShares)
+                            {
+                                <tr>
+                                    <td>@share.SharedWithUser?.DisplayName</td>
+                                    <td>
+                                        <span class="badge @(share.Permission == SharePermission.Edit ? "text-bg-warning" : "text-bg-secondary")">
+                                            @(share.Permission == SharePermission.Edit ? "Bearbeiten" : "Nur Lesen")
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <form method="post" asp-page-handler="RemoveUser"
+                                              asp-route-id="@Model.List.Id" asp-route-shareId="@share.Id"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Freigabe wirklich entfernen?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Noch mit niemandem geteilt.</p>
+            }
+
+            @if (Model.ShareCandidates.Count > 0)
+            {
+                <form method="post" asp-page-handler="AddUser" asp-route-id="@Model.List.Id"
+                      class="d-flex flex-wrap gap-2 align-items-end">
+                    <div>
+                        <label asp-for="ShareWithUserId" class="form-label mb-1">Benutzer</label>
+                        <select asp-for="ShareWithUserId" class="form-select">
+                            <option value="0">– wählen –</option>
+                            @foreach (var user in Model.ShareCandidates)
+                            {
+                                <option value="@user.Id">@user.DisplayName</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label asp-for="Permission" class="form-label mb-1">Berechtigung</label>
+                        <select asp-for="Permission" class="form-select">
+                            <option value="@SharePermission.ReadOnly">Nur Lesen</option>
+                            <option value="@SharePermission.Edit">Bearbeiten</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Teilen
+                    </button>
+                </form>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Keine weiteren Benutzer verfügbar.</p>
+            }
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="content-card p-3 h-100">
+            <h2 class="fs-5 mb-3"><i class="bi bi-link-45deg me-1"></i>Öffentlicher Link</h2>
+            <p class="text-muted">
+                Jeder mit diesem Link kann die Liste ansehen (nur lesen) – auch ohne Anmeldung.
+            </p>
+
+            @if (Model.PublicShare is not null)
+            {
+                var url = $"{Request.Scheme}://{Request.Host}/Shared/{Model.PublicShare.Token}";
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" value="@url" readonly id="publicLinkInput" />
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="navigator.clipboard.writeText(document.getElementById('publicLinkInput').value); this.innerHTML='<i class=&quot;bi bi-check-lg&quot;></i>';">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <form method="post" asp-page-handler="RevokeLink" asp-route-id="@Model.List.Id"
+                      onsubmit="return confirm('Öffentlichen Link wirklich widerrufen?');">
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i>Link widerrufen
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form method="post" asp-page-handler="CreateLink" asp-route-id="@Model.List.Id">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-link-45deg me-1"></i>Link erstellen
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="list-actions">
+    <a href="/Lists/@Model.List.Id" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Zurück zur Liste
+    </a>
+</div>

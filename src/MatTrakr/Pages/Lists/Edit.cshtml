@@ -1,0 +1,60 @@
+@page "/Lists/Edit/{id:long?}"
+@using MatTrakr.Data
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Lists.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Neue Liste" : "Liste bearbeiten";
+}
+
+<h1 class="page-title">
+    <i class="bi @(Model.IsNew ? "bi-plus-circle" : "bi-pencil-square")"></i>@ViewData["Title"]
+</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="content-card p-3" style="max-width: 560px;">
+    <form method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Name *</label>
+            <input asp-for="Name" class="form-control" autofocus />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Type" class="form-label">Typ</label>
+            @if (Model.IsNew)
+            {
+                <select asp-for="Type" class="form-select">
+                    <option value="@MediaType.Movies">Movies</option>
+                    <option value="@MediaType.Series">Series</option>
+                    <option value="@MediaType.Books">Books</option>
+                </select>
+            }
+            else
+            {
+                <input class="form-control" value="@Model.Type" disabled />
+                <input type="hidden" asp-for="Type" />
+                <div class="form-text">Der Typ kann nachträglich nicht geändert werden.</div>
+            }
+        </div>
+
+        <partial name="_FormActionsBar" model="@(new FormActionsModel
+        {
+            BackUrl = Model.IsNew ? "/" : $"/Lists/{Model.Id}",
+            DeleteHandler = Model.IsNew || Model.IsDefault ? null : "Delete",
+            DeleteConfirm = "Liste inklusive aller Einträge wirklich löschen?",
+        })" />
+    </form>
+
+    <partial name="_DeleteForm" model="@(new FormActionsModel
+    {
+        DeleteHandler = Model.IsNew || Model.IsDefault ? null : "Delete",
+        DeleteRouteValues = { ["id"] = Model.Id.ToString() },
+    })" />
+</div>
