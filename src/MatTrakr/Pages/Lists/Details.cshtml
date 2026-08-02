@@ -128,8 +128,14 @@ else
         <a href="/Lists/@Model.List.Id/Add" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i>Hinzufügen
         </a>
-        <a href="/Lists/@Model.List.Id/Share" class="btn btn-outline-secondary @(Model.Access != ListAccess.Owner ? "d-none" : null)">
-            <i class="bi bi-share me-1"></i>Teilen
-        </a>
+        @if (Model.Access == ListAccess.Owner)
+        {
+            <a href="/Lists/@Model.List.Id/Share" class="btn btn-outline-secondary">
+                <i class="bi bi-share me-1"></i>Teilen
+            </a>
+            <a href="/Lists/Edit/@Model.List.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-pencil me-1"></i>Liste bearbeiten
+            </a>
+        }
     </div>
 }

@@ -33,7 +33,8 @@ public class IndexModel : PageModel
         var query = _db.Users.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(q))
-            query = query.Where(u => u.Username.Contains(q) || u.DisplayName.Contains(q));
+            query = query.Where(u => EF.Functions.Like(u.Username, $"%{q}%") ||
+                                     EF.Functions.Like(u.DisplayName, $"%{q}%"));
 
         if (!string.IsNullOrEmpty(role) && Enum.TryParse<UserRole>(role, out var r))
             query = query.Where(u => u.Role == r);

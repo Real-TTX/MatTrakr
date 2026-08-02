@@ -34,9 +34,9 @@ public class IndexModel : PageModel
 
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(a =>
-                a.List!.Name.Contains(q) ||
-                a.AssignedUser!.Username.Contains(q) ||
-                a.List!.Owner!.Username.Contains(q));
+                EF.Functions.Like(a.List!.Name, $"%{q}%") ||
+                EF.Functions.Like(a.AssignedUser!.Username, $"%{q}%") ||
+                EF.Functions.Like(a.List!.Owner!.Username, $"%{q}%"));
 
         TotalCount = await query.CountAsync();
 

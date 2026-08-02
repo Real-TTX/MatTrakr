@@ -56,7 +56,7 @@ public class DetailsModel : PageModel
         var query = _db.ListItems.AsNoTracking().Where(i => i.ListId == id);
 
         if (!string.IsNullOrWhiteSpace(q))
-            query = query.Where(i => i.Title.Contains(q));
+            query = query.Where(i => EF.Functions.Like(i.Title, $"%{q}%"));
 
         if (status == "done") query = query.Where(i => i.Status == ItemStatus.Done);
         else if (status == "open") query = query.Where(i => i.Status == ItemStatus.Open);
