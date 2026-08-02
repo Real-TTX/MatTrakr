@@ -1,0 +1,15 @@
+@model MatTrakr.ViewComponents.FormActionsModel
+
+@*
+    Companion to _FormActionsBar: the hidden POST form the delete button
+    (form="deleteForm_<handler>") submits to. Render OUTSIDE the main form.
+*@
+@if (!string.IsNullOrEmpty(Model.DeleteHandler))
+{
+    <form method="post" asp-page-handler="@Model.DeleteHandler" id="@($"deleteForm_{Model.DeleteHandler}")" class="d-none">
+        @foreach (var kv in Model.DeleteRouteValues)
+        {
+            <input type="hidden" name="@kv.Key" value="@kv.Value" />
+        }
+    </form>
+}

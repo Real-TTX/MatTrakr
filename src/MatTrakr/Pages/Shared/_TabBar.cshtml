@@ -1,0 +1,21 @@
+@model MatTrakr.ViewComponents.TabBarModel
+
+<ul class="nav nav-tabs mb-3" id="@Model.Id">
+    @foreach (var tab in Model.Tabs)
+    {
+        <li class="nav-item">
+            <a class="nav-link @(tab.Key == Model.ActiveKey ? "active" : null)"
+               href="@(tab.Url ?? "#")">
+                @if (!string.IsNullOrEmpty(tab.Icon))
+                {
+                    <i class="bi @tab.Icon me-1"></i>
+                }
+                @tab.Text
+                @if (tab.Badge is not null)
+                {
+                    <span class="badge text-bg-secondary ms-1">@tab.Badge</span>
+                }
+            </a>
+        </li>
+    }
+</ul>

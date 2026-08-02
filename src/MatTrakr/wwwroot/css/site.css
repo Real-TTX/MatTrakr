@@ -35,6 +35,330 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   App shell: sidebar left + main content
+   -------------------------------------------------------------------------- */
+
+.app-body {
+  min-height: 100vh;
+  margin: 0;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--mt-sidebar-bg);
+  color: var(--mt-sidebar-fg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* offcanvas-lg keeps it static ≥lg; make the static variant sticky full-height */
+@media (min-width: 992px) {
+  .app-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+/* offcanvas (mobile) inherits dark background */
+.app-sidebar.offcanvas-lg {
+  --bs-offcanvas-width: 260px;
+  --bs-offcanvas-bg: var(--mt-sidebar-bg);
+  --bs-offcanvas-color: var(--mt-sidebar-fg);
+}
+
+.sidebar-brand {
+  padding: 1.1rem 1.25rem 0.75rem;
+}
+
+.sidebar-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sidebar-brand-link i {
+  color: var(--mt-primary);
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+  padding: 0.5rem 0.75rem;
+  overflow-y: auto;
+}
+
+.sidebar-section-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7c7c94;
+  padding: 0.9rem 0.5rem 0.35rem;
+}
+
+.sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--mt-sidebar-fg);
+  text-decoration: none;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.sidebar-link:hover {
+  background: var(--mt-sidebar-active);
+  color: #fff;
+}
+
+.sidebar-link.active {
+  background: var(--mt-primary);
+  color: #fff;
+}
+
+.sidebar-link-text {
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-link-badge {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.sidebar-footer {
+  padding: 0.75rem;
+  border-top: 1px solid #33334d;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.65rem;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.sidebar-logout {
+  cursor: pointer;
+}
+
+.app-main {
+  flex-grow: 1;
+  min-width: 0;
+  padding: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .app-main {
+    padding: 2rem 2.5rem;
+  }
+}
+
+/* Mobile top bar */
+.app-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--mt-sidebar-bg);
+  padding: 0.4rem 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.app-topbar-toggle {
+  color: #fff;
+  font-size: 1.4rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.app-topbar-brand {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.app-topbar-brand i {
+  color: var(--mt-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Reusable controls: table toolbar, pagination, form actions
+   -------------------------------------------------------------------------- */
+
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 1px solid #e3e4ee;
+  border-radius: 0.6rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.table-toolbar-search {
+  flex: 1 1 220px;
+  max-width: 340px;
+}
+
+.table-toolbar-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.table-toolbar-filter .form-select {
+  width: auto;
+}
+
+.table-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+/* Actions row under lists/forms: positive→negative left, delete pushed right */
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-actions-delete {
+  margin-left: auto;
+}
+
+.list-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.list-actions .btn-outline-danger,
+.list-actions .btn-danger {
+  margin-left: auto;
+}
+
+/* Content card wrapper for tables */
+.content-card {
+  background: #fff;
+  border: 1px solid #e3e4ee;
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+
+.content-card .table {
+  margin-bottom: 0;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Home: list overview cards */
+.home-card {
+  display: flex;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid #e3e4ee;
+  border-radius: 0.75rem;
+  padding: 1.1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  height: 100%;
+}
+
+.home-card:hover {
+  box-shadow: 0 0.5rem 1.25rem rgba(30, 30, 47, 0.12);
+  transform: translateY(-2px);
+  color: inherit;
+}
+
+.home-card-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 0.6rem;
+  background: rgba(108, 92, 231, 0.12);
+  color: var(--mt-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.home-card-body {
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.home-card-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-card-meta {
+  color: #6c757d;
+  font-size: 0.88rem;
+}
+
+.home-card-progress {
+  height: 6px;
+  margin-top: 0.6rem;
+}
+
+.home-card-progress .progress-bar {
+  background: var(--mt-primary);
+}
+
+/* --------------------------------------------------------------------------
    Auth pages (login / change password)
    -------------------------------------------------------------------------- */
 

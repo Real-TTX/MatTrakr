@@ -1,0 +1,49 @@
+@model MatTrakr.ViewComponents.TableToolbarModel
+
+<form method="get" class="table-toolbar" id="@Model.Id">
+    @foreach (var kv in Model.Hidden)
+    {
+        <input type="hidden" name="@kv.Key" value="@kv.Value" />
+    }
+
+    <div class="table-toolbar-search input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="search" class="form-control" name="@Model.SearchParam"
+               value="@Model.SearchValue" placeholder="@Model.SearchPlaceholder"
+               aria-label="Suchtext" />
+    </div>
+
+    @foreach (var filter in Model.Filters)
+    {
+        <div class="table-toolbar-filter">
+            <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_{filter.Name}")">@filter.Label</label>
+            <select class="form-select" name="@filter.Name" id="@($"{Model.Id}_{filter.Name}")"
+                    onchange="this.form.submit()">
+                @foreach (var (value, text) in filter.Options)
+                {
+                    <option value="@value" selected="@(value == (filter.Selected ?? ""))">@text</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (Model.SortOptions.Count > 0)
+    {
+        <div class="table-toolbar-filter">
+            <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_sort")">
+                <i class="bi bi-sort-down"></i>
+            </label>
+            <select class="form-select" name="@Model.SortParam" id="@($"{Model.Id}_sort")"
+                    onchange="this.form.submit()">
+                @foreach (var opt in Model.SortOptions)
+                {
+                    <option value="@opt.Value" selected="@(opt.Value == (Model.SortValue ?? ""))">@opt.Text</option>
+                }
+            </select>
+        </div>
+    }
+
+    <button type="submit" class="btn btn-outline-secondary">
+        <i class="bi bi-funnel me-1"></i>Anwenden
+    </button>
+</form>

@@ -1,0 +1,83 @@
+@using MatTrakr.Data
+@using MatTrakr.Services
+@model MatTrakr.ViewComponents.SidebarViewModel
+
+@functions {
+    private static string TypeIcon(MediaType type) => type switch
+    {
+        MediaType.Movies => "bi-film",
+        MediaType.Series => "bi-tv",
+        MediaType.Books => "bi-book",
+        _ => "bi-collection",
+    };
+}
+
+<div class="sidebar-brand">
+    <a href="/" class="sidebar-brand-link">
+        <i class="bi bi-collection-play"></i>
+        <span>MatTrakr</span>
+    </a>
+</div>
+
+<nav class="sidebar-nav">
+    <div class="sidebar-section-title">Listen</div>
+    <ul class="sidebar-list">
+        @foreach (var item in Model.Lists)
+        {
+            var current = ViewContext.HttpContext.Request.Path.Value ?? "";
+            var href = $"/Lists/{item.List.Id}";
+            var active = current.StartsWith(href, StringComparison.OrdinalIgnoreCase);
+            <li>
+                <a href="@href" class="sidebar-link @(active ? "active" : null)">
+                    <i class="bi @TypeIcon(item.List.Type)"></i>
+                    <span class="sidebar-link-text">@item.List.Name</span>
+                    @if (item.Access == ListAccess.ReadOnly)
+                    {
+                        <i class="bi bi-eye sidebar-link-badge" title="Nur Lesen"></i>
+                    }
+                    else if (item.Access != ListAccess.Owner)
+                    {
+                        <i class="bi bi-pencil sidebar-link-badge" title="Bearbeiten (geteilt/zugewiesen)"></i>
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+
+    @if (Model.IsAdmin)
+    {
+        <div class="sidebar-section-title">Administration</div>
+        <ul class="sidebar-list">
+            <li>
+                <a href="/Admin/Users" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Users", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
+                    <i class="bi bi-people"></i>
+                    <span class="sidebar-link-text">Users</span>
+                </a>
+            </li>
+            <li>
+                <a href="/Admin/Assignments" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Assignments", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
+                    <i class="bi bi-person-check"></i>
+                    <span class="sidebar-link-text">Listen-Zuweisungen</span>
+                </a>
+            </li>
+        </ul>
+    }
+</nav>
+
+<div class="sidebar-footer">
+    <div class="sidebar-user">
+        <i class="bi bi-person-circle"></i>
+        <span class="sidebar-link-text">@Model.DisplayName</span>
+    </div>
+    <a href="/Account/ChangePassword" class="sidebar-link" title="Passwort ändern">
+        <i class="bi bi-key"></i>
+        <span class="sidebar-link-text">Passwort</span>
+    </a>
+    <form method="post" action="/Account/Logout">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="sidebar-link sidebar-logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="sidebar-link-text">Abmelden</span>
+        </button>
+    </form>
+</div>

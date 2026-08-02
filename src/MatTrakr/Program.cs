@@ -27,6 +27,7 @@ builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite($"Data Source={dbPa
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ListAccessService>();
 
 builder.Services
     .AddAuthentication(AuthConstants.Scheme)
