@@ -34,5 +34,6 @@ public static class AuthConstants
     public const string SessionTokenClaim = "mt_token";
     public const string RoleClaim = "mt_role";
     public const string DisplayNameClaim = "mt_name";
+    public const string MustChangePasswordClaim = "mt_mustchange";
     public const string CookieName = "MatTrakr.Session";
 }

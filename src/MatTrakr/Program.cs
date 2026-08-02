@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using MatTrakr.Data;
 using MatTrakr.Services;
@@ -24,16 +25,38 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite($"Data Source={dbPath}"));
 
-builder.Services.AddRazorPages();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
+
+builder.Services
+    .AddAuthentication(AuthConstants.Scheme)
+    .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(AuthConstants.Scheme, _ => { });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Policies.AdminOnly, p => p.RequireRole(nameof(UserRole.Admin)));
+    options.AddPolicy(Policies.ManagerOrAdmin, p =>
+        p.RequireRole(nameof(UserRole.Admin), nameof(UserRole.Verwalter)));
+});
+
+builder.Services.AddRazorPages(options =>
+{
+    // Everything requires auth by default; carve out the public/anonymous areas.
+    options.Conventions.AuthorizeFolder("/");
+    options.Conventions.AllowAnonymousToFolder("/Account");
+    options.Conventions.AllowAnonymousToFolder("/Public");
+    options.Conventions.AllowAnonymousToPage("/Error");
+    options.Conventions.AuthorizeFolder("/Admin", Policies.AdminOnly);
+});
 
 var app = builder.Build();
 
-// --- Apply migrations on startup --------------------------------------------
+// --- Migrate + seed on startup ----------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
 }
+await DbSeeder.SeedAsync(app.Services);
 
 // --- Pipeline ----------------------------------------------------------------
 if (!app.Environment.IsDevelopment())
@@ -44,7 +67,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
+
+// Force a password change before anything else once flagged.
+app.UseMiddleware<MustChangePasswordMiddleware>();
+
 app.MapRazorPages();
 
 app.Run();

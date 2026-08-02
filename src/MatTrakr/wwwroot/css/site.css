@@ -1,3 +1,16 @@
+/* ==========================================================================
+   MatTrakr – global styles
+   ========================================================================== */
+
+:root {
+  --mt-primary: #6c5ce7;
+  --mt-primary-dark: #5a4bd1;
+  --mt-sidebar-bg: #1e1e2f;
+  --mt-sidebar-fg: #c7c7d6;
+  --mt-sidebar-active: #2d2d44;
+  --mt-body-bg: #f4f5fa;
+}
+
 html {
   font-size: 14px;
 }
@@ -8,24 +21,64 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+  background: var(--mt-body-bg);
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.btn-primary {
+  --bs-btn-bg: var(--mt-primary);
+  --bs-btn-border-color: var(--mt-primary);
+  --bs-btn-hover-bg: var(--mt-primary-dark);
+  --bs-btn-hover-border-color: var(--mt-primary-dark);
+  --bs-btn-active-bg: var(--mt-primary-dark);
+  --bs-btn-active-border-color: var(--mt-primary-dark);
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* --------------------------------------------------------------------------
+   Auth pages (login / change password)
+   -------------------------------------------------------------------------- */
+
+.auth-body {
+  background: linear-gradient(135deg, #1e1e2f 0%, #3a2f6b 100%);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--mt-primary);
+  margin-bottom: 1.5rem;
+}
+
+.auth-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.auth-subtitle {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
 }

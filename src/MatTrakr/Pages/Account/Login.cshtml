@@ -1,0 +1,45 @@
+@page
+@model MatTrakr.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Anmelden";
+    Layout = "_AuthLayout";
+}
+
+<h1 class="auth-title">Anmelden</h1>
+<p class="auth-subtitle">Melde dich an, um deine Listen zu verwalten.</p>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<form method="post">
+    <input type="hidden" asp-for="ReturnUrl" value="@Model.ReturnUrl" />
+
+    <div class="mb-3">
+        <label asp-for="Username" class="form-label">Benutzername</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input asp-for="Username" class="form-control" autocomplete="username" autofocus />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">Passwort</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input asp-for="Password" type="password" class="form-control" autocomplete="current-password" />
+        </div>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label">Angemeldet bleiben</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-box-arrow-in-right me-1"></i>Anmelden
+    </button>
+</form>
