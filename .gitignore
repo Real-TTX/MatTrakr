@@ -11,8 +11,9 @@ publish/
 *.suo
 .vscode/
 
-# Local runtime data (SQLite DB, mounted config)
-data/
+# Local runtime data (SQLite DB, mounted config) — root-anchored so it does NOT
+# match the C# source folder src/MatTrakr/Data (Git is case-insensitive on Windows).
+/data/
 *.db
 *.db-shm
 *.db-wal
