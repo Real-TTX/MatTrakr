@@ -36,6 +36,28 @@ public class MediaSearchService
 
     public bool TmdbConfigured => !string.IsNullOrWhiteSpace(_config["Tmdb:ApiKey"]);
 
+    /// <summary>Validates a TMDb API key with a minimal live request.</summary>
+    public async Task<(bool Ok, string Message)> TestTmdbKeyAsync(string apiKey, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return (false, "Kein API-Key angegeben.");
+
+        try
+        {
+            var client = _httpFactory.CreateClient("TMDb");
+            using var response = await client.GetAsync(
+                $"configuration?api_key={Uri.EscapeDataString(apiKey)}", ct);
+
+            return response.IsSuccessStatusCode
+                ? (true, "Verbindung erfolgreich – der TMDb-Key ist gültig.")
+                : (false, $"TMDb hat abgelehnt ({(int)response.StatusCode}). Bitte Key prüfen.");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Verbindung fehlgeschlagen: {ex.Message}");
+        }
+    }
+
     public async Task<List<MediaSearchResult>> SearchAsync(MediaType type, string query, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(query)) return new();

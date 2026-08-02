@@ -29,6 +29,8 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ListAccessService>();
 builder.Services.AddScoped<MediaSearchService>();
+builder.Services.AddSingleton(sp =>
+    new SettingsService(dataPath, sp.GetRequiredService<IConfiguration>()));
 
 builder.Services.AddHttpClient("TMDb", c =>
 {

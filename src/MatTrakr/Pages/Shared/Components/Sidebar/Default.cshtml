@@ -60,6 +60,12 @@
                     <span class="sidebar-link-text">Listen-Zuweisungen</span>
                 </a>
             </li>
+            <li>
+                <a href="/Admin/Settings" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Settings", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
+                    <i class="bi bi-gear"></i>
+                    <span class="sidebar-link-text">Einstellungen</span>
+                </a>
+            </li>
         </ul>
     }
 </nav>

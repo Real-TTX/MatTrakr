@@ -32,8 +32,8 @@ public class AddModel : PageModel
 
         SearchAvailable = List.Type == MediaType.Books || _search.TmdbConfigured;
         if (!SearchAvailable)
-            Warning = "Für die Movie/Series-Suche muss ein TMDb API-Key konfiguriert werden " +
-                      "(Tmdb:ApiKey in data/config/settings.json oder Env-Var Tmdb__ApiKey).";
+            Warning = "Für die Movie/Series-Suche muss ein TMDb API-Key hinterlegt werden. " +
+                      "Ein Admin kann ihn unter Administration → Einstellungen eintragen.";
 
         return Page();
     }

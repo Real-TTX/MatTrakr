@@ -1,0 +1,84 @@
+@page
+@model MatTrakr.Pages.Admin.Settings.IndexModel
+@{
+    ViewData["Title"] = "Einstellungen";
+}
+
+<h1 class="page-title"><i class="bi bi-gear"></i>Einstellungen</h1>
+
+@if (!string.IsNullOrEmpty(Model.Success))
+{
+    <div class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle me-1"></i>@Model.Success
+    </div>
+}
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="content-card p-3" style="max-width: 720px;">
+    <form method="post">
+        <h2 class="fs-5 mb-1">
+            <i class="bi bi-film me-1"></i>TMDb – Movies &amp; Series
+            @if (Model.TmdbConfigured)
+            {
+                <span class="badge text-bg-success ms-1">Konfiguriert</span>
+            }
+            else
+            {
+                <span class="badge text-bg-warning ms-1">Nicht konfiguriert</span>
+            }
+        </h2>
+        <p class="text-muted">
+            Erforderlich für die Film-/Serien-Suche. Kostenlosen Key erstellen unter
+            <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">themoviedb.org/settings/api</a>.
+        </p>
+
+        <div class="mb-4">
+            <label asp-for="TmdbApiKey" class="form-label">TMDb API-Key</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                <input asp-for="TmdbApiKey" class="form-control" autocomplete="off"
+                       spellcheck="false" placeholder="z.B. 1a2b3c4d5e6f…" />
+            </div>
+        </div>
+
+        <h2 class="fs-5 mb-1"><i class="bi bi-book me-1"></i>Google Books – Books</h2>
+        <p class="text-muted">
+            Optional – die Buch-Suche funktioniert auch ohne Key
+            (bei Bedarf Fallback auf Open Library). Ein eigener Key erhöht das Tages-Limit.
+        </p>
+
+        <div class="mb-4">
+            <label asp-for="GoogleBooksApiKey" class="form-label">Google Books API-Key (optional)</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                <input asp-for="GoogleBooksApiKey" class="form-control" autocomplete="off"
+                       spellcheck="false" placeholder="leer lassen für anonymen Zugriff" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <div class="form-actions-main">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Speichern
+                </button>
+                <button type="submit" asp-page-handler="TestTmdb" class="btn btn-outline-secondary">
+                    <i class="bi bi-plug me-1"></i>Speichern &amp; TMDb testen
+                </button>
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Zurück
+                </a>
+            </div>
+        </div>
+
+        <div class="form-text mt-3">
+            <i class="bi bi-info-circle me-1"></i>
+            Gespeichert wird in <code>data/config/settings.json</code> im Docker-Volume.
+            Änderungen greifen sofort, ein Container-Neustart ist nicht nötig.
+        </div>
+    </form>
+</div>
