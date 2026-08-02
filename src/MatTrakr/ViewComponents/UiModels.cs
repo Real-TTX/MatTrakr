@@ -46,7 +46,8 @@ public class PaginationModel
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
     public int TotalCount { get; set; }
-    public string PageParam { get; set; } = "page";
+    // "p", not "page" — "page" is a reserved Razor Pages route key.
+    public string PageParam { get; set; } = "p";
     /// <summary>Query values to preserve in page links (search, filters, sort).</summary>
     public Dictionary<string, string?> Query { get; set; } = new();
 

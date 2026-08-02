@@ -1,0 +1,135 @@
+@page "/Lists/{id:long}"
+@using MatTrakr.Data
+@using MatTrakr.Services
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Lists.DetailsModel
+@{
+    ViewData["Title"] = Model.List.Name;
+    var typeIcon = Model.List.Type switch
+    {
+        MediaType.Movies => "bi-film",
+        MediaType.Series => "bi-tv",
+        MediaType.Books => "bi-book",
+        _ => "bi-collection",
+    };
+}
+
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0"><i class="bi @typeIcon"></i>@Model.List.Name</h1>
+    @if (Model.Access == ListAccess.ReadOnly)
+    {
+        <span class="badge text-bg-secondary">Nur Lesen</span>
+    }
+</div>
+
+<partial name="_TableToolbar" model="@(new TableToolbarModel
+{
+    Id = "itemsToolbar",
+    SearchValue = Model.Q,
+    SearchPlaceholder = "Titel suchen …",
+    Filters =
+    {
+        new ToolbarFilter
+        {
+            Name = "status", Label = "Status", Selected = Model.StatusFilter,
+            Options =
+            {
+                ("", "Alle"),
+                ("open", Model.OpenWord),
+                ("done", Model.DoneWord),
+            },
+        },
+    },
+    SortOptions =
+    {
+        new ToolbarSortOption { Value = "title", Text = "Titel ↑" },
+        new ToolbarSortOption { Value = "title_desc", Text = "Titel ↓" },
+        new ToolbarSortOption { Value = "year", Text = "Jahr (neu zuerst)" },
+        new ToolbarSortOption { Value = "added", Text = "Zuletzt hinzugefügt" },
+    },
+    SortValue = Model.Sort,
+})" />
+
+@if (Model.Items.Count == 0)
+{
+    <div class="content-card p-5 text-center text-muted">
+        <i class="bi @typeIcon display-4 d-block mb-3 opacity-50"></i>
+        @if (Model.TotalCount == 0 && string.IsNullOrEmpty(Model.Q) && string.IsNullOrEmpty(Model.StatusFilter))
+        {
+            <p class="mb-0">Diese Liste ist noch leer.</p>
+        }
+        else
+        {
+            <p class="mb-0">Keine Einträge für die aktuelle Filterung.</p>
+        }
+    </div>
+}
+else
+{
+    <div class="media-grid">
+        @foreach (var item in Model.Items)
+        {
+            var done = item.Status == ItemStatus.Done;
+            <div class="media-card @(done ? "is-done" : null)">
+                <a href="/Lists/@Model.List.Id/Items/@item.Id" class="media-card-cover-link">
+                    @if (!string.IsNullOrEmpty(item.CoverUrl))
+                    {
+                        <img src="@item.CoverUrl" alt="@item.Title" class="media-card-cover" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="media-card-cover media-card-cover-placeholder">
+                            <i class="bi @typeIcon"></i>
+                        </div>
+                    }
+                    <span class="media-card-status badge @(done ? "text-bg-success" : "text-bg-secondary")">
+                        <i class="bi @(done ? "bi-check-lg" : "bi-hourglass")"></i>
+                        @(done ? Model.DoneWord : Model.OpenWord)
+                    </span>
+                </a>
+                <div class="media-card-body">
+                    <div class="media-card-title" title="@item.Title">@item.Title</div>
+                    <div class="media-card-year">@item.Year</div>
+                    @if (Model.CanEdit)
+                    {
+                        <form method="post" asp-page-handler="Toggle"
+                              asp-route-id="@Model.List.Id" asp-route-itemId="@item.Id"
+                              asp-route-q="@Model.Q" asp-route-status="@Model.StatusFilter"
+                              asp-route-sort="@Model.Sort" asp-route-p="@Model.PageNumber">
+                            <button type="submit" class="btn btn-sm w-100 @(done ? "btn-outline-secondary" : "btn-outline-success")">
+                                <i class="bi @(done ? "bi-arrow-counterclockwise" : "bi-check-lg") me-1"></i>
+                                @(done ? Model.OpenWord : Model.DoneWord)
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<partial name="_Pagination" model="@(new PaginationModel
+{
+    Id = "itemsPagination",
+    Page = Model.PageNumber,
+    PageSize = Model.PageSizeValue,
+    TotalCount = Model.TotalCount,
+    Query = new Dictionary<string, string?>
+    {
+        ["q"] = Model.Q,
+        ["status"] = Model.StatusFilter,
+        ["sort"] = Model.Sort,
+    },
+})" />
+
+@if (Model.CanEdit)
+{
+    <div class="list-actions">
+        <a href="/Lists/@Model.List.Id/Add" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Hinzufügen
+        </a>
+        <a href="/Lists/@Model.List.Id/Share" class="btn btn-outline-secondary @(Model.Access != ListAccess.Owner ? "d-none" : null)">
+            <i class="bi bi-share me-1"></i>Teilen
+        </a>
+    </div>
+}

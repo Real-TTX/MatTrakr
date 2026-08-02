@@ -359,6 +359,173 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Media grid (list details) — poster cards
+   -------------------------------------------------------------------------- */
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  }
+}
+
+.media-card {
+  background: #fff;
+  border: 1px solid #e3e4ee;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.15s ease;
+}
+
+.media-card:hover {
+  box-shadow: 0 0.4rem 1rem rgba(30, 30, 47, 0.14);
+}
+
+.media-card.is-done .media-card-cover {
+  filter: grayscale(0.35) brightness(0.92);
+}
+
+.media-card-cover-link {
+  position: relative;
+  display: block;
+}
+
+.media-card-cover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.media-card-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ececf4;
+  color: #a2a2bb;
+  font-size: 2.5rem;
+}
+
+.media-card-status {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.media-card-body {
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-grow: 1;
+}
+
+.media-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 2.3em;
+}
+
+.media-card-year {
+  color: #8b8b9e;
+  font-size: 0.8rem;
+  flex-grow: 1;
+}
+
+/* Item detail */
+.item-detail-cover {
+  width: 220px;
+  max-width: 100%;
+  border-radius: 0.5rem;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.item-detail-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ececf4;
+  color: #a2a2bb;
+  font-size: 3rem;
+}
+
+/* Search hits on the add page */
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.search-hit {
+  display: flex;
+  gap: 0.9rem;
+  background: #fff;
+  border: 1px solid #e3e4ee;
+  border-radius: 0.6rem;
+  padding: 0.75rem;
+  align-items: flex-start;
+}
+
+.search-hit.is-added {
+  opacity: 0.75;
+}
+
+.search-hit-cover {
+  width: 64px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 0.35rem;
+  flex-shrink: 0;
+}
+
+.search-hit-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ececf4;
+  color: #a2a2bb;
+  font-size: 1.5rem;
+}
+
+.search-hit-body {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.search-hit-title {
+  font-weight: 600;
+}
+
+.search-hit-subtitle {
+  color: #6c757d;
+  font-size: 0.88rem;
+}
+
+.search-hit-overview {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.search-hit-action {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* --------------------------------------------------------------------------
    Auth pages (login / change password)
    -------------------------------------------------------------------------- */
 

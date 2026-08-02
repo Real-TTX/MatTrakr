@@ -1,0 +1,117 @@
+@page "/Lists/{listId:long}/Items/{itemId:long}"
+@using MatTrakr.Data
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Lists.ItemModel
+@{
+    ViewData["Title"] = Model.Item.Title;
+    var meta = string.IsNullOrEmpty(Model.Item.MetadataJson)
+        ? null
+        : System.Text.Json.JsonDocument.Parse(Model.Item.MetadataJson);
+    string? subtitle = null;
+    if (meta is not null && meta.RootElement.TryGetProperty("subtitle", out var st))
+        subtitle = st.GetString();
+}
+
+<h1 class="page-title"><i class="bi bi-card-text"></i>@Model.Item.Title</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="content-card p-3">
+    <div class="row g-4">
+        <div class="col-12 col-md-auto">
+            @if (!string.IsNullOrEmpty(Model.Item.CoverUrl))
+            {
+                <img src="@Model.Item.CoverUrl" alt="@Model.Item.Title" class="item-detail-cover" />
+            }
+            else
+            {
+                <div class="item-detail-cover item-detail-cover-placeholder">
+                    <i class="bi bi-image"></i>
+                </div>
+            }
+        </div>
+        <div class="col">
+            <dl class="row mb-3">
+                <dt class="col-sm-3">Titel</dt>
+                <dd class="col-sm-9">@Model.Item.Title</dd>
+
+                @if (!string.IsNullOrEmpty(subtitle))
+                {
+                    <dt class="col-sm-3">@(Model.List.Type == MediaType.Books ? "Autor" : "Originaltitel")</dt>
+                    <dd class="col-sm-9">@subtitle</dd>
+                }
+
+                @if (Model.Item.Year is not null)
+                {
+                    <dt class="col-sm-3">Jahr</dt>
+                    <dd class="col-sm-9">@Model.Item.Year</dd>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Item.Overview))
+                {
+                    <dt class="col-sm-3">Beschreibung</dt>
+                    <dd class="col-sm-9">@Model.Item.Overview</dd>
+                }
+
+                <dt class="col-sm-3">Quelle</dt>
+                <dd class="col-sm-9">@Model.Item.Source</dd>
+            </dl>
+
+            @if (Model.CanEdit)
+            {
+                <form method="post">
+                    <div class="row g-3 mb-2" style="max-width: 560px;">
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="@ItemStatus.Open">@Model.OpenWord</option>
+                                <option value="@ItemStatus.Done">@Model.DoneWord</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="MoveToListId" class="form-label">
+                                Verschieben nach <i class="bi bi-arrow-right-circle"></i>
+                            </label>
+                            <select asp-for="MoveToListId" class="form-select">
+                                <option value="0">– nicht verschieben –</option>
+                                @foreach (var target in Model.MoveTargets)
+                                {
+                                    <option value="@target.Id">@target.Name</option>
+                                }
+                            </select>
+                            <div class="form-text">Nur Listen vom Typ @Model.List.Type.</div>
+                        </div>
+                    </div>
+
+                    <partial name="_FormActionsBar" model="@(new FormActionsModel
+                    {
+                        BackUrl = $"/Lists/{Model.List.Id}",
+                        DeleteHandler = "Delete",
+                        DeleteConfirm = $"„{Model.Item.Title}“ wirklich löschen?",
+                    })" />
+                </form>
+
+                <partial name="_DeleteForm" model="@(new FormActionsModel
+                {
+                    DeleteHandler = "Delete",
+                })" />
+            }
+            else
+            {
+                <span class="badge @(Model.Item.Status == ItemStatus.Done ? "text-bg-success" : "text-bg-secondary") me-2">
+                    @(Model.Item.Status == ItemStatus.Done ? Model.DoneWord : Model.OpenWord)
+                </span>
+                <div class="list-actions">
+                    <a href="/Lists/@Model.List.Id" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Zurück
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

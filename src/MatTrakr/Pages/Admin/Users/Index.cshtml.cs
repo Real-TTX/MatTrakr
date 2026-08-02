@@ -22,13 +22,13 @@ public class IndexModel : PageModel
     public int PageNumber { get; set; } = 1;
     public int PageSizeValue => PageSize;
 
-    public async Task OnGetAsync(string? q, string? role, string? active, string? sort, int page = 1)
+    public async Task OnGetAsync(string? q, string? role, string? active, string? sort, int p = 1)
     {
         Q = q;
         RoleFilter = role;
         ActiveFilter = active;
         Sort = string.IsNullOrEmpty(sort) ? "username" : sort;
-        PageNumber = Math.Max(1, page);
+        PageNumber = Math.Max(1, p);
 
         var query = _db.Users.AsNoTracking();
 

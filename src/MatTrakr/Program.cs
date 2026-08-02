@@ -28,6 +28,24 @@ builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite($"Data Source={dbPa
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ListAccessService>();
+builder.Services.AddScoped<MediaSearchService>();
+
+builder.Services.AddHttpClient("TMDb", c =>
+{
+    c.BaseAddress = new Uri("https://api.themoviedb.org/3/");
+    c.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddHttpClient("GoogleBooks", c =>
+{
+    c.BaseAddress = new Uri("https://www.googleapis.com/books/v1/");
+    c.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddHttpClient("OpenLibrary", c =>
+{
+    c.BaseAddress = new Uri("https://openlibrary.org/");
+    c.Timeout = TimeSpan.FromSeconds(10);
+    c.DefaultRequestHeaders.UserAgent.ParseAdd("MatTrakr/1.0");
+});
 
 builder.Services
     .AddAuthentication(AuthConstants.Scheme)
