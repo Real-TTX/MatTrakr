@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/out/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/*.user
+data/
+*.db
+*.db-shm
+*.db-wal
+.git/
+.gitignore
+**/appsettings.Local.json

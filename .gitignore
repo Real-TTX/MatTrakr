@@ -1,0 +1,27 @@
+# .NET build output
+bin/
+obj/
+out/
+publish/
+
+# Rider / VS / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+.vscode/
+
+# Local runtime data (SQLite DB, mounted config)
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Local secrets / env
+*.env
+.env
+appsettings.Local.json
+
+# OS
+Thumbs.db
+.DS_Store
