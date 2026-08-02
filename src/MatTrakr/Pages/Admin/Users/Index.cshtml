@@ -1,0 +1,116 @@
+@page
+@using MatTrakr.Data
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1 class="page-title"><i class="bi bi-people"></i>Users</h1>
+
+<partial name="_TableToolbar" model="@(new TableToolbarModel
+{
+    Id = "usersToolbar",
+    SearchValue = Model.Q,
+    SearchPlaceholder = "Benutzername oder Anzeigename …",
+    Filters =
+    {
+        new ToolbarFilter
+        {
+            Name = "role", Label = "Rolle", Selected = Model.RoleFilter,
+            Options =
+            {
+                ("", "Alle"),
+                (nameof(UserRole.Admin), "Admin"),
+                (nameof(UserRole.Verwalter), "Verwalter"),
+                (nameof(UserRole.User), "User"),
+            },
+        },
+        new ToolbarFilter
+        {
+            Name = "active", Label = "Status", Selected = Model.ActiveFilter,
+            Options = { ("", "Alle"), ("1", "Aktiv"), ("0", "Inaktiv") },
+        },
+    },
+    SortOptions =
+    {
+        new ToolbarSortOption { Value = "username", Text = "Benutzername ↑" },
+        new ToolbarSortOption { Value = "username_desc", Text = "Benutzername ↓" },
+        new ToolbarSortOption { Value = "role", Text = "Rolle" },
+        new ToolbarSortOption { Value = "created", Text = "Neueste zuerst" },
+    },
+    SortValue = Model.Sort,
+})" />
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Benutzername</th>
+                    <th>Anzeigename</th>
+                    <th>Rolle</th>
+                    <th>Status</th>
+                    <th class="text-end">Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.Username</td>
+                        <td>@user.DisplayName</td>
+                        <td>
+                            <span class="badge @(user.Role switch
+                                                 {
+                                                     UserRole.Admin => "text-bg-danger",
+                                                     UserRole.Verwalter => "text-bg-warning",
+                                                     _ => "text-bg-secondary",
+                                                 })">@user.Role</span>
+                        </td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="badge text-bg-success">Aktiv</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">Inaktiv</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a href="/Admin/Users/Edit/@user.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Users.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">Keine Benutzer gefunden.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<partial name="_Pagination" model="@(new PaginationModel
+{
+    Id = "usersPagination",
+    Page = Model.PageNumber,
+    PageSize = Model.PageSizeValue,
+    TotalCount = Model.TotalCount,
+    Query = new Dictionary<string, string?>
+    {
+        ["q"] = Model.Q,
+        ["role"] = Model.RoleFilter,
+        ["active"] = Model.ActiveFilter,
+        ["sort"] = Model.Sort,
+    },
+})" />
+
+<div class="list-actions">
+    <a href="/Admin/Users/Edit" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i>Neuer Benutzer
+    </a>
+</div>
