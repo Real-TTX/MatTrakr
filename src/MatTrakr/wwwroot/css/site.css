@@ -2,13 +2,66 @@
    MatTrakr – global styles
    ========================================================================== */
 
+/* Light theme (default) --------------------------------------------------- */
 :root {
+  color-scheme: light;
+
   --mt-primary: #6c5ce7;
   --mt-primary-dark: #5a4bd1;
+  --mt-primary-soft: rgba(108, 92, 231, 0.12);
+
+  /* Solid primary button fill — kept dark enough for a 4.5:1 white label in
+     both themes (decoupled from the lighter dark-mode accent --mt-primary). */
+  --mt-btn-primary-bg: #6c5ce7;
+  --mt-btn-primary-hover: #5a4bd1;
+
+  /* Content surfaces */
+  --mt-body-bg: #f4f5fa;
+  --mt-surface: #ffffff;
+  --mt-border: #e3e4ee;
+  --mt-text: #212529;
+  --mt-text-muted: #6c757d;
+  --mt-text-subtle: #74748a;
+  --mt-placeholder-bg: #ececf4;
+  --mt-placeholder-fg: #7c7c94;
+  --mt-shadow: rgba(30, 30, 47, 0.12);
+  --mt-shadow-strong: rgba(30, 30, 47, 0.16);
+
+  /* Sidebar / top bar — dark chrome in both themes */
   --mt-sidebar-bg: #1e1e2f;
   --mt-sidebar-fg: #c7c7d6;
   --mt-sidebar-active: #2d2d44;
-  --mt-body-bg: #f4f5fa;
+  --mt-sidebar-title: #8585a0;
+  --mt-sidebar-border: #33334d;
+  --mt-sidebar-version: #6a6a84;
+}
+
+/* Dark theme -------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --mt-primary: #8577f0;
+  --mt-primary-dark: #6c5ce7;
+  --mt-primary-soft: rgba(133, 119, 240, 0.18);
+
+  --mt-body-bg: #0f0f17;
+  --mt-surface: #1b1b28;
+  --mt-border: #2d2d44;
+  --mt-text: #e6e6f0;
+  --mt-text-muted: #9a9ab5;
+  --mt-text-subtle: #8686a0;
+  --mt-placeholder-bg: #24243a;
+  --mt-placeholder-fg: #8484a4;
+  --mt-shadow: rgba(0, 0, 0, 0.5);
+  --mt-shadow-strong: rgba(0, 0, 0, 0.65);
+
+  /* Slightly elevated relative to the darker body */
+  --mt-sidebar-bg: #171722;
+  --mt-sidebar-fg: #c7c7d6;
+  --mt-sidebar-active: #2d2d44;
+  --mt-sidebar-title: #8585a0;
+  --mt-sidebar-border: #2a2a40;
+  --mt-sidebar-version: #6a6a84;
 }
 
 html {
@@ -23,15 +76,29 @@ html {
 
 body {
   background: var(--mt-body-bg);
+  color: var(--mt-text);
+}
+
+/* Smooth the switch without animating everything on the page */
+body,
+.app-sidebar,
+.app-topbar,
+.table-toolbar,
+.content-card,
+.home-card,
+.media-card,
+.search-hit,
+.auth-card {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .btn-primary {
-  --bs-btn-bg: var(--mt-primary);
-  --bs-btn-border-color: var(--mt-primary);
-  --bs-btn-hover-bg: var(--mt-primary-dark);
-  --bs-btn-hover-border-color: var(--mt-primary-dark);
-  --bs-btn-active-bg: var(--mt-primary-dark);
-  --bs-btn-active-border-color: var(--mt-primary-dark);
+  --bs-btn-bg: var(--mt-btn-primary-bg);
+  --bs-btn-border-color: var(--mt-btn-primary-bg);
+  --bs-btn-hover-bg: var(--mt-btn-primary-hover);
+  --bs-btn-hover-border-color: var(--mt-btn-primary-hover);
+  --bs-btn-active-bg: var(--mt-btn-primary-hover);
+  --bs-btn-active-border-color: var(--mt-btn-primary-hover);
 }
 
 /* --------------------------------------------------------------------------
@@ -102,7 +169,7 @@ body {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #7c7c94;
+  color: var(--mt-sidebar-title);
   padding: 0.9rem 0.5rem 0.35rem;
 }
 
@@ -151,7 +218,7 @@ body {
 
 .sidebar-footer {
   padding: 0.75rem;
-  border-top: 1px solid #33334d;
+  border-top: 1px solid var(--mt-sidebar-border);
 }
 
 .sidebar-user {
@@ -168,8 +235,14 @@ body {
   cursor: pointer;
 }
 
+.sidebar-theme {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 0.25rem;
+}
+
 .sidebar-version {
-  color: #55556e;
+  color: var(--mt-sidebar-version);
   font-size: 0.72rem;
   text-align: center;
   padding-top: 0.5rem;
@@ -217,6 +290,67 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Theme switch (light / system / dark)
+   -------------------------------------------------------------------------- */
+
+.theme-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--mt-sidebar-border);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.theme-switch-btn {
+  border: 0;
+  background: transparent;
+  color: var(--mt-sidebar-fg);
+  border-radius: 0.4rem;
+  padding: 0.28rem 0.55rem;
+  line-height: 1;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.theme-switch-btn:hover {
+  color: #fff;
+  background: var(--mt-sidebar-active);
+}
+
+.theme-switch-btn.active {
+  background: var(--mt-primary);
+  color: #fff;
+}
+
+/* Variant for light surfaces (auth card, public top bar) */
+.theme-switch--plain {
+  background: var(--mt-surface);
+  border-color: var(--mt-border);
+}
+
+.theme-switch--plain .theme-switch-btn {
+  color: var(--mt-text-muted);
+}
+
+.theme-switch--plain .theme-switch-btn:hover {
+  color: var(--mt-text);
+  background: var(--mt-placeholder-bg);
+}
+
+.theme-switch--plain .theme-switch-btn.active {
+  background: var(--mt-primary);
+  color: #fff;
+}
+
+.theme-switch-floating {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1040;
+}
+
+/* --------------------------------------------------------------------------
    Reusable controls: table toolbar, pagination, form actions
    -------------------------------------------------------------------------- */
 
@@ -225,8 +359,8 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   padding: 0.75rem;
   margin-bottom: 1rem;
@@ -286,8 +420,8 @@ body {
 
 /* Content card wrapper for tables */
 .content-card {
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   overflow: hidden;
 }
@@ -309,8 +443,8 @@ body {
 .home-card {
   display: flex;
   gap: 1rem;
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.75rem;
   padding: 1.1rem;
   text-decoration: none;
@@ -320,7 +454,7 @@ body {
 }
 
 .home-card:hover {
-  box-shadow: 0 0.5rem 1.25rem rgba(30, 30, 47, 0.12);
+  box-shadow: 0 0.5rem 1.25rem var(--mt-shadow);
   transform: translateY(-2px);
   color: inherit;
 }
@@ -330,7 +464,7 @@ body {
   height: 52px;
   flex-shrink: 0;
   border-radius: 0.6rem;
-  background: rgba(108, 92, 231, 0.12);
+  background: var(--mt-primary-soft);
   color: var(--mt-primary);
   display: flex;
   align-items: center;
@@ -352,7 +486,7 @@ body {
 }
 
 .home-card-meta {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   font-size: 0.88rem;
 }
 
@@ -382,8 +516,8 @@ body {
 }
 
 .media-card {
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   overflow: hidden;
   display: flex;
@@ -392,7 +526,7 @@ body {
 }
 
 .media-card:hover {
-  box-shadow: 0 0.4rem 1rem rgba(30, 30, 47, 0.14);
+  box-shadow: 0 0.4rem 1rem var(--mt-shadow-strong);
 }
 
 .media-card.is-done .media-card-cover {
@@ -415,8 +549,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ececf4;
-  color: #a2a2bb;
+  background: var(--mt-placeholder-bg);
+  color: var(--mt-placeholder-fg);
   font-size: 2.5rem;
 }
 
@@ -446,7 +580,7 @@ body {
 }
 
 .media-card-year {
-  color: #8b8b9e;
+  color: var(--mt-text-subtle);
   font-size: 0.8rem;
   flex-grow: 1;
 }
@@ -464,8 +598,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ececf4;
-  color: #a2a2bb;
+  background: var(--mt-placeholder-bg);
+  color: var(--mt-placeholder-fg);
   font-size: 3rem;
 }
 
@@ -479,8 +613,8 @@ body {
 .search-hit {
   display: flex;
   gap: 0.9rem;
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   padding: 0.75rem;
   align-items: flex-start;
@@ -502,8 +636,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ececf4;
-  color: #a2a2bb;
+  background: var(--mt-placeholder-bg);
+  color: var(--mt-placeholder-fg);
   font-size: 1.5rem;
 }
 
@@ -517,12 +651,12 @@ body {
 }
 
 .search-hit-subtitle {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   font-size: 0.88rem;
 }
 
 .search-hit-overview {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
@@ -551,7 +685,8 @@ body {
 }
 
 .auth-card {
-  background: #fff;
+  background: var(--mt-surface);
+  color: var(--mt-text);
   border-radius: 1rem;
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
   padding: 2.5rem 2rem;
@@ -577,6 +712,29 @@ body {
 }
 
 .auth-subtitle {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion — placed last so it overrides the theme + hover transitions
+   declared above (a media query adds no specificity, so source order decides).
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .app-sidebar,
+  .app-topbar,
+  .table-toolbar,
+  .content-card,
+  .home-card,
+  .media-card,
+  .search-hit,
+  .auth-card {
+    transition: none;
+  }
+
+  .home-card:hover {
+    transform: none;
+  }
 }

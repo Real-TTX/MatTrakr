@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using MatTrakr.Data;
 using MatTrakr.Services;
@@ -19,6 +20,14 @@ builder.Configuration.AddJsonFile(
     optional: true, reloadOnChange: true);
 
 var dbPath = Path.Combine(dataPath, "mattrakr.db");
+
+// Persist DataProtection keys in the volume so antiforgery/data-protected
+// payloads survive image rebuilds (the dev workflow rebuilds on every change).
+var keysPath = Path.Combine(dataPath, "keys");
+Directory.CreateDirectory(keysPath);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+    .SetApplicationName("MatTrakr");
 
 // --- Services ----------------------------------------------------------------
 builder.Services.AddHttpContextAccessor();

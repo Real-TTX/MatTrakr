@@ -86,5 +86,8 @@
             <span class="sidebar-link-text">Abmelden</span>
         </button>
     </form>
+    <div class="sidebar-theme">
+        <partial name="_ThemeSwitch" model="@((string?)null)" />
+    </div>
     <div class="sidebar-version">@(Environment.GetEnvironmentVariable("MATTRAKR_VERSION") ?? "local")</div>
 </div>
