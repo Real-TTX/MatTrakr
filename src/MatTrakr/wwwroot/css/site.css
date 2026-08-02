@@ -168,6 +168,13 @@ body {
   cursor: pointer;
 }
 
+.sidebar-version {
+  color: #55556e;
+  font-size: 0.72rem;
+  text-align: center;
+  padding-top: 0.5rem;
+}
+
 .app-main {
   flex-grow: 1;
   min-width: 0;
