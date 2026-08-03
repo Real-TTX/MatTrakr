@@ -28,12 +28,6 @@
   --mt-shadow: rgba(30, 30, 47, 0.16);
   --mt-shadow-strong: rgba(30, 30, 47, 0.2);
 
-  /* Strengthen Bootstrap's own light-theme borders/muted text (tables, inputs).
-     Dark theme keeps Bootstrap's [data-bs-theme=dark] values (higher specificity). */
-  --bs-border-color: #cfd2e0;
-  --bs-secondary-color: rgba(27, 30, 33, 0.72);
-  --bs-tertiary-bg: #eef0f6;
-
   /* Sidebar / top bar — dark chrome in both themes */
   --mt-sidebar-bg: #1e1e2f;
   --mt-sidebar-fg: #c7c7d6;
@@ -69,6 +63,15 @@
   --mt-sidebar-title: #8585a0;
   --mt-sidebar-border: #2a2a40;
   --mt-sidebar-version: #6a6a84;
+}
+
+/* Strengthen Bootstrap's light-theme borders/muted text (tables, inputs,
+   placeholders). Scoped to light so it never leaks into the dark theme —
+   :root would win over [data-bs-theme=dark] by source order. */
+[data-bs-theme="light"] {
+  --bs-border-color: #cfd2e0;
+  --bs-secondary-color: rgba(27, 30, 33, 0.72);
+  --bs-tertiary-bg: #eef0f6;
 }
 
 html {
@@ -111,6 +114,17 @@ body {
   --bs-btn-hover-border-color: var(--mt-btn-primary-hover);
   --bs-btn-active-bg: var(--mt-btn-primary-hover);
   --bs-btn-active-border-color: var(--mt-btn-primary-hover);
+}
+
+/* Roomier buttons everywhere; comfortable touch targets. */
+.btn {
+  --bs-btn-padding-y: 0.5rem;
+  --bs-btn-padding-x: 0.9rem;
+}
+
+.btn-sm {
+  --bs-btn-padding-y: 0.4rem;
+  --bs-btn-padding-x: 0.7rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -807,6 +821,151 @@ body {
 .auth-subtitle {
   color: var(--mt-text-muted);
   margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile top bar page title (the heading lives in the header on small screens)
+   -------------------------------------------------------------------------- */
+
+.app-topbar-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-topbar-home {
+  color: #fff;
+  font-size: 1.35rem;
+  padding: 0.25rem 0.5rem;
+  text-decoration: none;
+}
+
+.app-topbar-home i {
+  color: var(--mt-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & touch optimization
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 991.98px) {
+  /* The page title now lives in the top bar, so drop the in-content H1.
+     Excludes the public share page (its main uses .container-lg and keeps its heading). */
+  .app-main:not(.container-lg) > .page-title,
+  .app-main:not(.container-lg) > .d-flex > .page-title {
+    display: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Bigger buttons and form controls for touch */
+  .btn {
+    --bs-btn-padding-y: 0.65rem;
+    --bs-btn-padding-x: 1rem;
+    --bs-btn-font-size: 1.02rem;
+  }
+
+  .form-control,
+  .form-select {
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+
+  .form-control-lg,
+  .form-select-lg {
+    min-height: 3.35rem;
+  }
+
+  /* Search toolbar: keep search + Filter/Sort icons on ONE row (no wrap) */
+  .table-toolbar {
+    flex-wrap: nowrap;
+  }
+
+  .table-toolbar-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .table-toolbar-search .form-control {
+    min-width: 0;
+  }
+
+  .table-toolbar-triggers {
+    flex: 0 0 auto;
+  }
+
+  /* Form action row: Save/Back share the top row, Delete gets its own line */
+  .form-actions {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .form-actions-main {
+    flex: 1 1 100%;
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .form-actions-main .btn {
+    flex: 1 1 0;
+  }
+
+  .form-actions-delete {
+    margin-left: 0;
+    flex: 1 1 100%;
+  }
+
+  /* List action row: buttons grow; destructive one on its own line */
+  .list-actions {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .list-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .list-actions .btn-outline-danger,
+  .list-actions .btn-danger {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+
+  /* Bigger, tappable pagination */
+  .table-pagination .pagination {
+    --bs-pagination-padding-x: 0.85rem;
+    --bs-pagination-padding-y: 0.5rem;
+    --bs-pagination-font-size: 1rem;
+  }
+
+  /* Bigger season checkboxes */
+  .season-check .form-check-input {
+    width: 1.35rem;
+    height: 1.35rem;
+    margin-top: 0.15rem;
+  }
+
+  .season-check {
+    min-width: 7.5rem;
+    padding-left: 2rem;
+  }
+
+  .season-check .form-check-label {
+    font-size: 1rem;
+  }
+
+  /* Bigger theme switch targets */
+  .theme-switch-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 1.05rem;
+  }
 }
 
 /* --------------------------------------------------------------------------
