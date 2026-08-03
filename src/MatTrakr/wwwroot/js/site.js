@@ -12,7 +12,10 @@ document.addEventListener("change", function (e) {
 
 // Season picker: quick-set the season toggle buttons — Alle / Teilweise / Keine.
 // "Teilweise" checks the first half (a quick "partway through" preset). The
-// quick buttons also stay highlighted to reflect the current selection.
+// quick buttons also stay highlighted to reflect the current selection. When the
+// picker is linked to the status shortcuts (data-status-sync) the two stay in
+// sync: seasons drive Ungesehen/Teilweise/Gesehen, and the status buttons drive
+// the seasons back (Abgebrochen leaves the seasons untouched).
 function mtSeasonBoxes(picker) {
     return Array.prototype.slice.call(
         picker.querySelectorAll('.season-checks input[type="checkbox"]'));
@@ -28,6 +31,21 @@ function mtSyncSeasonQuick(picker) {
     });
 }
 
+function mtSetStatusRadio(form, value) {
+    var radio = form.querySelector('[data-status-toggle] input[type="radio"][value="' + value + '"]');
+    if (radio) radio.checked = true; // programmatic — does not re-fire change
+}
+
+function mtSeasonsToStatus(picker) {
+    if (!picker.hasAttribute("data-status-sync")) return;
+    var form = picker.closest("form");
+    if (!form) return;
+    var boxes = mtSeasonBoxes(picker);
+    var checked = boxes.filter(function (cb) { return cb.checked; }).length;
+    var value = checked === 0 ? "Open" : checked === boxes.length ? "Done" : "Partial";
+    mtSetStatusRadio(form, value);
+}
+
 document.addEventListener("click", function (e) {
     var trigger = e.target.closest("[data-season-set]");
     if (!trigger) return;
@@ -40,14 +58,35 @@ document.addEventListener("click", function (e) {
         cb.checked = mode === "all" ? true : mode === "none" ? false : i < half;
     });
     mtSyncSeasonQuick(picker);
+    mtSeasonsToStatus(picker);
 });
 
-// Toggling an individual season re-evaluates which quick button is current.
+// Toggling an individual season re-evaluates the quick button and the status.
 document.addEventListener("change", function (e) {
     var cb = e.target.closest('.season-checks input[type="checkbox"]');
     if (!cb) return;
     var picker = cb.closest("[data-season-picker]");
-    if (picker) mtSyncSeasonQuick(picker);
+    if (!picker) return;
+    mtSyncSeasonQuick(picker);
+    mtSeasonsToStatus(picker);
+});
+
+// Choosing a status shortcut drives the linked season selection.
+document.addEventListener("change", function (e) {
+    var radio = e.target.closest('[data-status-toggle] input[type="radio"]');
+    if (!radio || !radio.checked) return;
+    var form = radio.closest("form");
+    if (!form) return;
+    var picker = form.querySelector("[data-season-picker][data-status-sync]");
+    if (!picker) return;
+
+    var boxes = mtSeasonBoxes(picker);
+    var half = Math.ceil(boxes.length / 2);
+    if (radio.value === "Done") boxes.forEach(function (cb) { cb.checked = true; });
+    else if (radio.value === "Open") boxes.forEach(function (cb) { cb.checked = false; });
+    else if (radio.value === "Partial") boxes.forEach(function (cb, i) { cb.checked = i < half; });
+    // Abandoned: leave the seasons as they are
+    mtSyncSeasonQuick(picker);
 });
 
 // Reflect the initial selection on load.

@@ -53,15 +53,16 @@ public class ItemModel : PageModel
         var result = await LoadAsync(listId, itemId, ListAccess.Edit);
         if (result is not null) return result;
 
+        // Status comes from the shortcuts (incl. Abgebrochen). For series we also
+        // persist which seasons are watched; the two are kept in sync client-side.
         if (UsesSeasons)
         {
-            // Checked seasons drive the status automatically (none → Open, all → Done, else → Partial).
-            Item.SetWatchedSeasons(Seasons, Item.TotalSeasons!.Value);
+            var total = Item.TotalSeasons!.Value;
+            var set = Seasons.Where(s => s >= 1 && s <= total).Distinct().OrderBy(s => s).ToList();
+            Item.WatchedSeasonsData = set.Count == 0 ? null : string.Join(",", set);
+            Item.WatchedSeasons = set.Count;
         }
-        else
-        {
-            Item.Status = Status;
-        }
+        Item.Status = Status;
 
         // Optional move — target must be editable and of the same media type.
         if (MoveToListId != 0 && MoveToListId != listId)
