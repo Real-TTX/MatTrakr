@@ -42,6 +42,12 @@
                 </a>
             </li>
         }
+        <li>
+            <a href="/Lists/Manage" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Lists/Manage", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
+                <i class="bi bi-gear"></i>
+                <span class="sidebar-link-text">Listen verwalten</span>
+            </a>
+        </li>
     </ul>
 
     @if (Model.IsAdmin)

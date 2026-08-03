@@ -87,16 +87,34 @@
                             }
                             else
                             {
-                                <select asp-for="Status" class="form-select">
-                                    <option value="@ItemStatus.Open">@Model.OpenWord</option>
+                                <div class="status-toggle">
+                                    <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Open"
+                                           id="st_open" autocomplete="off" checked="@(Model.Status == ItemStatus.Open)" />
+                                    <label class="btn btn-outline-primary status-btn" for="st_open">
+                                        <i class="bi bi-hourglass me-1"></i>@Model.OpenWord
+                                    </label>
+
                                     @if (Model.List.Type == MediaType.Series)
                                     {
-                                        <option value="@ItemStatus.Partial">@Model.PartialWord</option>
+                                        <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Partial"
+                                               id="st_partial" autocomplete="off" checked="@(Model.Status == ItemStatus.Partial)" />
+                                        <label class="btn btn-outline-primary status-btn" for="st_partial">
+                                            <i class="bi bi-hourglass-split me-1"></i>@Model.PartialWord
+                                        </label>
                                     }
-                                    <option value="@ItemStatus.Done">@Model.DoneWord</option>
-                                    <option disabled>──────────</option>
-                                    <option value="@ItemStatus.Abandoned">Abgebrochen</option>
-                                </select>
+
+                                    <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Done"
+                                           id="st_done" autocomplete="off" checked="@(Model.Status == ItemStatus.Done)" />
+                                    <label class="btn btn-outline-primary status-btn" for="st_done">
+                                        <i class="bi bi-check-lg me-1"></i>@Model.DoneWord
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Abandoned"
+                                           id="st_abandon" autocomplete="off" checked="@(Model.Status == ItemStatus.Abandoned)" />
+                                    <label class="btn btn-outline-danger status-btn status-btn--abandon" for="st_abandon">
+                                        <i class="bi bi-x-circle me-1"></i>Abgebrochen
+                                    </label>
+                                </div>
                             }
                         </div>
                         <div class="col-12 col-sm-6">

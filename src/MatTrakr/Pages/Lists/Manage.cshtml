@@ -1,0 +1,120 @@
+@page "/Lists/Manage"
+@using MatTrakr.Data
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Lists.ManageModel
+@{
+    ViewData["Title"] = "Listen verwalten";
+
+    string TypeIcon(MediaType t) => t switch
+    {
+        MediaType.Movies => "bi-film",
+        MediaType.Series => "bi-tv",
+        MediaType.Books => "bi-book",
+        _ => "bi-collection",
+    };
+}
+
+<h1 class="page-title"><i class="bi bi-collection"></i>Listen verwalten</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<partial name="_TableToolbar" model="@(new TableToolbarModel
+{
+    Id = "listsToolbar",
+    SearchValue = Model.Q,
+    SearchPlaceholder = "Liste suchen …",
+    Filters =
+    {
+        new ToolbarFilter
+        {
+            Name = "type", Label = "Typ", Selected = Model.TypeFilter,
+            Options =
+            {
+                ("", "Alle"),
+                (nameof(MediaType.Movies), "Movies"),
+                (nameof(MediaType.Series), "Series"),
+                (nameof(MediaType.Books), "Books"),
+            },
+        },
+    },
+    SortOptions =
+    {
+        new ToolbarSortOption { Value = "name", Text = "Name ↑" },
+        new ToolbarSortOption { Value = "name_desc", Text = "Name ↓" },
+        new ToolbarSortOption { Value = "type", Text = "Typ" },
+    },
+    SortValue = Model.Sort,
+})" />
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="content-card p-5 text-center text-muted">
+        <i class="bi bi-collection display-4 d-block mb-3 opacity-50"></i>
+        <p class="mb-0">Keine Listen gefunden.</p>
+    </div>
+}
+else
+{
+    <div class="content-card table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="d-none d-sm-table-cell">Typ</th>
+                    <th class="text-end">Einträge</th>
+                    <th class="text-end">Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Rows)
+                {
+                    <tr>
+                        <td>
+                            <a href="/Lists/@row.List.Id" class="text-decoration-none fw-semibold">
+                                <i class="bi @TypeIcon(row.List.Type) me-1"></i>@row.List.Name
+                            </a>
+                            @if (row.List.IsDefault)
+                            {
+                                <span class="badge text-bg-light ms-1">Standard</span>
+                            }
+                        </td>
+                        <td class="d-none d-sm-table-cell">@row.List.Type</td>
+                        <td class="text-end">@row.Done / @row.Total</td>
+                        <td class="text-end text-nowrap">
+                            <a href="/Lists/Edit/@row.List.Id" class="btn btn-sm btn-outline-secondary" title="Bearbeiten">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            @if (!row.List.IsDefault)
+                            {
+                                <form method="post" asp-page-handler="Delete" class="d-inline">
+                                    <input type="hidden" name="id" value="@row.List.Id" />
+                                    <input type="hidden" name="q" value="@Model.Q" />
+                                    <input type="hidden" name="type" value="@Model.TypeFilter" />
+                                    <input type="hidden" name="sort" value="@Model.Sort" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-2" title="Löschen"
+                                            onclick="return confirm('„@row.List.Name“ inklusive aller Einträge wirklich löschen?');">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div class="list-actions">
+    <a href="/Lists/Edit" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Neue Liste
+    </a>
+    <a href="/" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
+</div>

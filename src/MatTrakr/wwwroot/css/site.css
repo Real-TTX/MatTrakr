@@ -726,9 +726,9 @@ body {
   gap: 0.5rem;
 }
 
-.season-btn {
-  width: 100%;
-  /* Brand-purple toggle instead of Bootstrap's default blue */
+/* Brand-purple checkable toggle buttons (seasons + status) */
+.season-btn,
+.status-btn {
   --bs-btn-color: var(--mt-primary);
   --bs-btn-border-color: var(--mt-primary);
   --bs-btn-hover-color: #fff;
@@ -737,6 +737,35 @@ body {
   --bs-btn-active-color: #fff;
   --bs-btn-active-bg: var(--mt-btn-primary-bg);
   --bs-btn-active-border-color: var(--mt-btn-primary-bg);
+}
+
+.season-btn {
+  width: 100%;
+}
+
+/* Status toggle group (Movies/Books/Series-without-seasons) */
+.status-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.status-btn {
+  flex: 1 1 auto;
+}
+
+/* Abgebrochen: red, on its own row for a bit of separation */
+.status-btn--abandon {
+  flex: 1 1 100%;
+  margin-top: 0.15rem;
+  --bs-btn-color: var(--bs-danger);
+  --bs-btn-border-color: var(--bs-danger);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-danger);
+  --bs-btn-hover-border-color: var(--bs-danger);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bs-danger);
+  --bs-btn-active-border-color: var(--bs-danger);
 }
 
 /* Search hits on the add page */
