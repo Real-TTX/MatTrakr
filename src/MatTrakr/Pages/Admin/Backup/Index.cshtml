@@ -1,0 +1,47 @@
+@page "/Admin/Backup"
+@model MatTrakr.Pages.Admin.Backup.IndexModel
+@{
+    ViewData["Title"] = "Backup & Restore";
+}
+
+<h1 class="page-title"><i class="bi bi-hdd-stack"></i>Backup &amp; Restore</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="content-card p-3 mb-3" style="max-width: 720px;">
+    <h2 class="fs-5 mb-1"><i class="bi bi-download me-1"></i>Backup herunterladen</h2>
+    <p class="text-muted">
+        Lädt die komplette Datenbank als <code>.db</code>-Datei herunter (alle Listen,
+        Einträge, Benutzer). Cover-Bilder werden nicht lokal gespeichert – die Datenbank
+        enthält nur ihre URLs, das Backup ist damit vollständig.
+    </p>
+    <a href="/Admin/Backup?handler=Download" class="btn btn-primary">
+        <i class="bi bi-download me-1"></i>Backup herunterladen
+    </a>
+</div>
+
+<div class="content-card p-3" style="max-width: 720px;">
+    <h2 class="fs-5 mb-1"><i class="bi bi-upload me-1"></i>Wiederherstellen</h2>
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Achtung: Die aktuelle Datenbank wird <strong>vollständig ersetzt</strong>. Eine
+        automatische Sicherheitskopie der bisherigen Daten wird angelegt. Danach musst du
+        dich neu anmelden.
+    </div>
+
+    <form method="post" asp-page-handler="Restore" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="backupFile" class="form-label">Backup-Datei (.db)</label>
+            <input type="file" name="file" id="backupFile" class="form-control" accept=".db,application/x-sqlite3" required />
+        </div>
+        <button type="submit" class="btn btn-outline-danger"
+                onclick="return confirm('Die aktuelle Datenbank wirklich durch das Backup ersetzen?');">
+            <i class="bi bi-upload me-1"></i>Datenbank wiederherstellen
+        </button>
+    </form>
+</div>

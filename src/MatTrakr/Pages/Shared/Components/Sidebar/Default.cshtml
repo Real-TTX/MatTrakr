@@ -72,6 +72,12 @@
                     <span class="sidebar-link-text">Einstellungen</span>
                 </a>
             </li>
+            <li>
+                <a href="/Admin/Backup" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Backup", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
+                    <i class="bi bi-hdd-stack"></i>
+                    <span class="sidebar-link-text">Backup &amp; Restore</span>
+                </a>
+            </li>
         </ul>
     }
 </nav>
