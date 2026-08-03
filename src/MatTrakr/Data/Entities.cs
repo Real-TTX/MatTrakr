@@ -47,6 +47,13 @@ public enum SharePermission
     Edit = 1,
 }
 
+/// <summary>Where the status tag sits on a grid card (personal preference).</summary>
+public enum CardStatusPosition
+{
+    Above = 0,
+    Below = 1,
+}
+
 // ---------------------------------------------------------------------------
 // Audit base — every table carries Create/Update stamps (see AppDbContext).
 // PK is always "Id" as BIGINT (long).
@@ -74,6 +81,9 @@ public class User : AuditableEntity
     public UserRole Role { get; set; } = UserRole.User;
     public bool IsActive { get; set; } = true;
     public bool MustChangePassword { get; set; }
+
+    /// <summary>Personal preference: status tag above (small) or below (large) the cover.</summary>
+    public CardStatusPosition CardStatusPosition { get; set; } = CardStatusPosition.Above;
 
     public ICollection<TrackList> OwnedLists { get; set; } = new List<TrackList>();
     public ICollection<UserSession> Sessions { get; set; } = new List<UserSession>();

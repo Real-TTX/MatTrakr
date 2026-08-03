@@ -33,6 +33,7 @@ public class DetailsModel : PageModel
     public int PageSizeValue => PageSize;
 
     public bool CanEdit => Access >= ListAccess.Edit;
+    public CardStatusPosition StatusPosition { get; set; } = CardStatusPosition.Above;
 
     /// <summary>"Gesehen"/"Gelesen" depending on list type.</summary>
     public string DoneWord => List.Type == MediaType.Books ? "Gelesen" : "Gesehen";
@@ -45,6 +46,9 @@ public class DetailsModel : PageModel
 
         Access = await _access.GetAccessAsync(userId.Value, id);
         if (Access == ListAccess.None) return Redirect("/Account/AccessDenied");
+
+        StatusPosition = await _db.Users.Where(u => u.Id == userId.Value)
+            .Select(u => u.CardStatusPosition).FirstOrDefaultAsync();
 
         List = (await _db.Lists.AsNoTracking().FirstOrDefaultAsync(l => l.Id == id))!;
 

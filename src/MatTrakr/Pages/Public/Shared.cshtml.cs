@@ -24,6 +24,8 @@ public class SharedModel : PageModel
     public int PageNumber { get; set; } = 1;
     public int PageSizeValue => PageSize;
 
+    public CardStatusPosition StatusPosition { get; set; } = CardStatusPosition.Above;
+
     public string DoneWord => List.Type == MediaType.Books ? "Gelesen" : "Gesehen";
     public string OpenWord => List.Type == MediaType.Books ? "Ungelesen" : "Ungesehen";
 
@@ -37,6 +39,8 @@ public class SharedModel : PageModel
         if (share?.List is null) return NotFound();
 
         List = share.List;
+        StatusPosition = await _db.Users.Where(u => u.Id == List.OwnerUserId)
+            .Select(u => u.CardStatusPosition).FirstOrDefaultAsync();
         Token = token;
         Q = q;
         StatusFilter = status;

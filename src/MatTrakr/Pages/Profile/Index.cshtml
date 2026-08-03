@@ -1,0 +1,50 @@
+@page "/Profile"
+@using MatTrakr.Data
+@model MatTrakr.Pages.Profile.IndexModel
+@{
+    ViewData["Title"] = "Einstellungen";
+}
+
+<h1 class="page-title"><i class="bi bi-sliders"></i>Persönliche Einstellungen</h1>
+
+@if (!string.IsNullOrEmpty(Model.Success))
+{
+    <div class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle me-1"></i>@Model.Success
+    </div>
+}
+
+<form method="post" class="content-card p-3" style="max-width: 640px;">
+    <h2 class="fs-5 mb-1"><i class="bi bi-tags me-1"></i>Status-Anzeige auf den Kacheln</h2>
+    <p class="text-muted">Wo der Status (z.B. Gesehen, Teilweise) auf einer Cover-Kachel erscheint.</p>
+
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-sm-6">
+            <input class="btn-check" type="radio" asp-for="CardStatusPosition" value="@CardStatusPosition.Above"
+                   id="posAbove" autocomplete="off" />
+            <label class="btn btn-outline-primary w-100 text-start p-3" for="posAbove">
+                <i class="bi bi-align-top me-1"></i><strong>Über dem Cover</strong>
+                <span class="d-block small text-muted">Kompaktes Tag oberhalb des Covers.</span>
+            </label>
+        </div>
+        <div class="col-12 col-sm-6">
+            <input class="btn-check" type="radio" asp-for="CardStatusPosition" value="@CardStatusPosition.Below"
+                   id="posBelow" autocomplete="off" />
+            <label class="btn btn-outline-primary w-100 text-start p-3" for="posBelow">
+                <i class="bi bi-align-bottom me-1"></i><strong>Unter dem Cover</strong>
+                <span class="d-block small text-muted">Größer, über die volle Coverbreite.</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <div class="form-actions-main">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1"></i>Speichern
+            </button>
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Zurück
+            </a>
+        </div>
+    </div>
+</form>

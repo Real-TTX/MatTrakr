@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Username).HasMaxLength(100).IsRequired();
             e.Property(x => x.DisplayName).HasMaxLength(150);
             e.Property(x => x.Role).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.CardStatusPosition).HasConversion<string>().HasMaxLength(20);
         });
 
         b.Entity<UserSession>(e =>

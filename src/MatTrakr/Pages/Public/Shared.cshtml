@@ -68,7 +68,14 @@
                 {
                     var done = item.Status == ItemStatus.Done;
                     var badge = StatusDisplay.Badge(item, Model.List.Type);
+                    var above = Model.StatusPosition == CardStatusPosition.Above;
                     <div class="media-card @(done ? "is-done" : null)">
+                        @if (above)
+                        {
+                            <div class="media-card-statusbar media-card-statusbar--above @badge.Css">
+                                <i class="bi @badge.Icon me-1"></i>@badge.Text
+                            </div>
+                        }
                         <div class="media-card-cover-link">
                             @if (!string.IsNullOrEmpty(item.CoverUrl))
                             {
@@ -80,11 +87,13 @@
                                     <i class="bi @typeIcon"></i>
                                 </div>
                             }
-                            <span class="media-card-status badge @badge.Css">
-                                <i class="bi @badge.Icon"></i>
-                                @badge.Text
-                            </span>
                         </div>
+                        @if (!above)
+                        {
+                            <div class="media-card-statusbar media-card-statusbar--below @badge.Css">
+                                <i class="bi @badge.Icon me-1"></i>@badge.Text
+                            </div>
+                        }
                         <div class="media-card-body">
                             <div class="media-card-title" title="@item.Title">@item.Title</div>
                             <div class="media-card-year">@item.Year</div>

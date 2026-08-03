@@ -643,10 +643,26 @@ body {
   font-size: 2.5rem;
 }
 
-.media-card-status {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+/* Full-cover-width status strip; above (small) or below (larger) per preference */
+.media-card-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.media-card-statusbar--above {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.4rem;
+}
+
+.media-card-statusbar--below {
+  font-size: 0.85rem;
+  padding: 0.5rem;
 }
 
 .media-card-body {
@@ -674,11 +690,6 @@ body {
   flex-grow: 1;
 }
 
-/* Status shown as a plain tag on the card (display only, not a quick action) */
-.media-card-tag {
-  align-self: flex-start;
-  margin-top: 0.4rem;
-}
 
 /* Item detail */
 .item-detail-cover {
