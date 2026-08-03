@@ -3,12 +3,12 @@
 @model MatTrakr.Pages.Lists.AddModel
 @{
     ViewData["Title"] = $"Hinzufügen · {Model.List.Name}";
-    var searchLabel = Model.List.Type switch
+    var searchPlaceholder = Model.List.Type switch
     {
-        MediaType.Movies => "Film suchen (TMDb)",
-        MediaType.Series => "Serie suchen (TMDb)",
-        MediaType.Books => "Buch suchen (Google Books)",
-        _ => "Suchen",
+        MediaType.Movies => "Film suchen …",
+        MediaType.Series => "Serie suchen …",
+        MediaType.Books => "Buch suchen …",
+        _ => "Suchen …",
     };
 }
 
@@ -21,15 +21,12 @@
     </div>
 }
 
-<div class="content-card p-3 mb-3">
-    <label class="form-label" for="mediaSearchInput">@searchLabel</label>
-    <div class="input-group">
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="search" class="form-control form-control-lg" id="mediaSearchInput"
-               placeholder="Tippen zum Suchen …" autocomplete="off" autofocus
-               @(Model.SearchAvailable ? null : "disabled") />
-    </div>
-    <div class="form-text">Die Suche startet automatisch während der Eingabe.</div>
+<div class="input-group input-group-lg mb-3">
+    <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <input type="search" class="form-control" id="mediaSearchInput"
+           placeholder="@searchPlaceholder" autocomplete="off" autofocus
+           value="@Model.InitialQuery"
+           @(Model.SearchAvailable ? null : "disabled") />
 </div>
 
 <div id="searchStatus" class="text-muted small mb-2 d-none"></div>
@@ -63,6 +60,13 @@
         }
         timer = setTimeout(() => search(q), 350);
     });
+
+    // Pre-filled term (e.g. handed over from an empty list search): run it now.
+    const initialQuery = input.value.trim();
+    if (initialQuery.length >= 2) {
+        input.focus();
+        search(initialQuery);
+    }
 
     async function search(q) {
         if (controller) controller.abort();
@@ -104,21 +108,41 @@
                 </div>
                 <div class="search-hit-action"></div>`;
 
-            const action = card.querySelector('.search-hit-action');
-            if (hit.alreadyAdded) {
-                action.innerHTML = '<span class="badge text-bg-success"><i class="bi bi-check-lg"></i> In Liste</span>';
-            } else {
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-primary btn-sm';
-                btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Hinzufügen';
-                btn.addEventListener('click', () => add(hit, btn));
-                action.appendChild(btn);
-            }
+            renderAction(card.querySelector('.search-hit-action'), hit);
             resultsEl.appendChild(card);
         }
     }
 
-    async function add(hit, btn) {
+    // Renders the action area: "Hinzufügen", or (when in the list) "Öffnen" + "Entfernen".
+    function renderAction(action, hit) {
+        action.innerHTML = '';
+        if (hit.alreadyAdded) {
+            const open = document.createElement('a');
+            open.className = 'btn btn-outline-secondary btn-sm search-hit-open';
+            open.href = `/Lists/${listId}/Items/${hit.itemId}`;
+            open.title = 'Öffnen';
+            open.setAttribute('aria-label', 'Öffnen');
+            open.innerHTML = '<i class="bi bi-box-arrow-up-right"></i>';
+
+            const rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'btn btn-outline-danger btn-sm';
+            rm.innerHTML = '<i class="bi bi-trash me-1"></i>Entfernen';
+            rm.addEventListener('click', () => remove(hit, action, rm));
+
+            action.appendChild(open);
+            action.appendChild(rm);
+        } else {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-primary btn-sm';
+            btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Hinzufügen';
+            btn.addEventListener('click', () => add(hit, action, btn));
+            action.appendChild(btn);
+        }
+    }
+
+    async function add(hit, action, btn) {
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
@@ -140,11 +164,43 @@
                 body: form.toString(),
             });
             if (!res.ok) throw new Error(res.status);
-            btn.outerHTML = '<span class="badge text-bg-success"><i class="bi bi-check-lg"></i> In Liste</span>';
+            const data = await res.json();
+            hit.alreadyAdded = true;
+            hit.itemId = data.itemId;
+            action.closest('.search-hit')?.classList.add('is-added');
+            renderAction(action, hit);
         } catch {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Hinzufügen';
             alert('Hinzufügen fehlgeschlagen.');
+        }
+    }
+
+    async function remove(hit, action, rm) {
+        rm.disabled = true;
+        rm.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        const form = new URLSearchParams();
+        form.set('externalId', hit.externalId);
+
+        try {
+            const res = await fetch(`/Lists/${listId}/Add?handler=Remove`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token,
+                },
+                body: form.toString(),
+            });
+            if (!res.ok) throw new Error(res.status);
+            hit.alreadyAdded = false;
+            hit.itemId = null;
+            action.closest('.search-hit')?.classList.remove('is-added');
+            renderAction(action, hit);
+        } catch {
+            rm.disabled = false;
+            rm.innerHTML = '<i class="bi bi-trash me-1"></i>Entfernen';
+            alert('Entfernen fehlgeschlagen.');
         }
     }
 

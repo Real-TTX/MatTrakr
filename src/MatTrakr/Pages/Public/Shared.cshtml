@@ -48,8 +48,8 @@
                 {
                     Name = "status", Label = "Status", Selected = Model.StatusFilter,
                     Options = Model.List.Type == MediaType.Series
-                        ? new() { ("", "Alle"), ("open", Model.OpenWord), ("partial", "Teilweise"), ("done", Model.DoneWord) }
-                        : new() { ("", "Alle"), ("open", Model.OpenWord), ("done", Model.DoneWord) },
+                        ? new() { ("", "Alle"), ("open", Model.OpenWord), ("partial", "Teilweise"), ("done", Model.DoneWord), ("abandoned", "Abgebrochen") }
+                        : new() { ("", "Alle"), ("open", Model.OpenWord), ("done", Model.DoneWord), ("abandoned", "Abgebrochen") },
                 },
             },
         })" />

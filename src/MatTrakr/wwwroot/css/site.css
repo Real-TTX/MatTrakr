@@ -674,6 +674,12 @@ body {
   flex-grow: 1;
 }
 
+/* Status shown as a plain tag on the card (display only, not a quick action) */
+.media-card-tag {
+  align-self: flex-start;
+  margin-top: 0.4rem;
+}
+
 /* Item detail */
 .item-detail-cover {
   width: 220px;
@@ -692,22 +698,34 @@ body {
   font-size: 3rem;
 }
 
-/* Per-season checkbox picker (series item detail) */
+/* Per-season toggle-button picker (series item detail) */
 .season-picker-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.6rem;
-}
-
-.season-checks {
-  display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1.25rem;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--mt-border);
 }
 
-.season-check {
-  margin: 0;
-  min-width: 6rem;
+/* Equal-size season buttons in a responsive grid */
+.season-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.5rem;
+}
+
+.season-btn {
+  width: 100%;
+  /* Brand-purple toggle instead of Bootstrap's default blue */
+  --bs-btn-color: var(--mt-primary);
+  --bs-btn-border-color: var(--mt-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--mt-btn-primary-bg);
+  --bs-btn-hover-border-color: var(--mt-btn-primary-bg);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--mt-btn-primary-bg);
+  --bs-btn-active-border-color: var(--mt-btn-primary-bg);
 }
 
 /* Search hits on the add page */
@@ -771,6 +789,9 @@ body {
 .search-hit-action {
   flex-shrink: 0;
   align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -943,22 +964,6 @@ body {
     --bs-pagination-padding-x: 0.85rem;
     --bs-pagination-padding-y: 0.5rem;
     --bs-pagination-font-size: 1rem;
-  }
-
-  /* Bigger season checkboxes */
-  .season-check .form-check-input {
-    width: 1.35rem;
-    height: 1.35rem;
-    margin-top: 0.15rem;
-  }
-
-  .season-check {
-    min-width: 7.5rem;
-    padding-left: 2rem;
-  }
-
-  .season-check .form-check-label {
-    font-size: 1rem;
   }
 
   /* Bigger theme switch targets */

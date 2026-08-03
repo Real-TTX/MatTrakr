@@ -72,42 +72,21 @@
             @if (Model.CanEdit)
             {
                 <form method="post">
+                    @* Same layout for Movies/Series/Books: Status + Verschieben in one row. *@
                     <div class="row g-3 mb-2" style="max-width: 560px;">
-                        @if (Model.UsesSeasons)
-                        {
-                            var total = Model.Item.TotalSeasons!.Value;
-                            <div class="col-12">
-                                <label class="form-label d-block">Gesehene Staffeln abhaken</label>
-                                <div class="season-picker" data-season-picker>
-                                    <div class="season-picker-actions">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-season-all>
-                                            <i class="bi bi-check-all me-1"></i>Alle
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-season-none>
-                                            <i class="bi bi-x-lg me-1"></i>Keine
-                                        </button>
-                                    </div>
-                                    <div class="season-checks">
-                                        @for (var n = 1; n <= total; n++)
-                                        {
-                                            <div class="form-check season-check">
-                                                <input class="form-check-input" type="checkbox" name="Seasons" value="@n"
-                                                       id="season_@n" checked="@Model.Seasons.Contains(n)" />
-                                                <label class="form-check-label" for="season_@n">Staffel @n</label>
-                                            </div>
-                                        }
-                                    </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label">Status</label>
+                            @if (Model.UsesSeasons)
+                            {
+                                <div>
+                                    <span class="badge @badge.Css fs-6 py-2 px-3">
+                                        <i class="bi @badge.Icon me-1"></i>@badge.Text
+                                    </span>
                                 </div>
-                                <div class="form-text">
-                                    Status wird automatisch gesetzt: keine = @Model.OpenWord, alle = @Model.DoneWord,
-                                    dazwischen = @Model.PartialWord.
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="col-12 col-sm-6">
-                                <label asp-for="Status" class="form-label">Status</label>
+                                <div class="form-text">Ergibt sich aus den gesehenen Staffeln.</div>
+                            }
+                            else
+                            {
                                 <select asp-for="Status" class="form-select">
                                     <option value="@ItemStatus.Open">@Model.OpenWord</option>
                                     @if (Model.List.Type == MediaType.Series)
@@ -115,9 +94,11 @@
                                         <option value="@ItemStatus.Partial">@Model.PartialWord</option>
                                     }
                                     <option value="@ItemStatus.Done">@Model.DoneWord</option>
+                                    <option disabled>──────────</option>
+                                    <option value="@ItemStatus.Abandoned">Abgebrochen</option>
                                 </select>
-                            </div>
-                        }
+                            }
+                        </div>
                         <div class="col-12 col-sm-6">
                             <label asp-for="MoveToListId" class="form-label">
                                 Verschieben nach <i class="bi bi-arrow-right-circle"></i>
@@ -132,6 +113,38 @@
                             <div class="form-text">Nur Listen vom Typ @Model.List.Type.</div>
                         </div>
                     </div>
+
+                    @* Series only: the extra per-season picker, below the shared row. *@
+                    @if (Model.UsesSeasons)
+                    {
+                        var total = Model.Item.TotalSeasons!.Value;
+                        <div class="mb-3" style="max-width: 560px;">
+                            <label class="form-label d-block">Gesehene Staffeln abhaken</label>
+                            <div class="season-picker" data-season-picker>
+                                <div class="season-picker-actions">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-season-set="all">
+                                        <i class="bi bi-check-all me-1"></i>Alle
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-season-set="half">
+                                        <i class="bi bi-hourglass-split me-1"></i>Teilweise
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-season-set="none">
+                                        <i class="bi bi-x-lg me-1"></i>Keine
+                                    </button>
+                                </div>
+                                <div class="season-checks">
+                                    @for (var n = 1; n <= total; n++)
+                                    {
+                                        <input class="btn-check" type="checkbox" name="Seasons" value="@n"
+                                               id="season_@n" autocomplete="off" checked="@Model.Seasons.Contains(n)" />
+                                        <label class="btn btn-outline-primary season-btn" for="season_@n">
+                                            <i class="bi bi-tv me-1"></i>Staffel @n
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
 
                     <partial name="_FormActionsBar" model="@(new FormActionsModel
                     {

@@ -15,6 +15,7 @@ public static class StatusDisplay
         ItemStatus.Done => ("text-bg-success", "bi-check-lg", DoneWord(type)),
         ItemStatus.Partial => ("text-bg-warning", "bi-hourglass-split",
             item.TotalSeasons is > 0 ? $"Teilweise ({item.WatchedSeasons}/{item.TotalSeasons})" : "Teilweise"),
+        ItemStatus.Abandoned => ("text-bg-danger", "bi-x-circle", "Abgebrochen"),
         _ => ("text-bg-secondary", "bi-hourglass", OpenWord(type)),
     };
 }

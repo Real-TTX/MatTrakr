@@ -30,6 +30,8 @@ public enum ItemStatus
     Done = 1,
     /// <summary>Partially watched — used by series when some (but not all) seasons are seen.</summary>
     Partial = 2,
+    /// <summary>Started but abandoned / dropped.</summary>
+    Abandoned = 3,
 }
 
 public enum ExternalSource
