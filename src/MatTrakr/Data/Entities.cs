@@ -117,8 +117,10 @@ public class ListItem : AuditableEntity
 
     /// <summary>Series only: total number of seasons (from TMDb), null for movies/books.</summary>
     public int? TotalSeasons { get; set; }
-    /// <summary>Series only: how many seasons have been watched. Drives the derived status.</summary>
+    /// <summary>Series only: how many seasons have been watched (kept in sync with the set below).</summary>
     public int WatchedSeasons { get; set; }
+    /// <summary>Series only: which seasons are watched, as a sorted CSV of season numbers (e.g. "1,3,4").</summary>
+    public string? WatchedSeasonsData { get; set; }
 
     public string? MetadataJson { get; set; } // raw extras (author, director, genres, ...)
 
@@ -127,6 +129,35 @@ public class ListItem : AuditableEntity
     /// <summary>True when this item tracks progress per season (a series with known season count).</summary>
     [NotMapped]
     public bool UsesSeasons => TotalSeasons is > 0;
+
+    /// <summary>The watched season numbers (falls back to the first N seasons for legacy count-only data).</summary>
+    [NotMapped]
+    public HashSet<int> WatchedSeasonNumbers
+    {
+        get
+        {
+            var set = new HashSet<int>();
+            if (!string.IsNullOrWhiteSpace(WatchedSeasonsData))
+            {
+                foreach (var part in WatchedSeasonsData.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                    if (int.TryParse(part, out var n)) set.Add(n);
+            }
+            else if (WatchedSeasons > 0)
+            {
+                for (var n = 1; n <= WatchedSeasons; n++) set.Add(n); // legacy count-only fallback
+            }
+            return set;
+        }
+    }
+
+    /// <summary>Sets the watched seasons and keeps the count + status in sync.</summary>
+    public void SetWatchedSeasons(IEnumerable<int> seasons, int total)
+    {
+        var set = seasons.Where(s => s >= 1 && s <= total).Distinct().OrderBy(s => s).ToList();
+        WatchedSeasonsData = set.Count == 0 ? null : string.Join(",", set);
+        WatchedSeasons = set.Count;
+        Status = DeriveSeasonStatus(set.Count, total);
+    }
 
     /// <summary>Derives Open/Partial/Done from watched vs. total seasons.</summary>
     public static ItemStatus DeriveSeasonStatus(int watched, int total) =>

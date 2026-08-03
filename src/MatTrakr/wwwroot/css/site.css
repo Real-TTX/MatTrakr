@@ -678,6 +678,24 @@ body {
   font-size: 3rem;
 }
 
+/* Per-season checkbox picker (series item detail) */
+.season-picker-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.season-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+}
+
+.season-check {
+  margin: 0;
+  min-width: 6rem;
+}
+
 /* Search hits on the add page */
 .search-results {
   display: flex;

@@ -25,7 +25,7 @@ public class ItemModel : PageModel
     public List<TrackList> MoveTargets { get; set; } = new();
 
     [BindProperty] public ItemStatus Status { get; set; }
-    [BindProperty] public int WatchedSeasons { get; set; }
+    [BindProperty] public List<int> Seasons { get; set; } = new();
     [BindProperty] public long MoveToListId { get; set; }
 
     public bool CanEdit => Access >= ListAccess.Edit;
@@ -44,7 +44,7 @@ public class ItemModel : PageModel
         if (result is not null) return result;
 
         Status = Item.Status;
-        WatchedSeasons = Item.WatchedSeasons;
+        Seasons = Item.WatchedSeasonNumbers.OrderBy(n => n).ToList();
         return Page();
     }
 
@@ -55,10 +55,8 @@ public class ItemModel : PageModel
 
         if (UsesSeasons)
         {
-            // Season count drives the status automatically (0 → Open, all → Done, else → Partial).
-            var total = Item.TotalSeasons!.Value;
-            Item.WatchedSeasons = Math.Clamp(WatchedSeasons, 0, total);
-            Item.Status = ListItem.DeriveSeasonStatus(Item.WatchedSeasons, total);
+            // Checked seasons drive the status automatically (none → Open, all → Done, else → Partial).
+            Item.SetWatchedSeasons(Seasons, Item.TotalSeasons!.Value);
         }
         else
         {

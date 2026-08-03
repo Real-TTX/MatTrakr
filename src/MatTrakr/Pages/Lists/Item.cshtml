@@ -73,45 +73,51 @@
             {
                 <form method="post">
                     <div class="row g-3 mb-2" style="max-width: 560px;">
-                        <div class="col-12 col-sm-6">
-                            @if (Model.UsesSeasons)
-                            {
-                                var total = Model.Item.TotalSeasons!.Value;
-                                <label asp-for="WatchedSeasons" class="form-label">Gesehene Staffeln</label>
-                                <div class="input-group season-stepper">
-                                    <button type="button" class="btn btn-outline-secondary" data-season-step="-1" aria-label="Weniger">
-                                        <i class="bi bi-dash-lg"></i>
-                                    </button>
-                                    <input asp-for="WatchedSeasons" type="number" min="0" max="@total"
-                                           class="form-control text-center" />
-                                    <span class="input-group-text">/ @total</span>
-                                    <button type="button" class="btn btn-outline-secondary" data-season-step="1" aria-label="Mehr">
-                                        <i class="bi bi-plus-lg"></i>
-                                    </button>
+                        @if (Model.UsesSeasons)
+                        {
+                            var total = Model.Item.TotalSeasons!.Value;
+                            <div class="col-12">
+                                <label class="form-label d-block">Gesehene Staffeln abhaken</label>
+                                <div class="season-picker" data-season-picker>
+                                    <div class="season-picker-actions">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-season-all>
+                                            <i class="bi bi-check-all me-1"></i>Alle
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-season-none>
+                                            <i class="bi bi-x-lg me-1"></i>Keine
+                                        </button>
+                                    </div>
+                                    <div class="season-checks">
+                                        @for (var n = 1; n <= total; n++)
+                                        {
+                                            <div class="form-check season-check">
+                                                <input class="form-check-input" type="checkbox" name="Seasons" value="@n"
+                                                       id="season_@n" checked="@Model.Seasons.Contains(n)" />
+                                                <label class="form-check-label" for="season_@n">Staffel @n</label>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                                 <div class="form-text">
-                                    Status wird automatisch gesetzt: 0 = @Model.OpenWord, alle = @Model.DoneWord,
+                                    Status wird automatisch gesetzt: keine = @Model.OpenWord, alle = @Model.DoneWord,
                                     dazwischen = @Model.PartialWord.
                                 </div>
-                            }
-                            else if (Model.List.Type == MediaType.Series)
-                            {
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12 col-sm-6">
                                 <label asp-for="Status" class="form-label">Status</label>
                                 <select asp-for="Status" class="form-select">
                                     <option value="@ItemStatus.Open">@Model.OpenWord</option>
-                                    <option value="@ItemStatus.Partial">@Model.PartialWord</option>
+                                    @if (Model.List.Type == MediaType.Series)
+                                    {
+                                        <option value="@ItemStatus.Partial">@Model.PartialWord</option>
+                                    }
                                     <option value="@ItemStatus.Done">@Model.DoneWord</option>
                                 </select>
-                            }
-                            else
-                            {
-                                <label asp-for="Status" class="form-label">Status</label>
-                                <select asp-for="Status" class="form-select">
-                                    <option value="@ItemStatus.Open">@Model.OpenWord</option>
-                                    <option value="@ItemStatus.Done">@Model.DoneWord</option>
-                                </select>
-                            }
-                        </div>
+                            </div>
+                        }
                         <div class="col-12 col-sm-6">
                             <label asp-for="MoveToListId" class="form-label">
                                 Verschieben nach <i class="bi bi-arrow-right-circle"></i>

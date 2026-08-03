@@ -96,8 +96,9 @@ public class DetailsModel : PageModel
             {
                 // Quick toggle for a series: all seasons seen ↔ none (fine-grained on the item page).
                 var total = item.TotalSeasons!.Value;
-                item.WatchedSeasons = item.Status == ItemStatus.Done ? 0 : total;
-                item.Status = ListItem.DeriveSeasonStatus(item.WatchedSeasons, total);
+                item.SetWatchedSeasons(
+                    item.Status == ItemStatus.Done ? Enumerable.Empty<int>() : Enumerable.Range(1, total),
+                    total);
             }
             else
             {

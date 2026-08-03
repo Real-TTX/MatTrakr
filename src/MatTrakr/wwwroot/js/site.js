@@ -10,15 +10,14 @@ document.addEventListener("change", function (e) {
     }
 });
 
-// Season stepper: +/- buttons around a number input (item detail page).
+// Season picker: "Alle" / "Keine" quick-select all/none checkboxes (item detail).
 document.addEventListener("click", function (e) {
-    var btn = e.target.closest("[data-season-step]");
-    if (!btn) return;
-    var input = btn.parentElement.querySelector('input[type="number"]');
-    if (!input) return;
-    var step = parseInt(btn.getAttribute("data-season-step"), 10) || 0;
-    var min = input.min !== "" ? parseInt(input.min, 10) : -Infinity;
-    var max = input.max !== "" ? parseInt(input.max, 10) : Infinity;
-    var val = (parseInt(input.value, 10) || 0) + step;
-    input.value = Math.max(min, Math.min(max, val));
+    var all = e.target.closest("[data-season-all]");
+    var none = e.target.closest("[data-season-none]");
+    if (!all && !none) return;
+    var picker = (all || none).closest("[data-season-picker]");
+    if (!picker) return;
+    picker.querySelectorAll('.season-checks input[type="checkbox"]').forEach(function (cb) {
+        cb.checked = !!all;
+    });
 });
