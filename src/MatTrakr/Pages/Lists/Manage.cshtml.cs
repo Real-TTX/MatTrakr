@@ -43,13 +43,6 @@ public class ManageModel : PageModel
         var list = await _db.Lists.FirstOrDefaultAsync(l => l.Id == id && l.OwnerUserId == userId);
         if (list is null) return Redirect("/Account/AccessDenied");
 
-        if (list.IsDefault)
-        {
-            await LoadAsync(userId.Value, q, type, sort);
-            Error = "Standard-Listen (Movies, Series, Books) können nicht gelöscht werden.";
-            return Page();
-        }
-
         _db.Lists.Remove(list); // cascades items, shares, assignments
         await _db.SaveChangesAsync();
         return RedirectToPage(new { q, type, sort });

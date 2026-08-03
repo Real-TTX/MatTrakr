@@ -47,14 +47,14 @@
         <partial name="_FormActionsBar" model="@(new FormActionsModel
         {
             BackUrl = Model.IsNew ? "/" : $"/Lists/{Model.Id}",
-            DeleteHandler = Model.IsNew || Model.IsDefault ? null : "Delete",
+            DeleteHandler = Model.IsNew ? null : "Delete",
             DeleteConfirm = "Liste inklusive aller Einträge wirklich löschen?",
         })" />
     </form>
 
     <partial name="_DeleteForm" model="@(new FormActionsModel
     {
-        DeleteHandler = Model.IsNew || Model.IsDefault ? null : "Delete",
+        DeleteHandler = Model.IsNew ? null : "Delete",
         DeleteRouteValues = { ["id"] = Model.Id.ToString() },
     })" />
 </div>

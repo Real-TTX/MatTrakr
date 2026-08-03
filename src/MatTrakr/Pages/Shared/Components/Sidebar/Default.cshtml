@@ -20,7 +20,13 @@
 </div>
 
 <nav class="sidebar-nav">
-    <div class="sidebar-section-title">Listen</div>
+    <div class="sidebar-section-title sidebar-section-title--row">
+        <span>Listen</span>
+        <a href="/Lists/Manage" class="sidebar-section-action @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Lists/Manage", StringComparison.OrdinalIgnoreCase) ? "active" : null)"
+           title="Listen verwalten" aria-label="Listen verwalten">
+            <i class="bi bi-gear"></i>
+        </a>
+    </div>
     <ul class="sidebar-list">
         @foreach (var item in Model.Lists)
         {
@@ -42,12 +48,6 @@
                 </a>
             </li>
         }
-        <li>
-            <a href="/Lists/Manage" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Lists/Manage", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
-                <i class="bi bi-gear"></i>
-                <span class="sidebar-link-text">Listen verwalten</span>
-            </a>
-        </li>
     </ul>
 
     @if (Model.IsAdmin)

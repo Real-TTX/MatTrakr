@@ -74,16 +74,6 @@ public class EditModel : PageModel
         var list = await LoadOwnedAsync(id);
         if (list is null) return Redirect("/Account/AccessDenied");
 
-        if (list.IsDefault)
-        {
-            Error = "Die Standard-Listen können nicht gelöscht werden.";
-            Id = list.Id;
-            Name = list.Name;
-            Type = list.Type;
-            IsDefault = true;
-            return Page();
-        }
-
         _db.Lists.Remove(list); // cascades items, shares, assignments
         await _db.SaveChangesAsync();
         return Redirect("/");

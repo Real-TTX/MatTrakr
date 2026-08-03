@@ -199,6 +199,27 @@ body {
   padding: 0.9rem 0.5rem 0.35rem;
 }
 
+.sidebar-section-title--row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-section-action {
+  color: var(--mt-sidebar-title);
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.35rem;
+  text-decoration: none;
+}
+
+.sidebar-section-action:hover,
+.sidebar-section-action.active {
+  color: #fff;
+  background: var(--mt-sidebar-active);
+}
+
 .sidebar-list {
   list-style: none;
   margin: 0;
