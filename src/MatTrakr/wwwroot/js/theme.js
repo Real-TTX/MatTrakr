@@ -51,4 +51,11 @@
 
     // Sync button states on load (theme itself was already set by the head script).
     apply(storedMode());
+
+    // Enable theme transitions only after the first paint, so the initial load
+    // never animates. rAF is preferred; the timeout guarantees it fires even if
+    // rAF is throttled (e.g. a backgrounded tab). classList.add is idempotent.
+    function markReady() { root.classList.add("theme-ready"); }
+    requestAnimationFrame(markReady);
+    setTimeout(markReady, 200);
 })();

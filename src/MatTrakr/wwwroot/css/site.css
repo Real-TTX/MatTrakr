@@ -15,17 +15,24 @@
   --mt-btn-primary-bg: #6c5ce7;
   --mt-btn-primary-hover: #5a4bd1;
 
-  /* Content surfaces */
-  --mt-body-bg: #f4f5fa;
+  /* Content surfaces — stronger separation and darker secondary text for a
+     crisper light theme. */
+  --mt-body-bg: #e9ebf3;
   --mt-surface: #ffffff;
-  --mt-border: #e3e4ee;
-  --mt-text: #212529;
-  --mt-text-muted: #6c757d;
-  --mt-text-subtle: #74748a;
-  --mt-placeholder-bg: #ececf4;
-  --mt-placeholder-fg: #7c7c94;
-  --mt-shadow: rgba(30, 30, 47, 0.12);
-  --mt-shadow-strong: rgba(30, 30, 47, 0.16);
+  --mt-border: #cfd2e0;
+  --mt-text: #1b1e21;
+  --mt-text-muted: #545b63;
+  --mt-text-subtle: #5f5f74;
+  --mt-placeholder-bg: #e4e5ef;
+  --mt-placeholder-fg: #6f6f88;
+  --mt-shadow: rgba(30, 30, 47, 0.16);
+  --mt-shadow-strong: rgba(30, 30, 47, 0.2);
+
+  /* Strengthen Bootstrap's own light-theme borders/muted text (tables, inputs).
+     Dark theme keeps Bootstrap's [data-bs-theme=dark] values (higher specificity). */
+  --bs-border-color: #cfd2e0;
+  --bs-secondary-color: rgba(27, 30, 33, 0.72);
+  --bs-tertiary-bg: #eef0f6;
 
   /* Sidebar / top bar — dark chrome in both themes */
   --mt-sidebar-bg: #1e1e2f;
@@ -66,6 +73,9 @@
 
 html {
   font-size: 14px;
+  /* Always reserve the vertical scrollbar's space so the layout never jumps
+     sideways when it appears after content loads (the reload "wobble"). */
+  scrollbar-gutter: stable;
 }
 
 @media (min-width: 768px) {
@@ -79,16 +89,18 @@ body {
   color: var(--mt-text);
 }
 
-/* Smooth the switch without animating everything on the page */
-body,
-.app-sidebar,
-.app-topbar,
-.table-toolbar,
-.content-card,
-.home-card,
-.media-card,
-.search-hit,
-.auth-card {
+/* Smooth the switch without animating everything on the page. Gated on
+   .theme-ready (added by theme.js after first paint) so nothing animates
+   during the initial load. */
+.theme-ready body,
+.theme-ready .app-sidebar,
+.theme-ready .app-topbar,
+.theme-ready .table-toolbar,
+.theme-ready .content-card,
+.theme-ready .home-card,
+.theme-ready .media-card,
+.theme-ready .search-hit,
+.theme-ready .auth-card {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -369,6 +381,7 @@ body,
 .table-toolbar-search {
   flex: 1 1 220px;
   max-width: 340px;
+  min-width: 0;
 }
 
 .table-toolbar-filter {
@@ -379,6 +392,68 @@ body,
 
 .table-toolbar-filter .form-select {
   width: auto;
+}
+
+/* Mobile trigger buttons (Filter / Sortierung) */
+.table-toolbar-triggers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.table-toolbar-badge {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  font-size: 0.6rem;
+  padding: 0.2em 0.45em;
+}
+
+/* Desktop (≥md): offcanvas-md is static, its body lays filters/sort inline */
+@media (min-width: 768px) {
+  .table-toolbar-controls .offcanvas-body {
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* Mobile (<md): the controls become a fullscreen dialog with stacked inputs */
+@media (max-width: 767.98px) {
+  .table-toolbar-search {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  .table-toolbar-controls.offcanvas-md {
+    --bs-offcanvas-width: 100%;
+  }
+
+  .table-toolbar-controls .offcanvas-body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.1rem;
+    padding: 1rem 1.1rem 1.25rem;
+  }
+
+  .table-toolbar-controls .table-toolbar-filter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  .table-toolbar-controls .table-toolbar-filter .form-label {
+    font-weight: 600;
+  }
+
+  .table-toolbar-controls .table-toolbar-filter .form-select {
+    width: 100%;
+  }
+
+  .table-toolbar-dialog-actions {
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
 }
 
 .table-pagination {
