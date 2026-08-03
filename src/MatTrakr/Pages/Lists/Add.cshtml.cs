@@ -79,6 +79,11 @@ public class AddModel : PageModel
         var duplicate = await _db.ListItems.AnyAsync(i => i.ListId == id && i.ExternalId == externalId, ct);
         if (!duplicate)
         {
+            // Series: fetch the season count so we can track partial progress.
+            int? totalSeasons = List.Type == MediaType.Series
+                ? await _search.GetTvSeasonCountAsync(externalId, ct)
+                : null;
+
             _db.ListItems.Add(new ListItem
             {
                 ListId = id,
@@ -89,6 +94,8 @@ public class AddModel : PageModel
                 CoverUrl = coverUrl,
                 Overview = overview,
                 Status = ItemStatus.Open,
+                TotalSeasons = totalSeasons,
+                WatchedSeasons = 0,
                 MetadataJson = subtitle is null ? null : System.Text.Json.JsonSerializer.Serialize(new { subtitle }),
             });
             await _db.SaveChangesAsync();

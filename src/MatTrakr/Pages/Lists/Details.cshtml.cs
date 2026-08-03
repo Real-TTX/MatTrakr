@@ -60,6 +60,7 @@ public class DetailsModel : PageModel
 
         if (status == "done") query = query.Where(i => i.Status == ItemStatus.Done);
         else if (status == "open") query = query.Where(i => i.Status == ItemStatus.Open);
+        else if (status == "partial") query = query.Where(i => i.Status == ItemStatus.Partial);
 
         TotalCount = await query.CountAsync();
 
@@ -91,7 +92,17 @@ public class DetailsModel : PageModel
         var item = await _db.ListItems.FirstOrDefaultAsync(i => i.Id == itemId && i.ListId == id);
         if (item is not null)
         {
-            item.Status = item.Status == ItemStatus.Done ? ItemStatus.Open : ItemStatus.Done;
+            if (item.UsesSeasons)
+            {
+                // Quick toggle for a series: all seasons seen ↔ none (fine-grained on the item page).
+                var total = item.TotalSeasons!.Value;
+                item.WatchedSeasons = item.Status == ItemStatus.Done ? 0 : total;
+                item.Status = ListItem.DeriveSeasonStatus(item.WatchedSeasons, total);
+            }
+            else
+            {
+                item.Status = item.Status == ItemStatus.Done ? ItemStatus.Open : ItemStatus.Done;
+            }
             await _db.SaveChangesAsync();
         }
 

@@ -58,6 +58,37 @@ public class MediaSearchService
         }
     }
 
+    /// <summary>
+    /// Fetches a TV show's season count from the TMDb details endpoint (the search
+    /// endpoint doesn't include it). Returns null if unavailable.
+    /// </summary>
+    public async Task<int?> GetTvSeasonCountAsync(string tmdbId, CancellationToken ct = default)
+    {
+        var apiKey = _config["Tmdb:ApiKey"];
+        if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(tmdbId)) return null;
+
+        try
+        {
+            var client = _httpFactory.CreateClient("TMDb");
+            using var response = await client.GetAsync(
+                $"tv/{Uri.EscapeDataString(tmdbId)}?api_key={Uri.EscapeDataString(apiKey)}&language=de-DE", ct);
+            if (!response.IsSuccessStatusCode) return null;
+
+            using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+            if (doc.RootElement.TryGetProperty("number_of_seasons", out var ns) &&
+                ns.ValueKind == JsonValueKind.Number)
+            {
+                var count = ns.GetInt32();
+                return count > 0 ? count : null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "TMDb season lookup failed for tv/{Id}", tmdbId);
+        }
+        return null;
+    }
+
     public async Task<List<MediaSearchResult>> SearchAsync(MediaType type, string query, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(query)) return new();

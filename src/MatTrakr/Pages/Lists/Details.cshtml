@@ -12,6 +12,11 @@
         MediaType.Books => "bi-book",
         _ => "bi-collection",
     };
+
+    // Series lists gain a "Teilweise" status option.
+    var statusOptions = new List<(string, string)> { ("", "Alle"), ("open", Model.OpenWord) };
+    if (Model.List.Type == MediaType.Series) statusOptions.Add(("partial", "Teilweise"));
+    statusOptions.Add(("done", Model.DoneWord));
 }
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -32,12 +37,7 @@
         new ToolbarFilter
         {
             Name = "status", Label = "Status", Selected = Model.StatusFilter,
-            Options =
-            {
-                ("", "Alle"),
-                ("open", Model.OpenWord),
-                ("done", Model.DoneWord),
-            },
+            Options = statusOptions,
         },
     },
     SortOptions =
@@ -70,6 +70,7 @@ else
         @foreach (var item in Model.Items)
         {
             var done = item.Status == ItemStatus.Done;
+            var badge = StatusDisplay.Badge(item, Model.List.Type);
             <div class="media-card @(done ? "is-done" : null)">
                 <a href="/Lists/@Model.List.Id/Items/@item.Id" class="media-card-cover-link">
                     @if (!string.IsNullOrEmpty(item.CoverUrl))
@@ -82,9 +83,9 @@ else
                             <i class="bi @typeIcon"></i>
                         </div>
                     }
-                    <span class="media-card-status badge @(done ? "text-bg-success" : "text-bg-secondary")">
-                        <i class="bi @(done ? "bi-check-lg" : "bi-hourglass")"></i>
-                        @(done ? Model.DoneWord : Model.OpenWord)
+                    <span class="media-card-status badge @badge.Css">
+                        <i class="bi @badge.Icon"></i>
+                        @badge.Text
                     </span>
                 </a>
                 <div class="media-card-body">

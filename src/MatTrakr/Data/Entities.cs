@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace MatTrakr.Data;
 
 // ---------------------------------------------------------------------------
@@ -26,6 +28,8 @@ public enum ItemStatus
 {
     Open = 0,
     Done = 1,
+    /// <summary>Partially watched — used by series when some (but not all) seasons are seen.</summary>
+    Partial = 2,
 }
 
 public enum ExternalSource
@@ -110,9 +114,23 @@ public class ListItem : AuditableEntity
     public string? Overview { get; set; }
     public int? Year { get; set; }
     public ItemStatus Status { get; set; } = ItemStatus.Open;
+
+    /// <summary>Series only: total number of seasons (from TMDb), null for movies/books.</summary>
+    public int? TotalSeasons { get; set; }
+    /// <summary>Series only: how many seasons have been watched. Drives the derived status.</summary>
+    public int WatchedSeasons { get; set; }
+
     public string? MetadataJson { get; set; } // raw extras (author, director, genres, ...)
 
     public TrackList? List { get; set; }
+
+    /// <summary>True when this item tracks progress per season (a series with known season count).</summary>
+    [NotMapped]
+    public bool UsesSeasons => TotalSeasons is > 0;
+
+    /// <summary>Derives Open/Partial/Done from watched vs. total seasons.</summary>
+    public static ItemStatus DeriveSeasonStatus(int watched, int total) =>
+        watched <= 0 ? ItemStatus.Open : watched >= total ? ItemStatus.Done : ItemStatus.Partial;
 }
 
 /// <summary>

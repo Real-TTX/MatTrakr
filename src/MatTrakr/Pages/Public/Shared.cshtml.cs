@@ -49,6 +49,7 @@ public class SharedModel : PageModel
 
         if (status == "done") query = query.Where(i => i.Status == ItemStatus.Done);
         else if (status == "open") query = query.Where(i => i.Status == ItemStatus.Open);
+        else if (status == "partial") query = query.Where(i => i.Status == ItemStatus.Partial);
 
         TotalCount = await query.CountAsync();
 

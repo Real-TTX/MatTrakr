@@ -10,6 +10,7 @@
     string? subtitle = null;
     if (meta is not null && meta.RootElement.TryGetProperty("subtitle", out var st))
         subtitle = st.GetString();
+    var badge = StatusDisplay.Badge(Model.Item, Model.List.Type);
 }
 
 <h1 class="page-title"><i class="bi bi-card-text"></i>@Model.Item.Title</h1>
@@ -52,6 +53,12 @@
                     <dd class="col-sm-9">@Model.Item.Year</dd>
                 }
 
+                @if (Model.List.Type == MediaType.Series && Model.Item.TotalSeasons is > 0)
+                {
+                    <dt class="col-sm-3">Staffeln</dt>
+                    <dd class="col-sm-9">@Model.Item.WatchedSeasons von @Model.Item.TotalSeasons gesehen</dd>
+                }
+
                 @if (!string.IsNullOrEmpty(Model.Item.Overview))
                 {
                     <dt class="col-sm-3">Beschreibung</dt>
@@ -67,11 +74,43 @@
                 <form method="post">
                     <div class="row g-3 mb-2" style="max-width: 560px;">
                         <div class="col-12 col-sm-6">
-                            <label asp-for="Status" class="form-label">Status</label>
-                            <select asp-for="Status" class="form-select">
-                                <option value="@ItemStatus.Open">@Model.OpenWord</option>
-                                <option value="@ItemStatus.Done">@Model.DoneWord</option>
-                            </select>
+                            @if (Model.UsesSeasons)
+                            {
+                                var total = Model.Item.TotalSeasons!.Value;
+                                <label asp-for="WatchedSeasons" class="form-label">Gesehene Staffeln</label>
+                                <div class="input-group season-stepper">
+                                    <button type="button" class="btn btn-outline-secondary" data-season-step="-1" aria-label="Weniger">
+                                        <i class="bi bi-dash-lg"></i>
+                                    </button>
+                                    <input asp-for="WatchedSeasons" type="number" min="0" max="@total"
+                                           class="form-control text-center" />
+                                    <span class="input-group-text">/ @total</span>
+                                    <button type="button" class="btn btn-outline-secondary" data-season-step="1" aria-label="Mehr">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    Status wird automatisch gesetzt: 0 = @Model.OpenWord, alle = @Model.DoneWord,
+                                    dazwischen = @Model.PartialWord.
+                                </div>
+                            }
+                            else if (Model.List.Type == MediaType.Series)
+                            {
+                                <label asp-for="Status" class="form-label">Status</label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="@ItemStatus.Open">@Model.OpenWord</option>
+                                    <option value="@ItemStatus.Partial">@Model.PartialWord</option>
+                                    <option value="@ItemStatus.Done">@Model.DoneWord</option>
+                                </select>
+                            }
+                            else
+                            {
+                                <label asp-for="Status" class="form-label">Status</label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="@ItemStatus.Open">@Model.OpenWord</option>
+                                    <option value="@ItemStatus.Done">@Model.DoneWord</option>
+                                </select>
+                            }
                         </div>
                         <div class="col-12 col-sm-6">
                             <label asp-for="MoveToListId" class="form-label">
@@ -103,8 +142,8 @@
             }
             else
             {
-                <span class="badge @(Model.Item.Status == ItemStatus.Done ? "text-bg-success" : "text-bg-secondary") me-2">
-                    @(Model.Item.Status == ItemStatus.Done ? Model.DoneWord : Model.OpenWord)
+                <span class="badge @badge.Css me-2">
+                    <i class="bi @badge.Icon me-1"></i>@badge.Text
                 </span>
                 <div class="list-actions">
                     <a href="/Lists/@Model.List.Id" class="btn btn-outline-secondary">

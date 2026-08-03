@@ -25,11 +25,16 @@ public class ItemModel : PageModel
     public List<TrackList> MoveTargets { get; set; } = new();
 
     [BindProperty] public ItemStatus Status { get; set; }
+    [BindProperty] public int WatchedSeasons { get; set; }
     [BindProperty] public long MoveToListId { get; set; }
 
     public bool CanEdit => Access >= ListAccess.Edit;
     public string DoneWord => List.Type == MediaType.Books ? "Gelesen" : "Gesehen";
     public string OpenWord => List.Type == MediaType.Books ? "Ungelesen" : "Ungesehen";
+    public string PartialWord => "Teilweise gesehen";
+
+    /// <summary>Series with a known season count → track watched seasons (auto status).</summary>
+    public bool UsesSeasons => List.Type == MediaType.Series && Item.TotalSeasons is > 0;
 
     public string? Error { get; set; }
 
@@ -39,6 +44,7 @@ public class ItemModel : PageModel
         if (result is not null) return result;
 
         Status = Item.Status;
+        WatchedSeasons = Item.WatchedSeasons;
         return Page();
     }
 
@@ -47,7 +53,17 @@ public class ItemModel : PageModel
         var result = await LoadAsync(listId, itemId, ListAccess.Edit);
         if (result is not null) return result;
 
-        Item.Status = Status;
+        if (UsesSeasons)
+        {
+            // Season count drives the status automatically (0 → Open, all → Done, else → Partial).
+            var total = Item.TotalSeasons!.Value;
+            Item.WatchedSeasons = Math.Clamp(WatchedSeasons, 0, total);
+            Item.Status = ListItem.DeriveSeasonStatus(Item.WatchedSeasons, total);
+        }
+        else
+        {
+            Item.Status = Status;
+        }
 
         // Optional move — target must be editable and of the same media type.
         if (MoveToListId != 0 && MoveToListId != listId)
