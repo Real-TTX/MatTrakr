@@ -33,6 +33,7 @@ public class DetailsModel : PageModel
     public int PageSizeValue => PageSize;
 
     public bool CanEdit => Access >= ListAccess.Edit;
+    public CardStatusPosition StatusPosition { get; set; } = CardStatusPosition.Above;
 
     /// <summary>"Gesehen"/"Gelesen" depending on list type.</summary>
     public string DoneWord => List.Type == MediaType.Books ? "Gelesen" : "Gesehen";
@@ -45,6 +46,9 @@ public class DetailsModel : PageModel
 
         Access = await _access.GetAccessAsync(userId.Value, id);
         if (Access == ListAccess.None) return Redirect("/Account/AccessDenied");
+
+        StatusPosition = await _db.Users.Where(u => u.Id == userId.Value)
+            .Select(u => u.CardStatusPosition).FirstOrDefaultAsync();
 
         List = (await _db.Lists.AsNoTracking().FirstOrDefaultAsync(l => l.Id == id))!;
 
@@ -60,6 +64,8 @@ public class DetailsModel : PageModel
 
         if (status == "done") query = query.Where(i => i.Status == ItemStatus.Done);
         else if (status == "open") query = query.Where(i => i.Status == ItemStatus.Open);
+        else if (status == "partial") query = query.Where(i => i.Status == ItemStatus.Partial);
+        else if (status == "abandoned") query = query.Where(i => i.Status == ItemStatus.Abandoned);
 
         TotalCount = await query.CountAsync();
 
@@ -77,24 +83,5 @@ public class DetailsModel : PageModel
             .ToListAsync();
 
         return Page();
-    }
-
-    /// <summary>Quick status toggle from the card grid.</summary>
-    public async Task<IActionResult> OnPostToggleAsync(long id, long itemId, string? q, string? status, string? sort, int p = 1)
-    {
-        var userId = _currentUser.UserId;
-        if (userId is null) return Redirect("/Account/Login");
-
-        if (await _access.GetAccessAsync(userId.Value, id) < ListAccess.Edit)
-            return Redirect("/Account/AccessDenied");
-
-        var item = await _db.ListItems.FirstOrDefaultAsync(i => i.Id == itemId && i.ListId == id);
-        if (item is not null)
-        {
-            item.Status = item.Status == ItemStatus.Done ? ItemStatus.Open : ItemStatus.Done;
-            await _db.SaveChangesAsync();
-        }
-
-        return RedirectToPage(new { id, q, status, sort, p });
     }
 }

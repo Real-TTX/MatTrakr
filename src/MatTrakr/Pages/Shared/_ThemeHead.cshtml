@@ -1,0 +1,16 @@
+@* No-flash theme bootstrap: runs synchronously in <head> before first paint,
+   so the resolved light/dark theme is applied before the page renders.
+   Keep this in sync with wwwroot/js/theme.js (same storage key + logic). *@
+<script>
+    (function () {
+        try {
+            var mode = localStorage.getItem('mt-theme') || 'system';
+            var dark = mode === 'dark'
+                || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            var theme = dark ? 'dark' : 'light';
+            var root = document.documentElement;
+            root.setAttribute('data-theme', theme);
+            root.setAttribute('data-bs-theme', theme);
+        } catch (e) { /* localStorage/matchMedia unavailable — stay on light default */ }
+    })();
+</script>

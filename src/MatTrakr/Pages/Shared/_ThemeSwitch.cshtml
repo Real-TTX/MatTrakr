@@ -1,0 +1,17 @@
+@* 3-way theme switch (Hell / System / Dunkel). Wired by wwwroot/js/theme.js.
+   Model = optional extra CSS class, e.g. "theme-switch--plain" for light surfaces. *@
+@model string?
+<div class="theme-switch @Model" data-theme-switch role="group" aria-label="Farbschema">
+    <button type="button" class="theme-switch-btn" data-theme-option="light" title="Hell" aria-label="Helles Design" aria-pressed="false">
+        <i class="bi bi-sun-fill"></i>
+    </button>
+    @* Default mode is "system"; render it selected so the control is never in a
+       "nothing selected" state before/without theme.js. theme.js corrects it on
+       load if the stored choice differs. *@
+    <button type="button" class="theme-switch-btn active" data-theme-option="system" title="System" aria-label="Systemeinstellung folgen" aria-pressed="true">
+        <i class="bi bi-circle-half"></i>
+    </button>
+    <button type="button" class="theme-switch-btn" data-theme-option="dark" title="Dunkel" aria-label="Dunkles Design" aria-pressed="false">
+        <i class="bi bi-moon-stars-fill"></i>
+    </button>
+</div>

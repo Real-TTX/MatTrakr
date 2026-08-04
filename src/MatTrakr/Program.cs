@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using MatTrakr.Data;
 using MatTrakr.Services;
@@ -20,6 +22,14 @@ builder.Configuration.AddJsonFile(
 
 var dbPath = Path.Combine(dataPath, "mattrakr.db");
 
+// Persist DataProtection keys in the volume so antiforgery/data-protected
+// payloads survive image rebuilds (the dev workflow rebuilds on every change).
+var keysPath = Path.Combine(dataPath, "keys");
+Directory.CreateDirectory(keysPath);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+    .SetApplicationName("MatTrakr");
+
 // --- Services ----------------------------------------------------------------
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
@@ -29,6 +39,12 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ListAccessService>();
 builder.Services.AddScoped<MediaSearchService>();
+builder.Services.AddSingleton(sp =>
+    new SettingsService(dataPath, sp.GetRequiredService<IConfiguration>()));
+builder.Services.AddScoped(sp => new BackupService(
+    dbPath, dataPath,
+    sp.GetRequiredService<IServiceScopeFactory>(),
+    sp.GetRequiredService<ILogger<BackupService>>()));
 
 builder.Services.AddHttpClient("TMDb", c =>
 {
@@ -84,7 +100,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStaticFiles();
+// Serve static files, teaching the middleware the .webmanifest MIME type.
+var contentTypes = new FileExtensionContentTypeProvider();
+contentTypes.Mappings[".webmanifest"] = "application/manifest+json";
+app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

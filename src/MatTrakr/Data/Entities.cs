@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace MatTrakr.Data;
 
 // ---------------------------------------------------------------------------
@@ -26,6 +28,10 @@ public enum ItemStatus
 {
     Open = 0,
     Done = 1,
+    /// <summary>Partially watched — used by series when some (but not all) seasons are seen.</summary>
+    Partial = 2,
+    /// <summary>Started but abandoned / dropped.</summary>
+    Abandoned = 3,
 }
 
 public enum ExternalSource
@@ -39,6 +45,13 @@ public enum SharePermission
 {
     ReadOnly = 0,
     Edit = 1,
+}
+
+/// <summary>Where the status tag sits on a grid card (personal preference).</summary>
+public enum CardStatusPosition
+{
+    Above = 0,
+    Below = 1,
 }
 
 // ---------------------------------------------------------------------------
@@ -68,6 +81,9 @@ public class User : AuditableEntity
     public UserRole Role { get; set; } = UserRole.User;
     public bool IsActive { get; set; } = true;
     public bool MustChangePassword { get; set; }
+
+    /// <summary>Personal preference: status tag above (small) or below (large) the cover.</summary>
+    public CardStatusPosition CardStatusPosition { get; set; } = CardStatusPosition.Above;
 
     public ICollection<TrackList> OwnedLists { get; set; } = new List<TrackList>();
     public ICollection<UserSession> Sessions { get; set; } = new List<UserSession>();
@@ -110,9 +126,54 @@ public class ListItem : AuditableEntity
     public string? Overview { get; set; }
     public int? Year { get; set; }
     public ItemStatus Status { get; set; } = ItemStatus.Open;
+
+    /// <summary>Series only: total number of seasons (from TMDb), null for movies/books.</summary>
+    public int? TotalSeasons { get; set; }
+    /// <summary>Series only: how many seasons have been watched (kept in sync with the set below).</summary>
+    public int WatchedSeasons { get; set; }
+    /// <summary>Series only: which seasons are watched, as a sorted CSV of season numbers (e.g. "1,3,4").</summary>
+    public string? WatchedSeasonsData { get; set; }
+
     public string? MetadataJson { get; set; } // raw extras (author, director, genres, ...)
 
     public TrackList? List { get; set; }
+
+    /// <summary>True when this item tracks progress per season (a series with known season count).</summary>
+    [NotMapped]
+    public bool UsesSeasons => TotalSeasons is > 0;
+
+    /// <summary>The watched season numbers (falls back to the first N seasons for legacy count-only data).</summary>
+    [NotMapped]
+    public HashSet<int> WatchedSeasonNumbers
+    {
+        get
+        {
+            var set = new HashSet<int>();
+            if (!string.IsNullOrWhiteSpace(WatchedSeasonsData))
+            {
+                foreach (var part in WatchedSeasonsData.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                    if (int.TryParse(part, out var n)) set.Add(n);
+            }
+            else if (WatchedSeasons > 0)
+            {
+                for (var n = 1; n <= WatchedSeasons; n++) set.Add(n); // legacy count-only fallback
+            }
+            return set;
+        }
+    }
+
+    /// <summary>Sets the watched seasons and keeps the count + status in sync.</summary>
+    public void SetWatchedSeasons(IEnumerable<int> seasons, int total)
+    {
+        var set = seasons.Where(s => s >= 1 && s <= total).Distinct().OrderBy(s => s).ToList();
+        WatchedSeasonsData = set.Count == 0 ? null : string.Join(",", set);
+        WatchedSeasons = set.Count;
+        Status = DeriveSeasonStatus(set.Count, total);
+    }
+
+    /// <summary>Derives Open/Partial/Done from watched vs. total seasons.</summary>
+    public static ItemStatus DeriveSeasonStatus(int watched, int total) =>
+        watched <= 0 ? ItemStatus.Open : watched >= total ? ItemStatus.Done : ItemStatus.Partial;
 }
 
 /// <summary>

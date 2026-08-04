@@ -1,4 +1,10 @@
 @model MatTrakr.ViewComponents.TableToolbarModel
+@{
+    var panelId = $"{Model.Id}_panel";
+    var hasFilters = Model.Filters.Count > 0;
+    var hasSort = Model.SortOptions.Count > 0;
+    var activeFilters = Model.Filters.Count(f => !string.IsNullOrEmpty(f.Selected));
+}
 
 <form method="get" class="table-toolbar" id="@Model.Id">
     @foreach (var kv in Model.Hidden)
@@ -13,37 +19,82 @@
                aria-label="Suchtext" />
     </div>
 
-    @foreach (var filter in Model.Filters)
+    @* Mobile triggers — open the fullscreen filter/sort dialog *@
+    @if (hasFilters || hasSort)
     {
-        <div class="table-toolbar-filter">
-            <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_{filter.Name}")">@filter.Label</label>
-            <select class="form-select" name="@filter.Name" id="@($"{Model.Id}_{filter.Name}")"
-                    onchange="this.form.submit()">
-                @foreach (var (value, text) in filter.Options)
-                {
-                    <option value="@value" selected="@(value == (filter.Selected ?? ""))">@text</option>
-                }
-            </select>
+        <div class="table-toolbar-triggers d-md-none">
+            @if (hasFilters)
+            {
+                <button type="button" class="btn btn-outline-secondary position-relative"
+                        data-bs-toggle="offcanvas" data-bs-target="#@panelId" aria-controls="@panelId"
+                        aria-label="Filter">
+                    <i class="bi bi-funnel"></i>
+                    @if (activeFilters > 0)
+                    {
+                        <span class="badge rounded-pill text-bg-primary table-toolbar-badge">@activeFilters</span>
+                    }
+                </button>
+            }
+            @if (hasSort)
+            {
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-toggle="offcanvas" data-bs-target="#@panelId" aria-controls="@panelId"
+                        aria-label="Sortierung">
+                    <i class="bi bi-sort-down"></i>
+                </button>
+            }
         </div>
     }
 
-    @if (Model.SortOptions.Count > 0)
-    {
-        <div class="table-toolbar-filter">
-            <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_sort")">
-                <i class="bi bi-sort-down"></i>
-            </label>
-            <select class="form-select" name="@Model.SortParam" id="@($"{Model.Id}_sort")"
-                    onchange="this.form.submit()">
-                @foreach (var opt in Model.SortOptions)
-                {
-                    <option value="@opt.Value" selected="@(opt.Value == (Model.SortValue ?? ""))">@opt.Text</option>
-                }
-            </select>
+    @* Controls: inline on desktop (offcanvas-md is static ≥md), fullscreen dialog on mobile *@
+    <div class="table-toolbar-controls offcanvas-md offcanvas-end" tabindex="-1"
+         id="@panelId" aria-labelledby="@(panelId)_label">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="@(panelId)_label">
+                <i class="bi bi-sliders me-1"></i>Filter &amp; Sortierung
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Schließen"></button>
         </div>
-    }
+        <div class="offcanvas-body">
+            @foreach (var filter in Model.Filters)
+            {
+                <div class="table-toolbar-filter">
+                    <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_{filter.Name}")">@filter.Label</label>
+                    <select class="form-select" name="@filter.Name" id="@($"{Model.Id}_{filter.Name}")" data-toolbar-autosubmit>
+                        @foreach (var (value, text) in filter.Options)
+                        {
+                            <option value="@value" selected="@(value == (filter.Selected ?? ""))">@text</option>
+                        }
+                    </select>
+                </div>
+            }
 
-    <button type="submit" class="btn btn-outline-secondary">
+            @if (hasSort)
+            {
+                <div class="table-toolbar-filter">
+                    <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_sort")">
+                        <i class="bi bi-sort-down"></i><span class="d-md-none ms-1">Sortierung</span>
+                    </label>
+                    <select class="form-select" name="@Model.SortParam" id="@($"{Model.Id}_sort")" data-toolbar-autosubmit>
+                        @foreach (var opt in Model.SortOptions)
+                        {
+                            <option value="@opt.Value" selected="@(opt.Value == (Model.SortValue ?? ""))">@opt.Text</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            @* Dialog action row (mobile only) *@
+            <div class="table-toolbar-dialog-actions d-md-none">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-check-lg me-1"></i>Anwenden
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @* Desktop apply button *@
+    <button type="submit" class="btn btn-outline-secondary d-none d-md-inline-flex">
         <i class="bi bi-funnel me-1"></i>Anwenden
     </button>
 </form>

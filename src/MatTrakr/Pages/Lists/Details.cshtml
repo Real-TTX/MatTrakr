@@ -12,6 +12,12 @@
         MediaType.Books => "bi-book",
         _ => "bi-collection",
     };
+
+    // Series lists gain a "Teilweise" status option; all lists can filter "Abgebrochen".
+    var statusOptions = new List<(string, string)> { ("", "Alle"), ("open", Model.OpenWord) };
+    if (Model.List.Type == MediaType.Series) statusOptions.Add(("partial", "Teilweise"));
+    statusOptions.Add(("done", Model.DoneWord));
+    statusOptions.Add(("abandoned", "Abgebrochen"));
 }
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -32,12 +38,7 @@
         new ToolbarFilter
         {
             Name = "status", Label = "Status", Selected = Model.StatusFilter,
-            Options =
-            {
-                ("", "Alle"),
-                ("open", Model.OpenWord),
-                ("done", Model.DoneWord),
-            },
+            Options = statusOptions,
         },
     },
     SortOptions =
@@ -58,6 +59,13 @@
         {
             <p class="mb-0">Diese Liste ist noch leer.</p>
         }
+        else if (!string.IsNullOrWhiteSpace(Model.Q) && Model.CanEdit)
+        {
+            <p class="mb-3">„@Model.Q“ ist noch nicht in dieser Liste.</p>
+            <a href="/Lists/@Model.List.Id/Add?q=@Uri.EscapeDataString(Model.Q)" class="btn btn-primary">
+                <i class="bi bi-search me-1"></i>„@Model.Q“ jetzt suchen &amp; hinzufügen
+            </a>
+        }
         else
         {
             <p class="mb-0">Keine Einträge für die aktuelle Filterung.</p>
@@ -70,7 +78,15 @@ else
         @foreach (var item in Model.Items)
         {
             var done = item.Status == ItemStatus.Done;
+            var cardBadge = StatusDisplay.Badge(item, Model.List.Type);
+            var above = Model.StatusPosition == CardStatusPosition.Above;
             <div class="media-card @(done ? "is-done" : null)">
+                @if (above)
+                {
+                    <div class="media-card-statusbar media-card-statusbar--above @cardBadge.Css">
+                        <i class="bi @cardBadge.Icon me-1"></i>@cardBadge.Text
+                    </div>
+                }
                 <a href="/Lists/@Model.List.Id/Items/@item.Id" class="media-card-cover-link">
                     @if (!string.IsNullOrEmpty(item.CoverUrl))
                     {
@@ -82,26 +98,16 @@ else
                             <i class="bi @typeIcon"></i>
                         </div>
                     }
-                    <span class="media-card-status badge @(done ? "text-bg-success" : "text-bg-secondary")">
-                        <i class="bi @(done ? "bi-check-lg" : "bi-hourglass")"></i>
-                        @(done ? Model.DoneWord : Model.OpenWord)
-                    </span>
                 </a>
+                @if (!above)
+                {
+                    <div class="media-card-statusbar media-card-statusbar--below @cardBadge.Css">
+                        <i class="bi @cardBadge.Icon me-1"></i>@cardBadge.Text
+                    </div>
+                }
                 <div class="media-card-body">
                     <div class="media-card-title" title="@item.Title">@item.Title</div>
                     <div class="media-card-year">@item.Year</div>
-                    @if (Model.CanEdit)
-                    {
-                        <form method="post" asp-page-handler="Toggle"
-                              asp-route-id="@Model.List.Id" asp-route-itemId="@item.Id"
-                              asp-route-q="@Model.Q" asp-route-status="@Model.StatusFilter"
-                              asp-route-sort="@Model.Sort" asp-route-p="@Model.PageNumber">
-                            <button type="submit" class="btn btn-sm w-100 @(done ? "btn-outline-secondary" : "btn-outline-success")">
-                                <i class="bi @(done ? "bi-arrow-counterclockwise" : "bi-check-lg") me-1"></i>
-                                @(done ? Model.OpenWord : Model.DoneWord)
-                            </button>
-                        </form>
-                    }
                 </div>
             </div>
         }

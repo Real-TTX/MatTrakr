@@ -2,17 +2,83 @@
    MatTrakr – global styles
    ========================================================================== */
 
+/* Light theme (default) --------------------------------------------------- */
 :root {
+  color-scheme: light;
+
   --mt-primary: #6c5ce7;
   --mt-primary-dark: #5a4bd1;
+  --mt-primary-soft: rgba(108, 92, 231, 0.12);
+
+  /* Solid primary button fill — kept dark enough for a 4.5:1 white label in
+     both themes (decoupled from the lighter dark-mode accent --mt-primary). */
+  --mt-btn-primary-bg: #6c5ce7;
+  --mt-btn-primary-hover: #5a4bd1;
+
+  /* Content surfaces — stronger separation and darker secondary text for a
+     crisper light theme. */
+  --mt-body-bg: #e9ebf3;
+  --mt-surface: #ffffff;
+  --mt-border: #cfd2e0;
+  --mt-text: #1b1e21;
+  --mt-text-muted: #545b63;
+  --mt-text-subtle: #5f5f74;
+  --mt-placeholder-bg: #e4e5ef;
+  --mt-placeholder-fg: #6f6f88;
+  --mt-shadow: rgba(30, 30, 47, 0.16);
+  --mt-shadow-strong: rgba(30, 30, 47, 0.2);
+
+  /* Sidebar / top bar — dark chrome in both themes */
   --mt-sidebar-bg: #1e1e2f;
   --mt-sidebar-fg: #c7c7d6;
   --mt-sidebar-active: #2d2d44;
-  --mt-body-bg: #f4f5fa;
+  --mt-sidebar-title: #8585a0;
+  --mt-sidebar-border: #33334d;
+  --mt-sidebar-version: #6a6a84;
+}
+
+/* Dark theme -------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --mt-primary: #8577f0;
+  --mt-primary-dark: #6c5ce7;
+  --mt-primary-soft: rgba(133, 119, 240, 0.18);
+
+  --mt-body-bg: #0f0f17;
+  --mt-surface: #1b1b28;
+  --mt-border: #2d2d44;
+  --mt-text: #e6e6f0;
+  --mt-text-muted: #9a9ab5;
+  --mt-text-subtle: #8686a0;
+  --mt-placeholder-bg: #24243a;
+  --mt-placeholder-fg: #8484a4;
+  --mt-shadow: rgba(0, 0, 0, 0.5);
+  --mt-shadow-strong: rgba(0, 0, 0, 0.65);
+
+  /* Slightly elevated relative to the darker body */
+  --mt-sidebar-bg: #171722;
+  --mt-sidebar-fg: #c7c7d6;
+  --mt-sidebar-active: #2d2d44;
+  --mt-sidebar-title: #8585a0;
+  --mt-sidebar-border: #2a2a40;
+  --mt-sidebar-version: #6a6a84;
+}
+
+/* Strengthen Bootstrap's light-theme borders/muted text (tables, inputs,
+   placeholders). Scoped to light so it never leaks into the dark theme —
+   :root would win over [data-bs-theme=dark] by source order. */
+[data-bs-theme="light"] {
+  --bs-border-color: #cfd2e0;
+  --bs-secondary-color: rgba(27, 30, 33, 0.72);
+  --bs-tertiary-bg: #eef0f6;
 }
 
 html {
   font-size: 14px;
+  /* Always reserve the vertical scrollbar's space so the layout never jumps
+     sideways when it appears after content loads (the reload "wobble"). */
+  scrollbar-gutter: stable;
 }
 
 @media (min-width: 768px) {
@@ -23,15 +89,42 @@ html {
 
 body {
   background: var(--mt-body-bg);
+  color: var(--mt-text);
+}
+
+/* Smooth the switch without animating everything on the page. Gated on
+   .theme-ready (added by theme.js after first paint) so nothing animates
+   during the initial load. */
+.theme-ready body,
+.theme-ready .app-sidebar,
+.theme-ready .app-topbar,
+.theme-ready .table-toolbar,
+.theme-ready .content-card,
+.theme-ready .home-card,
+.theme-ready .media-card,
+.theme-ready .search-hit,
+.theme-ready .auth-card {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .btn-primary {
-  --bs-btn-bg: var(--mt-primary);
-  --bs-btn-border-color: var(--mt-primary);
-  --bs-btn-hover-bg: var(--mt-primary-dark);
-  --bs-btn-hover-border-color: var(--mt-primary-dark);
-  --bs-btn-active-bg: var(--mt-primary-dark);
-  --bs-btn-active-border-color: var(--mt-primary-dark);
+  --bs-btn-bg: var(--mt-btn-primary-bg);
+  --bs-btn-border-color: var(--mt-btn-primary-bg);
+  --bs-btn-hover-bg: var(--mt-btn-primary-hover);
+  --bs-btn-hover-border-color: var(--mt-btn-primary-hover);
+  --bs-btn-active-bg: var(--mt-btn-primary-hover);
+  --bs-btn-active-border-color: var(--mt-btn-primary-hover);
+}
+
+/* Roomier buttons everywhere; comfortable touch targets. */
+.btn {
+  --bs-btn-padding-y: 0.5rem;
+  --bs-btn-padding-x: 0.9rem;
+}
+
+.btn-sm {
+  --bs-btn-padding-y: 0.4rem;
+  --bs-btn-padding-x: 0.7rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -102,8 +195,29 @@ body {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #7c7c94;
+  color: var(--mt-sidebar-title);
   padding: 0.9rem 0.5rem 0.35rem;
+}
+
+.sidebar-section-title--row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-section-action {
+  color: var(--mt-sidebar-title);
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.35rem;
+  text-decoration: none;
+}
+
+.sidebar-section-action:hover,
+.sidebar-section-action.active {
+  color: #fff;
+  background: var(--mt-sidebar-active);
 }
 
 .sidebar-list {
@@ -151,7 +265,7 @@ body {
 
 .sidebar-footer {
   padding: 0.75rem;
-  border-top: 1px solid #33334d;
+  border-top: 1px solid var(--mt-sidebar-border);
 }
 
 .sidebar-user {
@@ -168,8 +282,14 @@ body {
   cursor: pointer;
 }
 
+.sidebar-theme {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 0.25rem;
+}
+
 .sidebar-version {
-  color: #55556e;
+  color: var(--mt-sidebar-version);
   font-size: 0.72rem;
   text-align: center;
   padding-top: 0.5rem;
@@ -217,6 +337,67 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Theme switch (light / system / dark)
+   -------------------------------------------------------------------------- */
+
+.theme-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--mt-sidebar-border);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.theme-switch-btn {
+  border: 0;
+  background: transparent;
+  color: var(--mt-sidebar-fg);
+  border-radius: 0.4rem;
+  padding: 0.28rem 0.55rem;
+  line-height: 1;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.theme-switch-btn:hover {
+  color: #fff;
+  background: var(--mt-sidebar-active);
+}
+
+.theme-switch-btn.active {
+  background: var(--mt-primary);
+  color: #fff;
+}
+
+/* Variant for light surfaces (auth card, public top bar) */
+.theme-switch--plain {
+  background: var(--mt-surface);
+  border-color: var(--mt-border);
+}
+
+.theme-switch--plain .theme-switch-btn {
+  color: var(--mt-text-muted);
+}
+
+.theme-switch--plain .theme-switch-btn:hover {
+  color: var(--mt-text);
+  background: var(--mt-placeholder-bg);
+}
+
+.theme-switch--plain .theme-switch-btn.active {
+  background: var(--mt-primary);
+  color: #fff;
+}
+
+.theme-switch-floating {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1040;
+}
+
+/* --------------------------------------------------------------------------
    Reusable controls: table toolbar, pagination, form actions
    -------------------------------------------------------------------------- */
 
@@ -225,8 +406,8 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   padding: 0.75rem;
   margin-bottom: 1rem;
@@ -235,6 +416,7 @@ body {
 .table-toolbar-search {
   flex: 1 1 220px;
   max-width: 340px;
+  min-width: 0;
 }
 
 .table-toolbar-filter {
@@ -245,6 +427,68 @@ body {
 
 .table-toolbar-filter .form-select {
   width: auto;
+}
+
+/* Mobile trigger buttons (Filter / Sortierung) */
+.table-toolbar-triggers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.table-toolbar-badge {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  font-size: 0.6rem;
+  padding: 0.2em 0.45em;
+}
+
+/* Desktop (≥md): offcanvas-md is static, its body lays filters/sort inline */
+@media (min-width: 768px) {
+  .table-toolbar-controls .offcanvas-body {
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* Mobile (<md): the controls become a fullscreen dialog with stacked inputs */
+@media (max-width: 767.98px) {
+  .table-toolbar-search {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  .table-toolbar-controls.offcanvas-md {
+    --bs-offcanvas-width: 100%;
+  }
+
+  .table-toolbar-controls .offcanvas-body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.1rem;
+    padding: 1rem 1.1rem 1.25rem;
+  }
+
+  .table-toolbar-controls .table-toolbar-filter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  .table-toolbar-controls .table-toolbar-filter .form-label {
+    font-weight: 600;
+  }
+
+  .table-toolbar-controls .table-toolbar-filter .form-select {
+    width: 100%;
+  }
+
+  .table-toolbar-dialog-actions {
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
 }
 
 .table-pagination {
@@ -286,8 +530,8 @@ body {
 
 /* Content card wrapper for tables */
 .content-card {
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   overflow: hidden;
 }
@@ -309,8 +553,8 @@ body {
 .home-card {
   display: flex;
   gap: 1rem;
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.75rem;
   padding: 1.1rem;
   text-decoration: none;
@@ -320,7 +564,7 @@ body {
 }
 
 .home-card:hover {
-  box-shadow: 0 0.5rem 1.25rem rgba(30, 30, 47, 0.12);
+  box-shadow: 0 0.5rem 1.25rem var(--mt-shadow);
   transform: translateY(-2px);
   color: inherit;
 }
@@ -330,7 +574,7 @@ body {
   height: 52px;
   flex-shrink: 0;
   border-radius: 0.6rem;
-  background: rgba(108, 92, 231, 0.12);
+  background: var(--mt-primary-soft);
   color: var(--mt-primary);
   display: flex;
   align-items: center;
@@ -352,7 +596,7 @@ body {
 }
 
 .home-card-meta {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   font-size: 0.88rem;
 }
 
@@ -382,8 +626,8 @@ body {
 }
 
 .media-card {
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   overflow: hidden;
   display: flex;
@@ -392,7 +636,7 @@ body {
 }
 
 .media-card:hover {
-  box-shadow: 0 0.4rem 1rem rgba(30, 30, 47, 0.14);
+  box-shadow: 0 0.4rem 1rem var(--mt-shadow-strong);
 }
 
 .media-card.is-done .media-card-cover {
@@ -415,15 +659,31 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ececf4;
-  color: #a2a2bb;
+  background: var(--mt-placeholder-bg);
+  color: var(--mt-placeholder-fg);
   font-size: 2.5rem;
 }
 
-.media-card-status {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+/* Full-cover-width status strip; above (small) or below (larger) per preference */
+.media-card-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.media-card-statusbar--above {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.4rem;
+}
+
+.media-card-statusbar--below {
+  font-size: 0.85rem;
+  padding: 0.5rem;
 }
 
 .media-card-body {
@@ -446,10 +706,11 @@ body {
 }
 
 .media-card-year {
-  color: #8b8b9e;
+  color: var(--mt-text-subtle);
   font-size: 0.8rem;
   flex-grow: 1;
 }
+
 
 /* Item detail */
 .item-detail-cover {
@@ -464,9 +725,68 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ececf4;
-  color: #a2a2bb;
+  background: var(--mt-placeholder-bg);
+  color: var(--mt-placeholder-fg);
   font-size: 3rem;
+}
+
+/* Per-season toggle-button picker (series item detail) */
+.season-picker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--mt-border);
+}
+
+/* Equal-size season buttons in a responsive grid */
+.season-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.5rem;
+}
+
+/* Brand-purple checkable toggle buttons (seasons + status) */
+.season-btn,
+.status-btn {
+  --bs-btn-color: var(--mt-primary);
+  --bs-btn-border-color: var(--mt-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--mt-btn-primary-bg);
+  --bs-btn-hover-border-color: var(--mt-btn-primary-bg);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--mt-btn-primary-bg);
+  --bs-btn-active-border-color: var(--mt-btn-primary-bg);
+}
+
+.season-btn {
+  width: 100%;
+}
+
+/* Status toggle group (Movies/Books/Series-without-seasons) */
+.status-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.status-btn {
+  flex: 1 1 auto;
+}
+
+/* Abgebrochen: red, on its own row for a bit of separation */
+.status-btn--abandon {
+  flex: 1 1 100%;
+  margin-top: 0.15rem;
+  --bs-btn-color: var(--bs-danger);
+  --bs-btn-border-color: var(--bs-danger);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-danger);
+  --bs-btn-hover-border-color: var(--bs-danger);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bs-danger);
+  --bs-btn-active-border-color: var(--bs-danger);
 }
 
 /* Search hits on the add page */
@@ -479,8 +799,8 @@ body {
 .search-hit {
   display: flex;
   gap: 0.9rem;
-  background: #fff;
-  border: 1px solid #e3e4ee;
+  background: var(--mt-surface);
+  border: 1px solid var(--mt-border);
   border-radius: 0.6rem;
   padding: 0.75rem;
   align-items: flex-start;
@@ -502,8 +822,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ececf4;
-  color: #a2a2bb;
+  background: var(--mt-placeholder-bg);
+  color: var(--mt-placeholder-fg);
   font-size: 1.5rem;
 }
 
@@ -517,12 +837,12 @@ body {
 }
 
 .search-hit-subtitle {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   font-size: 0.88rem;
 }
 
 .search-hit-overview {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
@@ -530,6 +850,9 @@ body {
 .search-hit-action {
   flex-shrink: 0;
   align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -551,7 +874,8 @@ body {
 }
 
 .auth-card {
-  background: #fff;
+  background: var(--mt-surface);
+  color: var(--mt-text);
   border-radius: 1rem;
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
   padding: 2.5rem 2rem;
@@ -577,6 +901,158 @@ body {
 }
 
 .auth-subtitle {
-  color: #6c757d;
+  color: var(--mt-text-muted);
   margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile top bar page title (the heading lives in the header on small screens)
+   -------------------------------------------------------------------------- */
+
+.app-topbar-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-topbar-home {
+  color: #fff;
+  font-size: 1.35rem;
+  padding: 0.25rem 0.5rem;
+  text-decoration: none;
+}
+
+.app-topbar-home i {
+  color: var(--mt-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & touch optimization
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 991.98px) {
+  /* The page title now lives in the top bar, so drop the in-content H1.
+     Excludes the public share page (its main uses .container-lg and keeps its heading). */
+  .app-main:not(.container-lg) > .page-title,
+  .app-main:not(.container-lg) > .d-flex > .page-title {
+    display: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Bigger buttons and form controls for touch */
+  .btn {
+    --bs-btn-padding-y: 0.65rem;
+    --bs-btn-padding-x: 1rem;
+    --bs-btn-font-size: 1.02rem;
+  }
+
+  .form-control,
+  .form-select {
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+
+  .form-control-lg,
+  .form-select-lg {
+    min-height: 3.35rem;
+  }
+
+  /* Search toolbar: keep search + Filter/Sort icons on ONE row (no wrap) */
+  .table-toolbar {
+    flex-wrap: nowrap;
+  }
+
+  .table-toolbar-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .table-toolbar-search .form-control {
+    min-width: 0;
+  }
+
+  .table-toolbar-triggers {
+    flex: 0 0 auto;
+  }
+
+  /* Form action row: Save/Back share the top row, Delete gets its own line */
+  .form-actions {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .form-actions-main {
+    flex: 1 1 100%;
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .form-actions-main .btn {
+    flex: 1 1 0;
+  }
+
+  .form-actions-delete {
+    margin-left: 0;
+    flex: 1 1 100%;
+  }
+
+  /* List action row: buttons grow; destructive one on its own line */
+  .list-actions {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .list-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .list-actions .btn-outline-danger,
+  .list-actions .btn-danger {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+
+  /* Bigger, tappable pagination */
+  .table-pagination .pagination {
+    --bs-pagination-padding-x: 0.85rem;
+    --bs-pagination-padding-y: 0.5rem;
+    --bs-pagination-font-size: 1rem;
+  }
+
+  /* Bigger theme switch targets */
+  .theme-switch-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 1.05rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion — placed last so it overrides the theme + hover transitions
+   declared above (a media query adds no specificity, so source order decides).
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .app-sidebar,
+  .app-topbar,
+  .table-toolbar,
+  .content-card,
+  .home-card,
+  .media-card,
+  .search-hit,
+  .auth-card {
+    transition: none;
+  }
+
+  .home-card:hover {
+    transform: none;
+  }
 }

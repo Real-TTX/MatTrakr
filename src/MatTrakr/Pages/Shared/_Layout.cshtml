@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] · MatTrakr</title>
+    <partial name="_ThemeHead" />
+    <partial name="_PwaHead" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -16,8 +18,9 @@
                 aria-label="Menü öffnen">
             <i class="bi bi-list"></i>
         </button>
-        <a href="/" class="app-topbar-brand">
-            <i class="bi bi-collection-play"></i> MatTrakr
+        <span class="app-topbar-title">@ViewData["Title"]</span>
+        <a href="/" class="app-topbar-home" aria-label="Startseite">
+            <i class="bi bi-collection-play"></i>
         </a>
     </header>
 
@@ -35,6 +38,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

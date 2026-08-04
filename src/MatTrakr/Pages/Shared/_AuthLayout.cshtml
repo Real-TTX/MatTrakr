@@ -4,11 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] · MatTrakr</title>
+    <partial name="_ThemeHead" />
+    <partial name="_PwaHead" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="auth-body">
+    <div class="theme-switch-floating">
+        <partial name="_ThemeSwitch" model="@("theme-switch--plain")" />
+    </div>
     <main class="auth-shell">
         <div class="auth-card">
             <div class="auth-brand">
@@ -19,6 +24,7 @@
         </div>
     </main>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
