@@ -29,7 +29,11 @@ public class SidebarViewComponent : ViewComponent
         var userId = _currentUser.UserId;
         if (userId is not null)
         {
-            model.Lists = await _access.GetVisibleListsAsync(userId.Value);
+            var visible = await _access.GetVisibleListsAsync(userId.Value);
+            // Sidebar shows pinned own lists plus every shared/assigned list.
+            model.Lists = visible
+                .Where(v => v.Access != ListAccess.Owner || v.List.IsFavorite)
+                .ToList();
             model.IsAdmin = HttpContext.User.IsInRole(nameof(UserRole.Admin));
             model.DisplayName = HttpContext.User.FindFirst(AuthConstants.DisplayNameClaim)?.Value ?? "";
         }

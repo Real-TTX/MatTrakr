@@ -1,0 +1,79 @@
+@page "/Lists/{id:long}/AddManual"
+@using MatTrakr.Data
+@using MatTrakr.ViewComponents
+@model MatTrakr.Pages.Lists.AddManualModel
+@{
+    ViewData["Title"] = "Eigener Eintrag";
+    var subtitleLabel = Model.List.Type == MediaType.Books ? "Autor" : "Originaltitel";
+    var kind = Model.List.Type switch
+    {
+        MediaType.Movies => "Film",
+        MediaType.Series => "Serie",
+        MediaType.Books => "Buch",
+        _ => "Eintrag",
+    };
+}
+
+<h1 class="page-title"><i class="bi bi-pencil-square"></i>Eigenen @kind hinzufügen</h1>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
+    </div>
+}
+
+<div class="content-card p-3" style="max-width: 640px;">
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Titel *</label>
+            <input asp-for="Title" class="form-control" autofocus />
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12 col-sm-8">
+                <label asp-for="Subtitle" class="form-label">@subtitleLabel</label>
+                <input asp-for="Subtitle" class="form-control" />
+            </div>
+            <div class="col-12 col-sm-4">
+                <label asp-for="Year" class="form-label">Jahr</label>
+                <input asp-for="Year" type="number" class="form-control" min="0" max="2999" />
+            </div>
+        </div>
+
+        @if (Model.List.Type == MediaType.Series)
+        {
+            <div class="mb-3 mt-3" style="max-width: 220px;">
+                <label asp-for="TotalSeasons" class="form-label">Anzahl Staffeln</label>
+                <input asp-for="TotalSeasons" type="number" class="form-control" min="0" max="100" />
+                <div class="form-text">Für die Staffel-Auswahl. Leer lassen, wenn unbekannt.</div>
+            </div>
+        }
+
+        <div class="mb-3 mt-3">
+            <label asp-for="Overview" class="form-label">Beschreibung</label>
+            <textarea asp-for="Overview" class="form-control" rows="3"></textarea>
+        </div>
+
+        <hr class="my-3" />
+
+        <div class="mb-3">
+            <label asp-for="CoverFile" class="form-label">Cover-Bild hochladen</label>
+            <input asp-for="CoverFile" type="file" class="form-control" accept="image/*" />
+            <div class="form-text">Optional, max. 5 MB. Wird in der Datenbank gespeichert.</div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CoverUrl" class="form-label">… oder Bild-URL</label>
+            <input asp-for="CoverUrl" class="form-control" placeholder="https://…" />
+            <div class="form-text">Wird verwendet, wenn keine Datei hochgeladen wurde.</div>
+        </div>
+
+        <partial name="_FormActionsBar" model="@(new FormActionsModel
+        {
+            SaveText = "Hinzufügen",
+            SaveIcon = "bi-plus-lg",
+            BackUrl = $"/Lists/{Model.List.Id}",
+        })" />
+    </form>
+</div>

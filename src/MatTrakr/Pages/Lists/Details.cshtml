@@ -132,7 +132,10 @@ else
 {
     <div class="list-actions">
         <a href="/Lists/@Model.List.Id/Add" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>Hinzufügen
+            <i class="bi bi-plus-lg me-1"></i>Suchen &amp; hinzufügen
+        </a>
+        <a href="/Lists/@Model.List.Id/AddManual" class="btn btn-outline-primary">
+            <i class="bi bi-pencil-square me-1"></i>Eigener Eintrag
         </a>
         @if (Model.Access == ListAccess.Owner)
         {

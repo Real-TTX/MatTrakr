@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<ListItem> ListItems => Set<ListItem>();
     public DbSet<ListShare> ListShares => Set<ListShare>();
     public DbSet<ListAssignment> ListAssignments => Set<ListAssignment>();
+    public DbSet<ItemCover> ItemCovers => Set<ItemCover>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -74,6 +75,15 @@ public class AppDbContext : DbContext
                 .HasForeignKey(x => x.ListId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(x => x.SharedWithUser).WithMany()
                 .HasForeignKey(x => x.SharedWithUserId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<ItemCover>(e =>
+        {
+            e.ToTable("ItemCovers");
+            e.HasIndex(x => x.ListItemId).IsUnique();
+            e.Property(x => x.ContentType).HasMaxLength(100);
+            e.HasOne(x => x.ListItem).WithMany()
+                .HasForeignKey(x => x.ListItemId).OnDelete(DeleteBehavior.Cascade);
         });
 
         b.Entity<ListAssignment>(e =>
