@@ -64,6 +64,7 @@ else
         <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
+                    <th style="width: 3rem;">Pin</th>
                     <th>Name</th>
                     <th class="d-none d-sm-table-cell">Typ</th>
                     <th class="text-end">Einträge</th>
@@ -74,6 +75,18 @@ else
                 @foreach (var row in Model.Rows)
                 {
                     <tr>
+                        <td>
+                            <form method="post" asp-page-handler="ToggleFavorite" class="d-inline">
+                                <input type="hidden" name="id" value="@row.List.Id" />
+                                <input type="hidden" name="q" value="@Model.Q" />
+                                <input type="hidden" name="type" value="@Model.TypeFilter" />
+                                <input type="hidden" name="sort" value="@Model.Sort" />
+                                <button type="submit" class="btn btn-sm btn-link p-0 list-pin @(row.List.IsFavorite ? "is-on" : null)"
+                                        title="@(row.List.IsFavorite ? "In Seitenleiste angepinnt – klicken zum Entfernen" : "An Seitenleiste anpinnen")">
+                                    <i class="bi @(row.List.IsFavorite ? "bi-star-fill" : "bi-star")"></i>
+                                </button>
+                            </form>
+                        </td>
                         <td>
                             <a href="/Lists/@row.List.Id" class="text-decoration-none fw-semibold">
                                 <i class="bi @TypeIcon(row.List.Type) me-1"></i>@row.List.Name

@@ -108,7 +108,8 @@ public class TrackList : AuditableEntity
     public string Name { get; set; } = string.Empty;
     public MediaType Type { get; set; }
     public long OwnerUserId { get; set; }
-    public bool IsDefault { get; set; } // one of the three auto-created lists
+    public bool IsDefault { get; set; }   // one of the three auto-created lists
+    public bool IsFavorite { get; set; }  // pinned to the sidebar
 
     public User? Owner { get; set; }
     public ICollection<ListItem> Items { get; set; } = new List<ListItem>();
@@ -189,6 +190,19 @@ public class ListShare : AuditableEntity
 
     public TrackList? List { get; set; }
     public User? SharedWithUser { get; set; }
+}
+
+/// <summary>
+/// Locally stored cover image for a (usually manually added) item. Kept in its own
+/// table so listing items never pulls the image bytes; served via /media/cover/{id}.
+/// </summary>
+public class ItemCover : AuditableEntity
+{
+    public long ListItemId { get; set; }
+    public byte[] Data { get; set; } = Array.Empty<byte>();
+    public string ContentType { get; set; } = "image/jpeg";
+
+    public ListItem? ListItem { get; set; }
 }
 
 /// <summary>

@@ -46,7 +46,10 @@ public class UserService
         await _db.SaveChangesAsync(); // assigns user.Id
 
         foreach (var (type, name) in DefaultLists)
-            _db.Lists.Add(new TrackList { Name = name, Type = type, OwnerUserId = user.Id, IsDefault = true });
+            _db.Lists.Add(new TrackList
+            {
+                Name = name, Type = type, OwnerUserId = user.Id, IsDefault = true, IsFavorite = true,
+            });
 
         await _db.SaveChangesAsync();
         return user;

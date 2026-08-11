@@ -540,6 +540,22 @@ body {
   margin-bottom: 0;
 }
 
+/* Favorite / sidebar-pin star in the list manager */
+.list-pin {
+  color: var(--mt-text-subtle);
+  font-size: 1.15rem;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.list-pin:hover {
+  color: #f5b301;
+}
+
+.list-pin.is-on {
+  color: #f5b301;
+}
+
 .page-title {
   font-size: 1.5rem;
   font-weight: 700;

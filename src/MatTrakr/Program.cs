@@ -114,4 +114,13 @@ app.UseMiddleware<MustChangePasswordMiddleware>();
 
 app.MapRazorPages();
 
+// Serves locally-stored cover images (manual entries). Public like other covers.
+app.MapGet("/media/cover/{id:long}", async (long id, AppDbContext db) =>
+{
+    var cover = await db.ItemCovers.AsNoTracking().FirstOrDefaultAsync(c => c.ListItemId == id);
+    return cover is null
+        ? Results.NotFound()
+        : Results.File(cover.Data, cover.ContentType);
+});
+
 app.Run();

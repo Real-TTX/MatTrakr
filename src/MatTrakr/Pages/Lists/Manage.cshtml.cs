@@ -35,6 +35,19 @@ public class ManageModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostToggleFavoriteAsync(long id, string? q, string? type, string? sort)
+    {
+        var userId = _currentUser.UserId;
+        if (userId is null) return Redirect("/Account/Login");
+
+        var list = await _db.Lists.FirstOrDefaultAsync(l => l.Id == id && l.OwnerUserId == userId);
+        if (list is null) return Redirect("/Account/AccessDenied");
+
+        list.IsFavorite = !list.IsFavorite;
+        await _db.SaveChangesAsync();
+        return RedirectToPage(new { q, type, sort });
+    }
+
     public async Task<IActionResult> OnPostDeleteAsync(long id, string? q, string? type, string? sort)
     {
         var userId = _currentUser.UserId;
