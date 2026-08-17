@@ -34,6 +34,7 @@ public class DetailsModel : PageModel
 
     public bool CanEdit => Access >= ListAccess.Edit;
     public CardStatusPosition StatusPosition { get; set; } = CardStatusPosition.Above;
+    public Dictionary<long, int> MyRatings { get; set; } = new();
 
     /// <summary>"Gesehen"/"Gelesen" depending on list type.</summary>
     public string DoneWord => List.Type == MediaType.Books ? "Gelesen" : "Gesehen";
@@ -81,6 +82,11 @@ public class DetailsModel : PageModel
             .Skip((PageNumber - 1) * PageSize)
             .Take(PageSize)
             .ToListAsync();
+
+        var itemIds = Items.Select(i => i.Id).ToList();
+        MyRatings = await _db.ItemRatings.AsNoTracking()
+            .Where(r => r.UserId == userId.Value && itemIds.Contains(r.ListItemId))
+            .ToDictionaryAsync(r => r.ListItemId, r => r.Stars);
 
         return Page();
     }

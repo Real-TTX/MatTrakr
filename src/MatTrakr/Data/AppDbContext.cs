@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<ListShare> ListShares => Set<ListShare>();
     public DbSet<ListAssignment> ListAssignments => Set<ListAssignment>();
     public DbSet<ItemCover> ItemCovers => Set<ItemCover>();
+    public DbSet<ItemRating> ItemRatings => Set<ItemRating>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -84,6 +85,17 @@ public class AppDbContext : DbContext
             e.Property(x => x.ContentType).HasMaxLength(100);
             e.HasOne(x => x.ListItem).WithMany()
                 .HasForeignKey(x => x.ListItemId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<ItemRating>(e =>
+        {
+            e.ToTable("ItemRatings");
+            e.HasIndex(x => new { x.ListItemId, x.UserId }).IsUnique();
+            e.Property(x => x.Comment).HasMaxLength(1000);
+            e.HasOne(x => x.ListItem).WithMany()
+                .HasForeignKey(x => x.ListItemId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.User).WithMany()
+                .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         b.Entity<ListAssignment>(e =>

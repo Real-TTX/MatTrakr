@@ -206,6 +206,21 @@ public class ItemCover : AuditableEntity
 }
 
 /// <summary>
+/// One user's personal rating of an item (1–5 stars + optional comment).
+/// Everyone with access to the item's list can see all ratings.
+/// </summary>
+public class ItemRating : AuditableEntity
+{
+    public long ListItemId { get; set; }
+    public long UserId { get; set; }
+    public int Stars { get; set; }        // 1..5
+    public string? Comment { get; set; }
+
+    public ListItem? ListItem { get; set; }
+    public User? User { get; set; }
+}
+
+/// <summary>
 /// Admin delegates edit rights on a foreign list to a Verwalter.
 /// The assigning admin is captured by <see cref="AuditableEntity.CreateUserId"/>.
 /// </summary>

@@ -108,6 +108,15 @@ else
                 <div class="media-card-body">
                     <div class="media-card-title" title="@item.Title">@item.Title</div>
                     <div class="media-card-year">@item.Year</div>
+                    @if (Model.MyRatings.TryGetValue(item.Id, out var myStars) && myStars > 0)
+                    {
+                        <div class="media-card-stars" title="Meine Bewertung: @myStars/5">
+                            @for (var s = 1; s <= 5; s++)
+                            {
+                                <i class="bi @(s <= myStars ? "bi-star-fill" : "bi-star")"></i>
+                            }
+                        </div>
+                    }
                 </div>
             </div>
         }

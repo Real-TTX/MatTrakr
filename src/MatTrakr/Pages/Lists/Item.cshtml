@@ -186,3 +186,60 @@
         </div>
     </div>
 </div>
+
+@* Personal ratings — everyone with access can rate and see the others' ratings *@
+<div class="content-card p-3 mt-3" style="max-width: 720px;">
+    <h2 class="fs-5 mb-3"><i class="bi bi-star me-1"></i>Bewertungen</h2>
+
+    <form method="post" asp-page-handler="Rate" asp-route-listId="@Model.List.Id" asp-route-itemId="@Model.Item.Id">
+        <label class="form-label mb-1">Meine Bewertung</label>
+        <div class="star-rating mb-2" data-star-rating>
+            <input type="hidden" asp-for="MyStars" />
+            @for (var s = 1; s <= 5; s++)
+            {
+                <button type="button" class="star-btn @(s <= Model.MyStars ? "is-on" : null)" data-star="@s"
+                        aria-label="@s Sterne" title="@s Sterne">
+                    <i class="bi @(s <= Model.MyStars ? "bi-star-fill" : "bi-star")"></i>
+                </button>
+            }
+            <button type="button" class="star-clear" data-star="0" title="Bewertung entfernen" aria-label="Bewertung entfernen">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="mb-2">
+            <textarea asp-for="MyComment" class="form-control" rows="2" maxlength="1000"
+                      placeholder="Optionaler Kommentar (z.B. „Anfang zäh, Ende top“)"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-check-lg me-1"></i>Bewertung speichern
+        </button>
+    </form>
+
+    @{
+        var others = Model.Ratings.Where(r => !r.IsMine).ToList();
+    }
+    @if (others.Count > 0)
+    {
+        <hr class="my-3" />
+        <div class="ratings-list">
+            @foreach (var r in others)
+            {
+                <div class="rating-row">
+                    <div class="rating-head">
+                        <span class="rating-name"><i class="bi bi-person-circle me-1"></i>@r.Name</span>
+                        <span class="rating-stars">
+                            @for (var s = 1; s <= 5; s++)
+                            {
+                                <i class="bi @(s <= r.Stars ? "bi-star-fill" : "bi-star")"></i>
+                            }
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(r.Comment))
+                    {
+                        <div class="rating-comment">@r.Comment</div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
