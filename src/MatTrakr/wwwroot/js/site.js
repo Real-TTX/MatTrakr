@@ -91,3 +91,31 @@ document.addEventListener("change", function (e) {
 
 // Reflect the initial selection on load.
 document.querySelectorAll("[data-season-picker]").forEach(mtSyncSeasonQuick);
+
+// Star rating widget: click to set 1–5, hover to preview, "x" to clear.
+function mtRenderStars(widget, value) {
+    widget.querySelectorAll(".star-btn").forEach(function (btn) {
+        var on = parseInt(btn.getAttribute("data-star"), 10) <= value;
+        var i = btn.querySelector("i");
+        if (i) i.className = "bi " + (on ? "bi-star-fill" : "bi-star");
+        btn.classList.toggle("is-on", on);
+    });
+}
+
+document.querySelectorAll("[data-star-rating]").forEach(function (widget) {
+    var input = widget.querySelector('input[type="hidden"]');
+    var current = function () { return parseInt(input.value, 10) || 0; };
+
+    widget.querySelectorAll("[data-star]").forEach(function (btn) {
+        var val = parseInt(btn.getAttribute("data-star"), 10) || 0;
+        btn.addEventListener("click", function () {
+            input.value = val;
+            mtRenderStars(widget, val);
+        });
+        if (btn.classList.contains("star-btn")) {
+            btn.addEventListener("mouseenter", function () { mtRenderStars(widget, val); });
+        }
+    });
+
+    widget.addEventListener("mouseleave", function () { mtRenderStars(widget, current()); });
+});

@@ -45,10 +45,12 @@ public class UserService
         _db.Users.Add(user);
         await _db.SaveChangesAsync(); // assigns user.Id
 
+        var order = 0;
         foreach (var (type, name) in DefaultLists)
             _db.Lists.Add(new TrackList
             {
-                Name = name, Type = type, OwnerUserId = user.Id, IsDefault = true, IsFavorite = true,
+                Name = name, Type = type, OwnerUserId = user.Id,
+                IsDefault = true, IsFavorite = true, SortOrder = order++,
             });
 
         await _db.SaveChangesAsync();

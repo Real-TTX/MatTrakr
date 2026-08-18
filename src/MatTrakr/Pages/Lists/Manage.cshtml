@@ -44,12 +44,21 @@
     },
     SortOptions =
     {
+        new ToolbarSortOption { Value = "order", Text = "Reihenfolge (Menü)" },
         new ToolbarSortOption { Value = "name", Text = "Name ↑" },
         new ToolbarSortOption { Value = "name_desc", Text = "Name ↓" },
         new ToolbarSortOption { Value = "type", Text = "Typ" },
     },
     SortValue = Model.Sort,
 })" />
+
+@if (Model.Rows.Count > 0 && !Model.CanReorder)
+{
+    <p class="text-muted small mb-2">
+        <i class="bi bi-info-circle me-1"></i>
+        Wähle Sortierung „Reihenfolge (Menü)" (ohne Filter/Suche), um die Reihenfolge per Pfeilen anzupassen.
+    </p>
+}
 
 @if (Model.Rows.Count == 0)
 {
@@ -64,6 +73,10 @@ else
         <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
+                    @if (Model.CanReorder)
+                    {
+                        <th style="width: 4rem;">Reihenfolge</th>
+                    }
                     <th style="width: 3rem;">Pin</th>
                     <th>Name</th>
                     <th class="d-none d-sm-table-cell">Typ</th>
@@ -72,9 +85,33 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var row in Model.Rows)
+                @for (var i = 0; i < Model.Rows.Count; i++)
                 {
+                    var row = Model.Rows[i];
                     <tr>
+                        @if (Model.CanReorder)
+                        {
+                            <td class="text-nowrap">
+                                <form method="post" asp-page-handler="Move" class="d-inline">
+                                    <input type="hidden" name="id" value="@row.List.Id" />
+                                    <input type="hidden" name="dir" value="up" />
+                                    <input type="hidden" name="sort" value="@Model.Sort" />
+                                    <button type="submit" class="btn btn-sm btn-link p-0 list-move" title="Nach oben"
+                                            aria-label="Nach oben" @(i == 0 ? "disabled" : null)>
+                                        <i class="bi bi-arrow-up"></i>
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="Move" class="d-inline">
+                                    <input type="hidden" name="id" value="@row.List.Id" />
+                                    <input type="hidden" name="dir" value="down" />
+                                    <input type="hidden" name="sort" value="@Model.Sort" />
+                                    <button type="submit" class="btn btn-sm btn-link p-0 list-move ms-1" title="Nach unten"
+                                            aria-label="Nach unten" @(i == Model.Rows.Count - 1 ? "disabled" : null)>
+                                        <i class="bi bi-arrow-down"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        }
                         <td>
                             <form method="post" asp-page-handler="ToggleFavorite" class="d-inline">
                                 <input type="hidden" name="id" value="@row.List.Id" />

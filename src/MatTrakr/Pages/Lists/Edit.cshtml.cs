@@ -53,7 +53,14 @@ public class EditModel : PageModel
 
         if (IsNew)
         {
-            var list = new TrackList { Name = Name.Trim(), Type = Type, OwnerUserId = userId.Value };
+            var maxOrder = await _db.Lists
+                .Where(l => l.OwnerUserId == userId.Value)
+                .Select(l => (int?)l.SortOrder)
+                .MaxAsync() ?? -1;
+            var list = new TrackList
+            {
+                Name = Name.Trim(), Type = Type, OwnerUserId = userId.Value, SortOrder = maxOrder + 1,
+            };
             _db.Lists.Add(list);
             await _db.SaveChangesAsync();
             return Redirect($"/Lists/{list.Id}");

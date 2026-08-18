@@ -110,6 +110,7 @@ public class TrackList : AuditableEntity
     public long OwnerUserId { get; set; }
     public bool IsDefault { get; set; }   // one of the three auto-created lists
     public bool IsFavorite { get; set; }  // pinned to the sidebar
+    public int SortOrder { get; set; }    // manual order within the owner's lists (sidebar/menu)
 
     public User? Owner { get; set; }
     public ICollection<ListItem> Items { get; set; } = new List<ListItem>();
@@ -203,6 +204,21 @@ public class ItemCover : AuditableEntity
     public string ContentType { get; set; } = "image/jpeg";
 
     public ListItem? ListItem { get; set; }
+}
+
+/// <summary>
+/// One user's personal rating of an item (1–5 stars + optional comment).
+/// Everyone with access to the item's list can see all ratings.
+/// </summary>
+public class ItemRating : AuditableEntity
+{
+    public long ListItemId { get; set; }
+    public long UserId { get; set; }
+    public int Stars { get; set; }        // 1..5
+    public string? Comment { get; set; }
+
+    public ListItem? ListItem { get; set; }
+    public User? User { get; set; }
 }
 
 /// <summary>

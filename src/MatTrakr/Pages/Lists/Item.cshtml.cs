@@ -28,6 +28,11 @@ public class ItemModel : PageModel
     [BindProperty] public List<int> Seasons { get; set; } = new();
     [BindProperty] public long MoveToListId { get; set; }
 
+    [BindProperty] public int MyStars { get; set; }
+    [BindProperty] public string? MyComment { get; set; }
+    public List<RatingView> Ratings { get; set; } = new();
+    public record RatingView(string Name, int Stars, string? Comment, bool IsMine);
+
     public bool CanEdit => Access >= ListAccess.Edit;
     public string DoneWord => List.Type == MediaType.Books ? "Gelesen" : "Gesehen";
     public string OpenWord => List.Type == MediaType.Books ? "Ungelesen" : "Ungesehen";
@@ -45,7 +50,62 @@ public class ItemModel : PageModel
 
         Status = Item.Status;
         Seasons = Item.WatchedSeasonNumbers.OrderBy(n => n).ToList();
+        await LoadRatingsAsync(_currentUser.UserId!.Value, itemId);
         return Page();
+    }
+
+    /// <summary>Set/update/clear the current user's personal rating (ReadOnly access is enough).</summary>
+    public async Task<IActionResult> OnPostRateAsync(long listId, long itemId)
+    {
+        var userId = _currentUser.UserId;
+        if (userId is null) return Redirect("/Account/Login");
+
+        var result = await LoadAsync(listId, itemId, ListAccess.ReadOnly);
+        if (result is not null) return result;
+
+        var stars = Math.Clamp(MyStars, 0, 5);
+        var comment = string.IsNullOrWhiteSpace(MyComment) ? null : MyComment.Trim();
+        if (comment is { Length: > 1000 }) comment = comment[..1000];
+
+        var existing = await _db.ItemRatings
+            .FirstOrDefaultAsync(r => r.ListItemId == itemId && r.UserId == userId);
+
+        if (stars == 0)
+        {
+            if (existing is not null) _db.ItemRatings.Remove(existing);
+        }
+        else if (existing is null)
+        {
+            _db.ItemRatings.Add(new ItemRating
+            {
+                ListItemId = itemId, UserId = userId.Value, Stars = stars, Comment = comment,
+            });
+        }
+        else
+        {
+            existing.Stars = stars;
+            existing.Comment = comment;
+        }
+
+        await _db.SaveChangesAsync();
+        return Redirect($"/Lists/{listId}/Items/{itemId}");
+    }
+
+    private async Task LoadRatingsAsync(long userId, long itemId)
+    {
+        var ratings = await _db.ItemRatings.AsNoTracking()
+            .Where(r => r.ListItemId == itemId)
+            .Include(r => r.User)
+            .OrderByDescending(r => r.Stars)
+            .ToListAsync();
+
+        Ratings = ratings.Select(r => new RatingView(
+            string.IsNullOrWhiteSpace(r.User?.DisplayName) ? (r.User?.Username ?? "?") : r.User!.DisplayName,
+            r.Stars, r.Comment, r.UserId == userId)).ToList();
+
+        var mine = ratings.FirstOrDefault(r => r.UserId == userId);
+        MyStars = mine?.Stars ?? 0;
+        MyComment = mine?.Comment;
     }
 
     public async Task<IActionResult> OnPostAsync(long listId, long itemId)
