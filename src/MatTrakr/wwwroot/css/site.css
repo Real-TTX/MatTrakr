@@ -562,6 +562,21 @@ body {
   color: #f5b301;
 }
 
+.list-move {
+  color: var(--mt-text-muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.list-move:hover {
+  color: var(--mt-primary);
+}
+
+.list-move:disabled {
+  opacity: 0.3;
+}
+
 .page-title {
   font-size: 1.5rem;
   font-weight: 700;

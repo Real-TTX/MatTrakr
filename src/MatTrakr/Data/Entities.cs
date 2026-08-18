@@ -110,6 +110,7 @@ public class TrackList : AuditableEntity
     public long OwnerUserId { get; set; }
     public bool IsDefault { get; set; }   // one of the three auto-created lists
     public bool IsFavorite { get; set; }  // pinned to the sidebar
+    public int SortOrder { get; set; }    // manual order within the owner's lists (sidebar/menu)
 
     public User? Owner { get; set; }
     public ICollection<ListItem> Items { get; set; } = new List<ListItem>();

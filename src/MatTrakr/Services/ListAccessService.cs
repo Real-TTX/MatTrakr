@@ -47,7 +47,7 @@ public class ListAccessService
         var result = new List<VisibleList>();
         var seen = new HashSet<long>();
 
-        foreach (var l in own.OrderBy(l => l.Type).ThenBy(l => l.Name))
+        foreach (var l in own.OrderBy(l => l.SortOrder).ThenBy(l => l.Name))
             if (seen.Add(l.Id))
                 result.Add(new VisibleList(l, ListAccess.Owner));
 

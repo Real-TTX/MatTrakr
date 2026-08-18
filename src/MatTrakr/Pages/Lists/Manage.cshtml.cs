@@ -23,8 +23,12 @@ public class ManageModel : PageModel
     public List<Row> Rows { get; set; } = new();
     public string? Q { get; set; }
     public string? TypeFilter { get; set; }
-    public string Sort { get; set; } = "name";
+    public string Sort { get; set; } = "order";
     public string? Error { get; set; }
+
+    /// <summary>Up/down reordering only makes sense in the unfiltered manual-order view.</summary>
+    public bool CanReorder => Sort == "order"
+        && string.IsNullOrEmpty(Q) && string.IsNullOrEmpty(TypeFilter);
 
     public async Task<IActionResult> OnGetAsync(string? q, string? type, string? sort)
     {
@@ -61,11 +65,35 @@ public class ManageModel : PageModel
         return RedirectToPage(new { q, type, sort });
     }
 
+    /// <summary>Moves a list one step up/down in the manual order (swaps with its neighbour).</summary>
+    public async Task<IActionResult> OnPostMoveAsync(long id, string dir, string? q, string? type, string? sort)
+    {
+        var userId = _currentUser.UserId;
+        if (userId is null) return Redirect("/Account/Login");
+
+        var lists = await _db.Lists
+            .Where(l => l.OwnerUserId == userId)
+            .OrderBy(l => l.SortOrder).ThenBy(l => l.Name)
+            .ToListAsync();
+
+        var idx = lists.FindIndex(l => l.Id == id);
+        var swap = dir == "up" ? idx - 1 : idx + 1;
+        if (idx >= 0 && swap >= 0 && swap < lists.Count)
+        {
+            // Normalise to clean indices first, then swap the two positions.
+            for (var i = 0; i < lists.Count; i++) lists[i].SortOrder = i;
+            (lists[idx].SortOrder, lists[swap].SortOrder) = (lists[swap].SortOrder, lists[idx].SortOrder);
+            await _db.SaveChangesAsync();
+        }
+
+        return RedirectToPage(new { q, type, sort });
+    }
+
     private async Task LoadAsync(long userId, string? q, string? type, string? sort)
     {
         Q = q;
         TypeFilter = type;
-        Sort = string.IsNullOrEmpty(sort) ? "name" : sort;
+        Sort = string.IsNullOrEmpty(sort) ? "order" : sort;
 
         var query = _db.Lists.AsNoTracking().Where(l => l.OwnerUserId == userId);
 
@@ -77,9 +105,10 @@ public class ManageModel : PageModel
 
         query = Sort switch
         {
+            "name" => query.OrderBy(l => l.Name),
             "name_desc" => query.OrderByDescending(l => l.Name),
             "type" => query.OrderBy(l => l.Type).ThenBy(l => l.Name),
-            _ => query.OrderBy(l => l.Name),
+            _ => query.OrderBy(l => l.SortOrder).ThenBy(l => l.Name),
         };
 
         var lists = await query.ToListAsync();
