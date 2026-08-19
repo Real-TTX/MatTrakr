@@ -11,6 +11,8 @@ ratings and sharing. One container, no cloud, no third-party account.
 
 </div>
 
+![The Books list: cover grid with status strips, a rating and the action bar](docs/images/list-books.png)
+
 ---
 
 ## What this is about
@@ -56,6 +58,31 @@ file.
 - **Backup & Restore** in the admin area: download the database, or replace it from a file
   (a safety copy of the previous state is kept)
 - API keys are managed in the UI (*Administration → Einstellungen*) and take effect without a restart
+
+## Screenshots
+
+### Item detail — status shortcuts, seasons and personal rating
+
+![Item detail with status buttons, move-to and the rating widget](docs/images/item.png)
+
+Every type shares the same layout: status shortcuts (for series plus a per-season picker),
+an optional move, then the personal rating with a comment and everyone else's ratings below.
+
+### Home, list management and administration
+
+| Home | Listen verwalten | Administration |
+|---|---|---|
+| ![Home with list cards and progress](docs/images/home.png) | ![Manage lists: pin to sidebar and reorder](docs/images/manage.png) | ![Admin settings for the API keys](docs/images/settings.png) |
+
+The home page shows every list with progress; *Listen verwalten* lets you rename, delete,
+**pin lists to the sidebar** and put them in your **own order**; the admin area holds users,
+list assignments, settings and backup.
+
+### Dark theme and sign-in
+
+| Dark theme | Sign-in |
+|---|---|
+| ![The Books list in the dark theme](docs/images/list-books-dark.png) | ![Sign-in screen](docs/images/login.png) |
 
 ## Quick start
 
