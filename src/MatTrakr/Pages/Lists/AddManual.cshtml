@@ -23,7 +23,7 @@
     </div>
 }
 
-<div class="content-card p-3" style="max-width: 640px;">
+<div class="content-card p-3" style="max-width: 720px;">
     <form method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label asp-for="Title" class="form-label">Titel *</label>
@@ -57,16 +57,43 @@
 
         <hr class="my-3" />
 
-        <div class="mb-3">
-            <label asp-for="CoverFile" class="form-label">Cover-Bild hochladen</label>
-            <input asp-for="CoverFile" type="file" class="form-control" accept="image/*" />
-            <div class="form-text">Optional, max. 5 MB. Wird in der Datenbank gespeichert.</div>
-        </div>
+        <label class="form-label d-block">Cover</label>
+        <div class="cover-editor">
+            <div class="cover-editor-preview">
+                <img id="coverPreview" alt="Cover-Vorschau" hidden />
+                <div id="coverPlaceholder" class="cover-ph"><i class="bi bi-image"></i></div>
+            </div>
 
-        <div class="mb-3">
-            <label asp-for="CoverUrl" class="form-label">… oder Bild-URL</label>
-            <input asp-for="CoverUrl" class="form-control" placeholder="https://…" />
-            <div class="form-text">Wird verwendet, wenn keine Datei hochgeladen wurde.</div>
+            <div class="cover-editor-controls">
+                @if (Model.CoverSearchAvailable)
+                {
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" id="coverSearchInput" class="form-control"
+                               placeholder="Cover suchen (Titel) …" autocomplete="off" />
+                        <button type="button" id="coverSearchBtn" class="btn btn-outline-secondary">Suchen</button>
+                    </div>
+                    <div id="coverSearchStatus" class="form-text"></div>
+                    <div id="coverSearchResults" class="cover-search-results"></div>
+                }
+                else
+                {
+                    <div class="form-text mb-2">
+                        <i class="bi bi-info-circle me-1"></i>Cover-Suche für Movies/Series braucht einen TMDb-Key
+                        (Administration → Einstellungen). Du kannst trotzdem ein Bild hochladen oder eine URL einfügen.
+                    </div>
+                }
+
+                <label for="coverFileInput" class="form-label mt-3">… oder Bild hochladen (zuschneidbar)</label>
+                <input asp-for="CoverFile" type="file" id="coverFileInput" class="form-control" accept="image/*" />
+
+                <details class="mt-2">
+                    <summary class="small text-muted">Bild-URL einfügen</summary>
+                    <input asp-for="CoverUrl" id="coverUrlInput" class="form-control mt-2" placeholder="https://…" />
+                </details>
+
+                <input asp-for="CroppedImage" id="CroppedImage" type="hidden" />
+            </div>
         </div>
 
         <partial name="_FormActionsBar" model="@(new FormActionsModel
@@ -77,3 +104,126 @@
         })" />
     </form>
 </div>
+
+@* Crop dialog *@
+<div id="cropOverlay" class="crop-overlay" hidden>
+    <div class="crop-box">
+        <h2 class="fs-6 mb-2">Cover zuschneiden</h2>
+        <canvas id="cropCanvas" width="240" height="360"></canvas>
+        <label class="form-label small mt-2 mb-0"><i class="bi bi-zoom-in me-1"></i>Zoom</label>
+        <input type="range" id="cropZoom" class="form-range" min="1" max="3" step="0.01" value="1" />
+        <div class="form-text">Ziehen zum Verschieben, Regler zum Zoomen.</div>
+        <div class="d-flex gap-2 mt-2">
+            <button type="button" id="cropApply" class="btn btn-primary btn-sm">
+                <i class="bi bi-check-lg me-1"></i>Übernehmen
+            </button>
+            <button type="button" id="cropCancel" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-x-lg me-1"></i>Abbrechen
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    const listId = @Model.List.Id;
+    const preview = document.getElementById('coverPreview');
+    const placeholder = document.getElementById('coverPlaceholder');
+    const urlInput = document.getElementById('coverUrlInput');
+    const croppedInput = document.getElementById('CroppedImage');
+    const fileInput = document.getElementById('coverFileInput');
+
+    function showPreview(src) {
+        if (src) { preview.src = src; preview.hidden = false; placeholder.hidden = true; }
+        else { preview.removeAttribute('src'); preview.hidden = true; placeholder.hidden = false; }
+    }
+    function pickUrl(url) { croppedInput.value = ''; fileInput.value = ''; if (urlInput) urlInput.value = url; showPreview(url); }
+    function pickCropped(dataUrl) { if (urlInput) urlInput.value = ''; fileInput.value = ''; croppedInput.value = dataUrl; showPreview(dataUrl); }
+
+    // Restore preview after a validation re-render
+    if (croppedInput.value) showPreview(croppedInput.value);
+    else if (urlInput && urlInput.value) showPreview(urlInput.value);
+
+    if (urlInput) urlInput.addEventListener('input', () => { croppedInput.value = ''; showPreview(urlInput.value.trim()); });
+
+    // --- Cover search ---
+    const searchInput = document.getElementById('coverSearchInput');
+    const searchBtn = document.getElementById('coverSearchBtn');
+    const searchStatus = document.getElementById('coverSearchStatus');
+    const searchResults = document.getElementById('coverSearchResults');
+    let controller = null;
+
+    async function doSearch() {
+        const q = searchInput.value.trim();
+        if (q.length < 2) { searchResults.innerHTML = ''; searchStatus.textContent = ''; return; }
+        if (controller) controller.abort();
+        controller = new AbortController();
+        searchStatus.textContent = 'Suche läuft …';
+        try {
+            const res = await fetch(`/Lists/${listId}/AddManual?handler=CoverSearch&q=${encodeURIComponent(q)}`, { signal: controller.signal });
+            const data = await res.json();
+            const covers = data.covers || [];
+            searchResults.innerHTML = '';
+            searchStatus.textContent = covers.length ? `${covers.length} Treffer – zum Wählen anklicken` : 'Keine Cover gefunden.';
+            for (const c of covers) {
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'cover-hit';
+                b.title = c.title + (c.year ? ` (${c.year})` : '');
+                b.innerHTML = `<img src="${c.coverUrl}" alt="" loading="lazy">`;
+                b.addEventListener('click', () => pickUrl(c.coverUrl));
+                searchResults.appendChild(b);
+            }
+        } catch (e) { if (e.name !== 'AbortError') searchStatus.textContent = 'Suche fehlgeschlagen.'; }
+    }
+    if (searchBtn) searchBtn.addEventListener('click', doSearch);
+    if (searchInput) searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+
+    // --- Cropper (2:3) ---
+    const overlay = document.getElementById('cropOverlay');
+    const canvas = document.getElementById('cropCanvas');
+    const ctx = canvas.getContext('2d');
+    const zoom = document.getElementById('cropZoom');
+    const Ws = canvas.width, Hs = canvas.height;
+    let img = null, base = 1, tx = 0, ty = 0, dragging = false, lastX = 0, lastY = 0;
+
+    function draw() {
+        const s = base * parseFloat(zoom.value);
+        const dw = img.width * s, dh = img.height * s;
+        tx = Math.min(0, Math.max(Ws - dw, tx));
+        ty = Math.min(0, Math.max(Hs - dh, ty));
+        ctx.clearRect(0, 0, Ws, Hs);
+        ctx.drawImage(img, tx, ty, dw, dh);
+    }
+
+    fileInput.addEventListener('change', () => {
+        const f = fileInput.files && fileInput.files[0];
+        if (!f || !f.type.startsWith('image/')) return;
+        const url = URL.createObjectURL(f);
+        img = new Image();
+        img.onload = () => {
+            base = Math.max(Ws / img.width, Hs / img.height);
+            zoom.value = '1';
+            const s = base; tx = (Ws - img.width * s) / 2; ty = (Hs - img.height * s) / 2;
+            draw();
+            overlay.hidden = false;
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;
+    });
+    zoom.addEventListener('input', () => { if (img) draw(); });
+    canvas.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove', e => { if (!dragging || !img) return; tx += e.clientX - lastX; ty += e.clientY - lastY; lastX = e.clientX; lastY = e.clientY; draw(); });
+    canvas.addEventListener('pointerup', () => { dragging = false; });
+    document.getElementById('cropCancel').addEventListener('click', () => { overlay.hidden = true; fileInput.value = ''; });
+    document.getElementById('cropApply').addEventListener('click', () => {
+        const outW = 500, outH = 750, f = outW / Ws;
+        const out = document.createElement('canvas'); out.width = outW; out.height = outH;
+        const s = base * parseFloat(zoom.value);
+        out.getContext('2d').drawImage(img, tx * f, ty * f, img.width * s * f, img.height * s * f);
+        pickCropped(out.toDataURL('image/jpeg', 0.9));
+        overlay.hidden = true;
+    });
+})();
+</script>
+}

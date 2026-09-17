@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using MatTrakr.Data;
@@ -5,9 +6,9 @@ using MatTrakr.Data;
 namespace MatTrakr.Services;
 
 /// <summary>
-/// Admin database backup (consistent snapshot download) and restore (replace the
-/// live SQLite file, keeping a safety copy). Cover images are not stored locally
-/// — only their URLs live in the DB — so the database file is the full backup.
+/// Admin database backup and restore. A backup is a ZIP containing a consistent
+/// database snapshot plus the configuration (API keys). Restore accepts that ZIP
+/// as well as a legacy bare .db file, and keeps a safety copy of the old data.
 /// </summary>
 public class BackupService
 {
@@ -24,35 +25,47 @@ public class BackupService
         _log = log;
     }
 
-    /// <summary>Produces a consistent single-file snapshot of the database.</summary>
-    public async Task<byte[]> CreateSnapshotAsync(CancellationToken ct = default)
+    private string SettingsPath => Path.Combine(_dataPath, "config", "settings.json");
+
+    /// <summary>Builds a ZIP backup: mattrakr.db (consistent snapshot) + config/settings.json.</summary>
+    public async Task<byte[]> CreateBackupAsync(CancellationToken ct = default)
     {
-        var tmp = Path.Combine(_dataPath, $"snapshot-{Guid.NewGuid():N}.db");
+        var tmpDb = Path.Combine(_dataPath, $"snapshot-{Guid.NewGuid():N}.db");
         try
         {
             await using (var conn = new SqliteConnection($"Data Source={_dbPath};Mode=ReadOnly"))
             {
                 await conn.OpenAsync(ct);
                 await using var cmd = conn.CreateCommand();
-                // VACUUM INTO writes a clean, defragmented, fully-committed copy.
-                cmd.CommandText = $"VACUUM INTO '{tmp.Replace("'", "''")}'";
+                cmd.CommandText = $"VACUUM INTO '{tmpDb.Replace("'", "''")}'";
                 await cmd.ExecuteNonQueryAsync(ct);
             }
-            return await File.ReadAllBytesAsync(tmp, ct);
+
+            using var mem = new MemoryStream();
+            using (var zip = new ZipArchive(mem, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                await AddFileAsync(zip, tmpDb, "mattrakr.db", ct);
+                if (File.Exists(SettingsPath))
+                    await AddFileAsync(zip, SettingsPath, "config/settings.json", ct);
+            }
+            return mem.ToArray();
         }
         finally
         {
-            TryDelete(tmp);
+            TryDelete(tmpDb);
         }
     }
 
     /// <summary>
-    /// Validates and installs an uploaded database, replacing the current one.
-    /// The previous database is kept as mattrakr-before-restore-*.db.
+    /// Restores from a ZIP (db + optional config) or a legacy bare .db file.
+    /// Replaces the live database (and config, if present) and keeps a safety copy.
     /// </summary>
     public async Task<(bool Ok, string Message)> RestoreAsync(Stream upload, CancellationToken ct = default)
     {
-        var incoming = Path.Combine(_dataPath, $"restore-{Guid.NewGuid():N}.db");
+        var incoming = Path.Combine(_dataPath, $"restore-{Guid.NewGuid():N}.bin");
+        string? dbToInstall = null;
+        string? cfgToInstall = null;
+        var cfgRestored = false;
         try
         {
             await using (var fs = File.Create(incoming))
@@ -61,39 +74,86 @@ public class BackupService
             if (new FileInfo(incoming).Length == 0)
                 return (false, "Die hochgeladene Datei ist leer.");
 
-            if (!await IsMatTrakrDatabaseAsync(incoming, ct))
-                return (false, "Das ist keine gültige MatTrakr-Datenbank.");
+            var head = new byte[2];
+            await using (var fs = File.OpenRead(incoming))
+                _ = await fs.ReadAsync(head.AsMemory(0, 2), ct);
+            var isZip = head[0] == 0x50 && head[1] == 0x4B; // "PK"
 
-            // Release any pooled handles so the file can be swapped.
+            if (isZip)
+            {
+                using var za = ZipFile.OpenRead(incoming);
+                var dbEntry = za.GetEntry("mattrakr.db");
+                if (dbEntry is null)
+                    return (false, "Im ZIP fehlt mattrakr.db.");
+                dbToInstall = Path.Combine(_dataPath, $"restore-db-{Guid.NewGuid():N}.db");
+                dbEntry.ExtractToFile(dbToInstall, overwrite: true);
+
+                var cfgEntry = za.GetEntry("config/settings.json");
+                if (cfgEntry is not null)
+                {
+                    cfgToInstall = Path.Combine(_dataPath, $"restore-cfg-{Guid.NewGuid():N}.json");
+                    cfgEntry.ExtractToFile(cfgToInstall, overwrite: true);
+                }
+            }
+            else
+            {
+                dbToInstall = incoming; // legacy raw .db
+            }
+
+            if (!await IsMatTrakrDatabaseAsync(dbToInstall, ct))
+                return (false, "Das Backup enthält keine gültige MatTrakr-Datenbank.");
+
             SqliteConnection.ClearAllPools();
 
-            var safety = Path.Combine(_dataPath, $"mattrakr-before-restore-{DateTime.UtcNow:yyyyMMdd-HHmmss}.db");
-            if (File.Exists(_dbPath))
-                File.Copy(_dbPath, safety, overwrite: true);
+            var stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+            var safety = Path.Combine(_dataPath, $"mattrakr-before-restore-{stamp}.db");
+            if (File.Exists(_dbPath)) File.Copy(_dbPath, safety, overwrite: true);
 
             TryDelete(_dbPath);
             TryDelete(_dbPath + "-wal");
             TryDelete(_dbPath + "-shm");
-            File.Move(incoming, _dbPath);
+            File.Move(dbToInstall, _dbPath);
+            dbToInstall = null; // moved
 
-            // Bring the restored database up to the current schema if it is older.
+            if (cfgToInstall is not null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
+                if (File.Exists(SettingsPath))
+                    File.Copy(SettingsPath, SettingsPath + $".before-restore-{stamp}", overwrite: true);
+                File.Move(cfgToInstall, SettingsPath, overwrite: true);
+                cfgToInstall = null; // moved
+                cfgRestored = true;
+            }
+
             using (var scope = _scopeFactory.CreateScope())
                 await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync(ct);
 
-            return (true, $"Wiederhergestellt. Eine Sicherheitskopie der vorherigen Daten liegt unter {Path.GetFileName(safety)}.");
+            var cfgNote = cfgRestored ? " inkl. Konfiguration (API-Keys)" : "";
+            return (true, $"Wiederhergestellt{cfgNote}. Sicherheitskopie der vorherigen Daten: {Path.GetFileName(safety)}.");
         }
         catch (Exception ex)
         {
             _log.LogError(ex, "Database restore failed");
-            TryDelete(incoming);
             return (false, $"Wiederherstellung fehlgeschlagen: {ex.Message}");
+        }
+        finally
+        {
+            TryDelete(incoming);
+            if (dbToInstall is not null && dbToInstall != incoming) TryDelete(dbToInstall);
+            if (cfgToInstall is not null) TryDelete(cfgToInstall);
         }
     }
 
-    /// <summary>Checks the file is SQLite and carries the MatTrakr schema.</summary>
+    private static async Task AddFileAsync(ZipArchive zip, string path, string entryName, CancellationToken ct)
+    {
+        var entry = zip.CreateEntry(entryName, CompressionLevel.Fastest);
+        await using var es = entry.Open();
+        await using var fs = File.OpenRead(path);
+        await fs.CopyToAsync(es, ct);
+    }
+
     private static async Task<bool> IsMatTrakrDatabaseAsync(string path, CancellationToken ct)
     {
-        // SQLite header magic.
         var header = new byte[16];
         await using (var fs = File.OpenRead(path))
         {
@@ -109,8 +169,7 @@ public class BackupService
             await using var cmd = conn.CreateCommand();
             cmd.CommandText =
                 "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('Users','Lists','ListItems')";
-            var count = Convert.ToInt32(await cmd.ExecuteScalarAsync(ct));
-            return count == 3;
+            return Convert.ToInt32(await cmd.ExecuteScalarAsync(ct)) == 3;
         }
         catch
         {

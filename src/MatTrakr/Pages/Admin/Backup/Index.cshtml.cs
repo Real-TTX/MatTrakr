@@ -17,9 +17,9 @@ public class IndexModel : PageModel
     /// <summary>Streams a fresh database snapshot as a download.</summary>
     public async Task<IActionResult> OnGetDownloadAsync(CancellationToken ct)
     {
-        var bytes = await _backup.CreateSnapshotAsync(ct);
-        var name = $"mattrakr-backup-{DateTime.UtcNow:yyyyMMdd-HHmmss}.db";
-        return File(bytes, "application/x-sqlite3", name);
+        var bytes = await _backup.CreateBackupAsync(ct);
+        var name = $"mattrakr-backup-{DateTime.UtcNow:yyyyMMdd-HHmmss}.zip";
+        return File(bytes, "application/zip", name);
     }
 
     public async Task<IActionResult> OnPostRestoreAsync(IFormFile? file, CancellationToken ct)
