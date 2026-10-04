@@ -283,6 +283,24 @@ body {
   font-size: 0.95rem;
 }
 
+.sidebar-user-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.65rem;
+  color: var(--mt-sidebar-strong);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: 0.5rem;
+}
+
+.sidebar-user-link:hover,
+.sidebar-user-link.active {
+  background: var(--mt-sidebar-active);
+  color: var(--mt-sidebar-strong);
+}
+
 .sidebar-logout {
   cursor: pointer;
 }
@@ -1166,10 +1184,18 @@ body {
     --bs-btn-font-size: 1.02rem;
   }
 
+  /* 16px keeps iOS/Android from auto-zooming when a field gets focus (also in PWA) */
+  .form-control,
+  .form-select,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
   .form-control,
   .form-select {
     min-height: 3rem;
-    font-size: 1rem;
   }
 
   .form-control-lg,

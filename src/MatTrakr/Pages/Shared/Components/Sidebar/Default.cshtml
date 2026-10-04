@@ -83,17 +83,10 @@
 </nav>
 
 <div class="sidebar-footer">
-    <div class="sidebar-user">
+    <a href="/Profile" class="sidebar-user-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Profile", StringComparison.OrdinalIgnoreCase) ? "active" : null)" title="Mein Konto">
         <i class="bi bi-person-circle"></i>
         <span class="sidebar-link-text">@Model.DisplayName</span>
-    </div>
-    <a href="/Profile" class="sidebar-link" title="Persönliche Einstellungen">
-        <i class="bi bi-sliders"></i>
-        <span class="sidebar-link-text">Einstellungen</span>
-    </a>
-    <a href="/Account/ChangePassword" class="sidebar-link" title="Passwort ändern">
-        <i class="bi bi-key"></i>
-        <span class="sidebar-link-text">Passwort</span>
+        <i class="bi bi-gear sidebar-link-badge"></i>
     </a>
     <form method="post" action="/Account/Logout">
         @Html.AntiForgeryToken()
