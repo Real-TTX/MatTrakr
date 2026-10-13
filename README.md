@@ -175,7 +175,13 @@ Cover images for manual entries live **inside the database**, not on disk — a 
 ## How it is built
 
 - **ASP.NET Core 10** Razor Pages, **EF Core** with SQLite, custom cookie auth with DB-backed sessions
-- Reusable UI controls (table toolbar, pagination, form actions, tabs); **plain JavaScript**, no build step
+- The look is **MatUi**, the design system of the Mat apps ([MatDesign](https://github.com/Real-TTX/MatDesign)):
+  one accent colour (`data-app="mattrakr"`), a shell with menu, breadcrumb and drawer, dialogs instead of
+  browser pop-ups, light/dark/system theming. The toolkit is **copied** into
+  [`src/MatTrakr/wwwroot/matui`](src/MatTrakr/wwwroot/matui) so the app works offline and as a PWA; refresh it
+  with `scripts/update-matui.ps1`. Only what is specific to MatTrakr (poster covers, cover cropper, star
+  ratings, season toggles) lives in [`wwwroot/css/app.css`](src/MatTrakr/wwwroot/css/app.css)
+- Reusable UI controls (table toolbar, pagination, form actions, tabs) that emit MatUi markup; **plain JavaScript**, no build step
 - Metadata via `IHttpClientFactory` — TMDb, Google Books, Open Library fallback
 - Uploaded covers as BLOBs in a separate table, served from `/media/cover/{id}`
 - Passwords hashed with `PasswordHasher`, DataProtection keys persisted to the volume

@@ -7,20 +7,16 @@
 
     string TypeIcon(MediaType t) => t switch
     {
-        MediaType.Movies => "bi-film",
-        MediaType.Series => "bi-tv",
-        MediaType.Books => "bi-book",
-        _ => "bi-collection",
+        MediaType.Movies => "film",
+        MediaType.Series => "tv",
+        MediaType.Books => "book",
+        _ => "collection",
     };
 }
 
-<h1 class="page-title"><i class="bi bi-collection"></i>Listen verwalten</h1>
-
 @if (!string.IsNullOrEmpty(Model.Error))
 {
-    <div class="alert alert-danger" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
-    </div>
+    <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.Error</span></div>
 }
 
 <partial name="_TableToolbar" model="@(new TableToolbarModel
@@ -54,34 +50,31 @@
 
 @if (Model.Rows.Count > 0 && !Model.CanReorder)
 {
-    <p class="text-muted small mb-2">
-        <i class="bi bi-info-circle me-1"></i>
-        Wähle Sortierung „Reihenfolge (Menü)" (ohne Filter/Suche), um die Reihenfolge per Pfeilen anzupassen.
-    </p>
+    <p class="mat-muted">@Ui.Icon("info") Wähle Sortierung „Reihenfolge (Menü)" (ohne Filter/Suche), um die Reihenfolge per Pfeilen anzupassen.</p>
 }
 
 @if (Model.Rows.Count == 0)
 {
-    <div class="content-card p-5 text-center text-muted">
-        <i class="bi bi-collection display-4 d-block mb-3 opacity-50"></i>
-        <p class="mb-0">Keine Listen gefunden.</p>
+    <div class="mat-empty">
+        <div class="mat-empty__icon">@Ui.Icon("collection")</div>
+        <p class="mat-empty__title">Keine Listen gefunden.</p>
     </div>
 }
 else
 {
-    <div class="content-card table-responsive">
-        <table class="table table-hover align-middle mb-0">
+    <div class="mat-table-wrap">
+        <table class="mat-table">
             <thead>
                 <tr>
                     @if (Model.CanReorder)
                     {
-                        <th style="width: 4rem;">Reihenfolge</th>
+                        <th>Reihenfolge</th>
                     }
-                    <th style="width: 3rem;">Pin</th>
+                    <th>Pin</th>
                     <th>Name</th>
-                    <th class="d-none d-sm-table-cell">Typ</th>
-                    <th class="text-end">Einträge</th>
-                    <th class="text-end">Aktionen</th>
+                    <th class="mat-hide-sm">Typ</th>
+                    <th class="mat-num">Einträge</th>
+                    <th><span class="mat-sr-only">Aktionen</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -91,60 +84,51 @@ else
                     <tr>
                         @if (Model.CanReorder)
                         {
-                            <td class="text-nowrap">
-                                <form method="post" asp-page-handler="Move" class="d-inline">
-                                    <input type="hidden" name="id" value="@row.List.Id" />
-                                    <input type="hidden" name="dir" value="up" />
-                                    <input type="hidden" name="sort" value="@Model.Sort" />
-                                    <button type="submit" class="btn btn-sm btn-link p-0 list-move" title="Nach oben"
-                                            aria-label="Nach oben" @(i == 0 ? "disabled" : null)>
-                                        <i class="bi bi-arrow-up"></i>
-                                    </button>
-                                </form>
-                                <form method="post" asp-page-handler="Move" class="d-inline">
-                                    <input type="hidden" name="id" value="@row.List.Id" />
-                                    <input type="hidden" name="dir" value="down" />
-                                    <input type="hidden" name="sort" value="@Model.Sort" />
-                                    <button type="submit" class="btn btn-sm btn-link p-0 list-move ms-1" title="Nach unten"
-                                            aria-label="Nach unten" @(i == Model.Rows.Count - 1 ? "disabled" : null)>
-                                        <i class="bi bi-arrow-down"></i>
-                                    </button>
-                                </form>
+                            <td data-label="Reihenfolge" class="mat-table__cell-actions">
+                                <div class="mat-table__actions">
+                                    <form method="post" asp-page-handler="Move">
+                                        <input type="hidden" name="id" value="@row.List.Id" />
+                                        <input type="hidden" name="dir" value="up" />
+                                        <input type="hidden" name="sort" value="@Model.Sort" />
+                                        <button type="submit" class="mat-btn mat-btn--ghost mat-btn--icon mat-btn--sm" title="Nach oben" aria-label="Nach oben" @(i == 0 ? "disabled" : null)>@Ui.Icon("arrow-up")</button>
+                                    </form>
+                                    <form method="post" asp-page-handler="Move">
+                                        <input type="hidden" name="id" value="@row.List.Id" />
+                                        <input type="hidden" name="dir" value="down" />
+                                        <input type="hidden" name="sort" value="@Model.Sort" />
+                                        <button type="submit" class="mat-btn mat-btn--ghost mat-btn--icon mat-btn--sm" title="Nach unten" aria-label="Nach unten" @(i == Model.Rows.Count - 1 ? "disabled" : null)>@Ui.Icon("arrow-down")</button>
+                                    </form>
+                                </div>
                             </td>
                         }
-                        <td>
-                            <form method="post" asp-page-handler="ToggleFavorite" class="d-inline">
+                        <td data-label="Pin">
+                            <form method="post" asp-page-handler="ToggleFavorite">
                                 <input type="hidden" name="id" value="@row.List.Id" />
                                 <input type="hidden" name="q" value="@Model.Q" />
                                 <input type="hidden" name="type" value="@Model.TypeFilter" />
                                 <input type="hidden" name="sort" value="@Model.Sort" />
-                                <button type="submit" class="btn btn-sm btn-link p-0 list-pin @(row.List.IsFavorite ? "is-on" : null)"
-                                        title="@(row.List.IsFavorite ? "In Seitenleiste angepinnt – klicken zum Entfernen" : "An Seitenleiste anpinnen")">
-                                    <i class="bi @(row.List.IsFavorite ? "bi-star-fill" : "bi-star")"></i>
-                                </button>
+                                <button type="submit" class="mt-list-pin @(row.List.IsFavorite ? "is-on" : null)"
+                                        title="@(row.List.IsFavorite ? "In Seitenleiste angepinnt – klicken zum Entfernen" : "An Seitenleiste anpinnen")"
+                                        aria-label="@(row.List.IsFavorite ? "Pin entfernen" : "Anpinnen")">@Ui.Icon("star")</button>
                             </form>
                         </td>
-                        <td>
-                            <a href="/Lists/@row.List.Id" class="text-decoration-none fw-semibold">
-                                <i class="bi @TypeIcon(row.List.Type) me-1"></i>@row.List.Name
-                            </a>
+                        <td data-label="Name">
+                            <a href="/Lists/@row.List.Id" class="mat-table__name">@Ui.Icon(TypeIcon(row.List.Type))<span>@row.List.Name</span></a>
                         </td>
-                        <td class="d-none d-sm-table-cell">@row.List.Type</td>
-                        <td class="text-end">@row.Done / @row.Total</td>
-                        <td class="text-end text-nowrap">
-                            <a href="/Lists/Edit/@row.List.Id" class="btn btn-sm btn-outline-secondary" title="Bearbeiten">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form method="post" asp-page-handler="Delete" class="d-inline">
-                                <input type="hidden" name="id" value="@row.List.Id" />
-                                <input type="hidden" name="q" value="@Model.Q" />
-                                <input type="hidden" name="type" value="@Model.TypeFilter" />
-                                <input type="hidden" name="sort" value="@Model.Sort" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2" title="Löschen"
-                                        onclick="return confirm('„@row.List.Name“ inklusive aller Einträge wirklich löschen?');">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                        <td data-label="Typ" class="mat-hide-sm">@row.List.Type</td>
+                        <td data-label="Einträge" class="mat-num">@row.Done / @row.Total</td>
+                        <td class="mat-table__cell-actions">
+                            <div class="mat-table__actions">
+                                <a href="/Lists/Edit/@row.List.Id" class="mat-btn mat-btn--ghost mat-btn--icon mat-btn--sm" title="Bearbeiten" aria-label="Bearbeiten">@Ui.Icon("edit")</a>
+                                <form method="post" asp-page-handler="Delete">
+                                    <input type="hidden" name="id" value="@row.List.Id" />
+                                    <input type="hidden" name="q" value="@Model.Q" />
+                                    <input type="hidden" name="type" value="@Model.TypeFilter" />
+                                    <input type="hidden" name="sort" value="@Model.Sort" />
+                                    <button type="submit" class="mat-btn mat-btn--danger mat-btn--icon mat-btn--sm" title="Löschen" aria-label="Löschen"
+                                            data-confirm="„@row.List.Name“ inklusive aller Einträge wirklich löschen?" data-confirm-ok="Löschen">@Ui.Icon("trash")</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -153,11 +137,7 @@ else
     </div>
 }
 
-<div class="list-actions">
-    <a href="/Lists/Edit" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i>Neue Liste
-    </a>
-    <a href="/" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Zurück
-    </a>
+<div class="mat-actions">
+    <a href="/Lists/Edit" class="mat-btn mat-btn--primary">@Ui.Icon("plus")<span>Neue Liste</span></a>
+    <a href="/" class="mat-btn mat-btn--secondary">@Ui.Icon("arrow-left")<span>Zurück</span></a>
 </div>

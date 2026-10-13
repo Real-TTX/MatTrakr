@@ -6,7 +6,7 @@
 *@
 @if (!string.IsNullOrEmpty(Model.DeleteHandler))
 {
-    <form method="post" asp-page-handler="@Model.DeleteHandler" id="@($"deleteForm_{Model.DeleteHandler}")" class="d-none">
+    <form method="post" asp-page-handler="@Model.DeleteHandler" id="@($"deleteForm_{Model.DeleteHandler}")" hidden>
         @foreach (var kv in Model.DeleteRouteValues)
         {
             <input type="hidden" name="@kv.Key" value="@kv.Value" />

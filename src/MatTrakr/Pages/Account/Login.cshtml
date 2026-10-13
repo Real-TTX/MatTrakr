@@ -5,41 +5,39 @@
     Layout = "_AuthLayout";
 }
 
-<h1 class="auth-title">Anmelden</h1>
-<p class="auth-subtitle">Melde dich an, um deine Listen zu verwalten.</p>
+<h1 class="mt-auth-title">Anmelden</h1>
+<p class="mt-auth-sub">Melde dich an, um deine Listen zu verwalten.</p>
 
 @if (!string.IsNullOrEmpty(Model.Error))
 {
-    <div class="alert alert-danger" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
-    </div>
+    <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.Error</span></div>
 }
 
-<form method="post">
+<form method="post" class="mt-auth-form">
     <input type="hidden" asp-for="ReturnUrl" value="@Model.ReturnUrl" />
 
-    <div class="mb-3">
-        <label asp-for="Username" class="form-label">Benutzername</label>
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-person"></i></span>
-            <input asp-for="Username" class="form-control" autocomplete="username" autofocus />
+    <div class="mat-field">
+        <label asp-for="Username" class="mat-label">Benutzername</label>
+        <div class="mat-input-icon">
+            @Ui.Icon("user")
+            <input asp-for="Username" class="mat-input" autocomplete="username" autofocus />
         </div>
+        <span asp-validation-for="Username" class="mat-error"></span>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label">Passwort</label>
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-lock"></i></span>
-            <input asp-for="Password" type="password" class="form-control" autocomplete="current-password" />
+    <div class="mat-field">
+        <label asp-for="Password" class="mat-label">Passwort</label>
+        <div class="mat-input-icon">
+            @Ui.Icon("lock")
+            <input asp-for="Password" type="password" class="mat-input" autocomplete="current-password" />
         </div>
+        <span asp-validation-for="Password" class="mat-error"></span>
     </div>
 
-    <div class="form-check mb-3">
-        <input asp-for="RememberMe" class="form-check-input" />
-        <label asp-for="RememberMe" class="form-check-label">Angemeldet bleiben</label>
-    </div>
+    <label class="mat-check">
+        <input asp-for="RememberMe" type="checkbox" />
+        <span class="mat-check__text">Angemeldet bleiben</span>
+    </label>
 
-    <button type="submit" class="btn btn-primary w-100">
-        <i class="bi bi-box-arrow-in-right me-1"></i>Anmelden
-    </button>
+    <button type="submit" class="mat-btn mat-btn--primary mat-btn--block">@Ui.Icon("login")<span>Anmelden</span></button>
 </form>

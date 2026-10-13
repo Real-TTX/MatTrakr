@@ -1,14 +1,5 @@
-// MatTrakr site scripts.
-
-// Toolbar: auto-submit filter/sort selects on desktop only. On mobile the same
-// selects live in the fullscreen dialog, where the user applies via the button.
-document.addEventListener("change", function (e) {
-    var sel = e.target.closest("select[data-toolbar-autosubmit]");
-    if (!sel || !sel.form) return;
-    if (window.matchMedia("(min-width: 768px)").matches) {
-        sel.form.submit();
-    }
-});
+// MatTrakr site scripts. The shell, dialogs, theme and menus are the MatUi
+// toolkit's (matui.js); this file holds only MatTrakr's own widgets.
 
 // Season picker: quick-set the season toggle buttons — Alle / Teilweise / Keine.
 // "Teilweise" checks the first half (a quick "partway through" preset). The
@@ -93,11 +84,10 @@ document.addEventListener("change", function (e) {
 document.querySelectorAll("[data-season-picker]").forEach(mtSyncSeasonQuick);
 
 // Star rating widget: click to set 1–5, hover to preview, "x" to clear.
+// The icon is always the sprite star; .is-on fills it (gold) via CSS.
 function mtRenderStars(widget, value) {
     widget.querySelectorAll(".star-btn").forEach(function (btn) {
         var on = parseInt(btn.getAttribute("data-star"), 10) <= value;
-        var i = btn.querySelector("i");
-        if (i) i.className = "bi " + (on ? "bi-star-fill" : "bi-star");
         btn.classList.toggle("is-on", on);
     });
 }
@@ -118,4 +108,9 @@ document.querySelectorAll("[data-star-rating]").forEach(function (widget) {
     });
 
     widget.addEventListener("mouseleave", function () { mtRenderStars(widget, current()); });
+});
+
+// Progress bars: the width is data, so the script sets it (no inline style in markup).
+document.querySelectorAll(".mt-progress__bar[data-pct]").forEach(function (bar) {
+    bar.style.width = (parseInt(bar.getAttribute("data-pct"), 10) || 0) + "%";
 });

@@ -61,7 +61,7 @@ public class PaginationModel
 public class FormActionsModel
 {
     public string SaveText { get; set; } = "Speichern";
-    public string? SaveIcon { get; set; } = "bi-check-lg";
+    public string? SaveIcon { get; set; } = "check";
     public string? BackUrl { get; set; }
     public string BackText { get; set; } = "Zurück";
     /// <summary>Set to show a delete button (posts to this page handler).</summary>

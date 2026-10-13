@@ -9,55 +9,45 @@
 @functions {
     private static string TypeIcon(MediaType type) => type switch
     {
-        MediaType.Movies => "bi-film",
-        MediaType.Series => "bi-tv",
-        MediaType.Books => "bi-book",
-        _ => "bi-collection",
+        MediaType.Movies => "film",
+        MediaType.Series => "tv",
+        MediaType.Books => "book",
+        _ => "collection",
     };
 
     private static string DoneLabel(MediaType type) =>
         type == MediaType.Books ? "gelesen" : "gesehen";
 }
 
-<h1 class="page-title"><i class="bi bi-collection-play"></i>Meine Listen</h1>
-
-<div class="row g-3">
+<div class="mt-home-grid">
     @foreach (var card in Model.Cards)
     {
-        <div class="col-12 col-sm-6 col-xl-4">
-            <a href="/Lists/@card.List.Id" class="home-card">
-                <div class="home-card-icon"><i class="bi @TypeIcon(card.List.Type)"></i></div>
-                <div class="home-card-body">
-                    <div class="home-card-title">@card.List.Name</div>
-                    <div class="home-card-meta">
-                        @card.Done von @card.Total @DoneLabel(card.List.Type)
-                        @if (card.Access == ListAccess.ReadOnly)
-                        {
-                            <span class="badge text-bg-secondary ms-1">Nur Lesen</span>
-                        }
-                        else if (card.Access != ListAccess.Owner)
-                        {
-                            <span class="badge text-bg-info ms-1">Geteilt</span>
-                        }
-                    </div>
-                    @if (card.Total > 0)
+        var pct = card.Total == 0 ? 0 : card.Done * 100 / card.Total;
+        <a href="/Lists/@card.List.Id" class="mat-card mat-card--link mt-home-card">
+            <div class="mt-home-card__icon">@Ui.Icon(TypeIcon(card.List.Type))</div>
+            <div class="mt-home-card__body">
+                <div class="mt-home-card__title">@card.List.Name</div>
+                <div class="mt-home-card__meta">
+                    @card.Done von @card.Total @DoneLabel(card.List.Type)
+                    @if (card.Access == ListAccess.ReadOnly)
                     {
-                        <div class="progress home-card-progress">
-                            <div class="progress-bar" role="progressbar"
-                                 style="width: @(card.Total == 0 ? 0 : card.Done * 100 / card.Total)%"></div>
-                        </div>
+                        <span class="mat-tag">Nur Lesen</span>
+                    }
+                    else if (card.Access != ListAccess.Owner)
+                    {
+                        <span class="mat-tag">Geteilt</span>
                     }
                 </div>
-            </a>
-        </div>
+                @if (card.Total > 0)
+                {
+                    <div class="mt-progress"><div class="mt-progress__bar" data-pct="@pct" role="progressbar" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div></div>
+                }
+            </div>
+        </a>
     }
 </div>
 
-<div class="list-actions">
-    <a href="/Lists/Edit" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i>Neue Liste
-    </a>
-    <a href="/Lists/Manage" class="btn btn-outline-secondary">
-        <i class="bi bi-gear me-1"></i>Listen verwalten
-    </a>
+<div class="mat-actions mat-mt-6">
+    <a href="/Lists/Edit" class="mat-btn mat-btn--primary">@Ui.Icon("plus")<span>Neue Liste</span></a>
+    <a href="/Lists/Manage" class="mat-btn mat-btn--secondary">@Ui.Icon("settings")<span>Listen verwalten</span></a>
 </div>

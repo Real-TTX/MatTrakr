@@ -1,0 +1,184 @@
+/* ==========================================================================
+   MatTrakr — app-specific styles on top of the MatUi toolkit.
+   Only what the toolkit does not ship: poster covers, the cover editor and its
+   cropper, the star ratings, the season/status toggles and the add-search hits.
+   Everything uses the --mat-* tokens so it follows the accent, light and dark.
+   ========================================================================== */
+
+/* Stars are a graphic: --mat-warning keeps 3:1 against the surface in light and dark (the old #f5b301 had 1.85:1 on white). */
+:root { --mt-gold: var(--mat-warning); }
+
+/* ---- Auth card (login / change password / access denied) ----------------- */
+.mt-auth-title { font-size: var(--mat-fs-xl); font-weight: 650; margin: 0 0 var(--mat-space-1); text-align: center; }
+.mt-auth-sub { color: var(--mat-text-muted); text-align: center; margin: 0 0 var(--mat-space-5); }
+.mt-auth-form { display: flex; flex-direction: column; gap: var(--mat-space-4); }
+
+/* ---- Public shared-list page (no shell) ---------------------------------- */
+.mt-public-bar { display: flex; align-items: center; gap: var(--mat-space-3); padding: var(--mat-space-3) var(--mat-content-pad); border-bottom: 1px solid var(--mat-border); background: var(--mat-surface); }
+.mt-public-brand { display: flex; align-items: center; gap: var(--mat-space-2); font-weight: 650; color: var(--mat-text); text-decoration: none; }
+.mt-public-brand .mat-logo { width: 30px; height: 30px; }
+.mt-public-main { width: 100%; max-width: var(--mat-content-max); margin: 0 auto; padding: var(--mat-space-6) var(--mat-content-pad) var(--mat-space-10); display: flex; flex-direction: column; gap: var(--mat-space-6); }
+
+/* ---- Home: list overview cards ------------------------------------------- */
+.mt-home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--mat-gap);
+}
+.mt-home-card {
+  display: flex;
+  gap: var(--mat-space-4);
+  align-items: flex-start;
+  padding: var(--mat-space-5);
+}
+.mt-home-card__icon {
+  flex: none;
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: var(--mat-radius);
+  background: var(--mat-accent-soft-strong);
+  color: var(--mat-accent-text);
+}
+.mt-home-card__icon .mat-icon { font-size: 1.5rem; }
+.mt-home-card__body { min-width: 0; flex: 1 1 auto; }
+.mt-home-card__title { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mt-home-card__meta { color: var(--mat-text-muted); font-size: var(--mat-fs-sm); }
+.mt-progress { height: 6px; border-radius: var(--mat-radius-pill); background: var(--mat-surface-3); overflow: hidden; margin-top: var(--mat-space-3); }
+.mt-progress__bar { height: 100%; background: var(--mat-accent); }
+
+/* ---- Media gallery: poster covers (2:3) ---------------------------------- */
+.mt-cover { aspect-ratio: 2 / 3; }
+.mt-tile.is-done .mat-tile__media img { filter: grayscale(.35) brightness(.92); }
+.mt-statusbar {
+  display: flex; align-items: center; justify-content: center; gap: var(--mat-space-1);
+  width: 100%; text-align: center; font-weight: 600; line-height: 1.2;
+}
+.mt-statusbar--above { font-size: var(--mat-fs-xs); padding: var(--mat-space-1) var(--mat-space-2); }
+.mt-statusbar--below { font-size: var(--mat-fs-sm); padding: var(--mat-space-2); }
+.mt-statusbar--open { background: var(--mat-surface-3); color: var(--mat-text-muted); }
+.mt-statusbar--done { background: var(--mat-success-bg); color: var(--mat-success-text); }
+.mt-statusbar--partial { background: var(--mat-warning-bg); color: var(--mat-warning-text); }
+.mt-statusbar--abandoned { background: var(--mat-danger-bg); color: var(--mat-danger-text); }
+.mt-tile__title2 { font-weight: 600; font-size: var(--mat-fs-sm); line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mt-tile__stars { color: var(--mt-gold); font-size: var(--mat-fs-xs); line-height: 1; }
+.mt-tile__stars .mat-icon.is-off { color: var(--mat-text-faint); }
+
+/* ---- Item detail layout -------------------------------------------------- */
+.mt-item-layout { display: flex; gap: var(--mat-space-6); flex-wrap: wrap; }
+.mt-item-main { flex: 1 1 320px; min-width: 0; }
+.mt-field-block { max-width: 560px; }
+
+/* ---- Item detail cover --------------------------------------------------- */
+.mt-detail-cover { width: 220px; max-width: 100%; border-radius: var(--mat-radius-lg); aspect-ratio: 2 / 3; object-fit: cover; display: block; }
+.mt-cover-ph { display: grid; place-items: center; background: var(--mat-surface-3); color: var(--mat-text-faint); }
+.mt-detail-cover.mt-cover-ph { font-size: 3rem; }
+
+/* ---- Cover editor + cropper (manual add) --------------------------------- */
+.cover-editor { display: flex; gap: var(--mat-space-5); align-items: flex-start; flex-wrap: wrap; }
+.cover-editor-preview { width: 150px; flex: none; }
+.cover-editor-preview img, .cover-editor-preview .cover-ph {
+  width: 150px; aspect-ratio: 2 / 3; object-fit: cover;
+  border-radius: var(--mat-radius-lg); border: 1px solid var(--mat-border); display: block;
+}
+.cover-ph { display: grid; place-items: center; background: var(--mat-surface-3); color: var(--mat-text-faint); font-size: 2rem; }
+.cover-editor-controls { flex: 1 1 260px; min-width: 0; }
+.cover-search-results {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: var(--mat-space-2); margin-top: var(--mat-space-3); max-height: 240px; overflow-y: auto;
+}
+.cover-hit { border: 2px solid transparent; border-radius: var(--mat-radius-sm); padding: 0; background: none; cursor: pointer; overflow: hidden; }
+.cover-hit img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; border-radius: var(--mat-radius-xs); }
+.cover-hit:hover { border-color: var(--mat-accent); }
+
+.crop-overlay:not([hidden]) {
+  position: fixed; inset: 0; z-index: 1080;
+  display: flex; align-items: center; justify-content: center; padding: var(--mat-space-4);
+  background: color-mix(in srgb, #000 60%, transparent);
+}
+.crop-box { background: var(--mat-surface); color: var(--mat-text); padding: var(--mat-space-4) var(--mat-space-5) var(--mat-space-5); border-radius: var(--mat-radius-lg); box-shadow: var(--mat-shadow-3); max-width: 100%; }
+.crop-box canvas { touch-action: none; cursor: grab; border-radius: var(--mat-radius); display: block; margin: 0 auto; background: #000; max-width: 100%; }
+
+/* ---- Star rating widget + ratings list ----------------------------------- */
+.star-rating { display: inline-flex; align-items: center; gap: var(--mat-space-1); }
+.star-btn { border: 0; background: transparent; padding: 0 2px; cursor: pointer; color: var(--mt-gold); line-height: 1; }
+.star-btn .mat-icon { font-size: 1.6rem; }
+.star-btn:not(.is-on) .mat-icon { color: var(--mat-text-faint); }
+.star-clear { border: 0; background: transparent; color: var(--mat-text-faint); cursor: pointer; margin-left: var(--mat-space-3); line-height: 1; }
+.star-clear:hover { color: var(--mat-danger-text); }
+.star-static { color: var(--mt-gold); white-space: nowrap; display: inline-flex; gap: 1px; }
+.star-static .mat-icon.is-off { color: var(--mat-text-faint); }
+
+.ratings-list { display: flex; flex-direction: column; gap: var(--mat-space-4); }
+.rating-head { display: flex; align-items: center; justify-content: space-between; gap: var(--mat-space-3); }
+.rating-name { font-weight: 600; }
+.rating-comment { color: var(--mat-text-muted); font-size: var(--mat-fs-sm); margin-top: 2px; }
+
+/* ---- Season / status toggle buttons -------------------------------------- */
+/* A hidden native input + its label styled as a checkable button. */
+.mt-toggle-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.mt-toggle {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--mat-space-2);
+  width: 100%; min-height: var(--mat-control-h); padding: 0 var(--mat-space-3);
+  border: 1px solid var(--mat-border-strong); border-radius: var(--mat-radius);
+  background: var(--mat-surface); color: var(--mat-text); font-weight: 600; cursor: pointer; text-align: center;
+  transition: background var(--mat-dur-fast) var(--mat-ease), border-color var(--mat-dur-fast) var(--mat-ease), color var(--mat-dur-fast) var(--mat-ease);
+}
+.mt-toggle:hover { background: var(--mat-surface-3); }
+.mt-toggle-input:focus-visible + .mt-toggle { box-shadow: var(--mat-focus-ring); }
+.mt-toggle-input:checked + .mt-toggle,
+.mt-toggle.active { background: var(--mat-accent); border-color: var(--mat-accent); color: var(--mat-on-accent); }
+/* Abgebrochen: red */
+.mt-toggle--danger { border-color: color-mix(in srgb, var(--mat-danger) 45%, transparent); color: var(--mat-danger-text); }
+.mt-toggle-input:checked + .mt-toggle--danger { background: var(--mat-danger); border-color: var(--mat-danger); color: var(--mat-on-danger); }
+
+.season-picker-actions { display: flex; flex-wrap: wrap; gap: var(--mat-space-2); margin-bottom: var(--mat-space-5); padding-bottom: var(--mat-space-4); border-bottom: 1px solid var(--mat-border); }
+.season-picker-actions .mt-toggle { width: auto; }
+.season-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--mat-space-2); }
+.status-toggle { display: flex; flex-wrap: wrap; gap: var(--mat-space-2); }
+.status-toggle > label { flex: 1 1 auto; }
+.status-toggle__full { flex: 1 1 100%; }
+
+/* ---- Add page: search hits ----------------------------------------------- */
+.search-results { display: flex; flex-direction: column; gap: var(--mat-space-3); }
+.search-hit { display: flex; gap: var(--mat-space-4); background: var(--mat-surface); border: 1px solid var(--mat-border); border-radius: var(--mat-radius-lg); padding: var(--mat-space-3); align-items: flex-start; }
+.search-hit.is-added { opacity: .7; }
+.search-hit-cover { width: 64px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: var(--mat-radius-sm); flex: none; }
+.search-hit-cover-placeholder { display: grid; place-items: center; background: var(--mat-surface-3); color: var(--mat-text-faint); font-size: 1.5rem; }
+.search-hit-body { flex: 1 1 auto; min-width: 0; }
+.search-hit-title { font-weight: 600; }
+.search-hit-subtitle { color: var(--mat-text-muted); font-size: var(--mat-fs-sm); }
+.search-hit-overview { color: var(--mat-text-muted); font-size: var(--mat-fs-sm); margin-top: var(--mat-space-1); }
+.search-hit-action { flex: none; align-self: center; display: flex; align-items: center; gap: var(--mat-space-2); }
+
+/* ---- Small helpers ------------------------------------------------------- */
+.mt-list-pin { color: var(--mat-text-faint); line-height: 1; text-decoration: none; background: transparent; border: 0; cursor: pointer; }
+.mt-list-pin:hover, .mt-list-pin.is-on { color: var(--mt-gold); }
+.mt-list-move { color: var(--mat-text-muted); line-height: 1; text-decoration: none; }
+.mt-list-move:hover { color: var(--mat-accent-text); }
+.mt-list-move.is-disabled { opacity: .3; pointer-events: none; }
+
+.mt-push-end { margin-left: auto; }
+
+/* ---- Poster gallery: two covers across on a phone, like the posters of a shelf ---- */
+.mt-gallery { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: var(--mat-space-3); }
+@media (min-width: 768px) {
+  .mt-gallery { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: var(--mat-space-4); }
+}
+
+/* ---- Toolbar on a phone: the search and the Filter / Sort buttons stay on ONE line ----
+   The toolkit puts the buttons under the field below 480 px; here they shrink to icon buttons
+   (the label stays for screen readers through aria-label) so the whole toolbar is a single row. */
+@media (max-width: 480px) {
+  .mt-toolbar { flex-wrap: nowrap; }
+  .mt-toolbar .mat-toolbar__search { flex: 1 1 auto; max-width: none; min-width: 0; }
+  .mt-toolbar .mat-toolbar__end { gap: var(--mat-space-1); }
+  .mt-toolbar .mat-toolbar__btn { position: relative; width: var(--mat-control-h); padding: 0; }
+  .mt-toolbar .mat-toolbar__btn > span:not(.mat-badge) { display: none; }
+  .mt-toolbar .mat-toolbar__btn .mat-badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; }
+}
+
+/* The star of the sprite is an outline; a chosen / pinned one is filled, the others stay outlines. */
+.star-btn.is-on .mat-icon,
+.star-static .mat-icon:not(.is-off),
+.mt-tile__stars .mat-icon:not(.is-off),
+.mt-list-pin.is-on .mat-icon { fill: currentColor; }

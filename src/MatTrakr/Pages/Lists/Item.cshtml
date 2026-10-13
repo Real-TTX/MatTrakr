@@ -13,233 +13,208 @@
     var badge = StatusDisplay.Badge(Model.Item, Model.List.Type);
 }
 
-<h1 class="page-title"><i class="bi bi-card-text"></i>@Model.Item.Title</h1>
-
 @if (!string.IsNullOrEmpty(Model.Error))
 {
-    <div class="alert alert-danger" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
-    </div>
+    <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.Error</span></div>
 }
 
-<div class="content-card p-3">
-    <div class="row g-4">
-        <div class="col-12 col-md-auto">
-            @if (!string.IsNullOrEmpty(Model.Item.CoverUrl))
-            {
-                <img src="@Model.Item.CoverUrl" alt="@Model.Item.Title" class="item-detail-cover" />
-            }
-            else
-            {
-                <div class="item-detail-cover item-detail-cover-placeholder">
-                    <i class="bi bi-image"></i>
-                </div>
-            }
-        </div>
-        <div class="col">
-            <dl class="row mb-3">
-                <dt class="col-sm-3">Titel</dt>
-                <dd class="col-sm-9">@Model.Item.Title</dd>
-
-                @if (!string.IsNullOrEmpty(subtitle))
+<div class="mat-card">
+    <div class="mat-card__body">
+        <div class="mt-item-layout">
+            <div>
+                @if (!string.IsNullOrEmpty(Model.Item.CoverUrl))
                 {
-                    <dt class="col-sm-3">@(Model.List.Type == MediaType.Books ? "Autor" : "Originaltitel")</dt>
-                    <dd class="col-sm-9">@subtitle</dd>
+                    <img src="@Model.Item.CoverUrl" alt="@Model.Item.Title" class="mt-detail-cover" />
                 }
-
-                @if (Model.Item.Year is not null)
+                else
                 {
-                    <dt class="col-sm-3">Jahr</dt>
-                    <dd class="col-sm-9">@Model.Item.Year</dd>
+                    <div class="mt-detail-cover mt-cover-ph">@Ui.Icon("image")</div>
                 }
+            </div>
+            <div class="mt-item-main">
+                <dl class="mat-kv mat-mb-5">
+                    <dt>Titel</dt>
+                    <dd>@Model.Item.Title</dd>
 
-                @if (Model.List.Type == MediaType.Series && Model.Item.TotalSeasons is > 0)
+                    @if (!string.IsNullOrEmpty(subtitle))
+                    {
+                        <dt>@(Model.List.Type == MediaType.Books ? "Autor" : "Originaltitel")</dt>
+                        <dd>@subtitle</dd>
+                    }
+                    @if (Model.Item.Year is not null)
+                    {
+                        <dt>Jahr</dt>
+                        <dd>@Model.Item.Year</dd>
+                    }
+                    @if (Model.List.Type == MediaType.Series && Model.Item.TotalSeasons is > 0)
+                    {
+                        <dt>Staffeln</dt>
+                        <dd>@Model.Item.WatchedSeasons von @Model.Item.TotalSeasons gesehen</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Item.Overview))
+                    {
+                        <dt>Beschreibung</dt>
+                        <dd>@Model.Item.Overview</dd>
+                    }
+                    <dt>Quelle</dt>
+                    <dd>@Model.Item.Source</dd>
+                </dl>
+
+                @if (Model.CanEdit)
                 {
-                    <dt class="col-sm-3">Staffeln</dt>
-                    <dd class="col-sm-9">@Model.Item.WatchedSeasons von @Model.Item.TotalSeasons gesehen</dd>
-                }
-
-                @if (!string.IsNullOrEmpty(Model.Item.Overview))
-                {
-                    <dt class="col-sm-3">Beschreibung</dt>
-                    <dd class="col-sm-9">@Model.Item.Overview</dd>
-                }
-
-                <dt class="col-sm-3">Quelle</dt>
-                <dd class="col-sm-9">@Model.Item.Source</dd>
-            </dl>
-
-            @if (Model.CanEdit)
-            {
-                <form method="post">
-                    <div style="max-width: 560px;">
-                        @* 1. Status shortcuts — always, incl. Abgebrochen *@
-                        <div class="mb-3">
-                            <label class="form-label">Status</label>
-                            <div class="status-toggle" data-status-toggle>
-                                <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Open"
-                                       id="st_open" autocomplete="off" checked="@(Model.Status == ItemStatus.Open)" />
-                                <label class="btn btn-outline-primary status-btn" for="st_open">
-                                    <i class="bi bi-hourglass me-1"></i>@Model.OpenWord
-                                </label>
-
-                                @if (Model.List.Type == MediaType.Series)
-                                {
-                                    <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Partial"
-                                           id="st_partial" autocomplete="off" checked="@(Model.Status == ItemStatus.Partial)" />
-                                    <label class="btn btn-outline-primary status-btn" for="st_partial">
-                                        <i class="bi bi-hourglass-split me-1"></i>@Model.PartialWord
-                                    </label>
-                                }
-
-                                <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Done"
-                                       id="st_done" autocomplete="off" checked="@(Model.Status == ItemStatus.Done)" />
-                                <label class="btn btn-outline-primary status-btn" for="st_done">
-                                    <i class="bi bi-check-lg me-1"></i>@Model.DoneWord
-                                </label>
-
-                                <input type="radio" class="btn-check" name="Status" value="@ItemStatus.Abandoned"
-                                       id="st_abandon" autocomplete="off" checked="@(Model.Status == ItemStatus.Abandoned)" />
-                                <label class="btn btn-outline-danger status-btn status-btn--abandon" for="st_abandon">
-                                    <i class="bi bi-x-circle me-1"></i>Abgebrochen
-                                </label>
-                            </div>
-                        </div>
-
-                        @* 2. Season picker — series with a known season count *@
-                        @if (Model.UsesSeasons)
-                        {
-                            var total = Model.Item.TotalSeasons!.Value;
-                            <div class="mb-3">
-                                <label class="form-label d-block">Gesehene Staffeln</label>
-                                <div class="season-picker" data-season-picker data-status-sync>
-                                    <div class="season-picker-actions">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-season-set="all">
-                                            <i class="bi bi-check-all me-1"></i>Alle
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-season-set="half">
-                                            <i class="bi bi-hourglass-split me-1"></i>Teilweise
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-season-set="none">
-                                            <i class="bi bi-x-lg me-1"></i>Keine
-                                        </button>
+                    <form method="post" class="mat-form">
+                        <div class="mt-field-block mat-form">
+                            @* 1. Status shortcuts — always, incl. Abgebrochen *@
+                            <div class="mat-field">
+                                <span class="mat-label">Status</span>
+                                <div class="status-toggle" data-status-toggle>
+                                    <div>
+                                        <input type="radio" class="mt-toggle-input" name="Status" value="@ItemStatus.Open"
+                                               id="st_open" autocomplete="off" checked="@(Model.Status == ItemStatus.Open)" />
+                                        <label class="mt-toggle" for="st_open">@Ui.Icon("eye-off")<span>@Model.OpenWord</span></label>
                                     </div>
-                                    <div class="season-checks">
-                                        @for (var n = 1; n <= total; n++)
-                                        {
-                                            <input class="btn-check" type="checkbox" name="Seasons" value="@n"
-                                                   id="season_@n" autocomplete="off" checked="@Model.Seasons.Contains(n)" />
-                                            <label class="btn btn-outline-primary season-btn" for="season_@n">
-                                                <i class="bi bi-tv me-1"></i>Staffel @n
-                                            </label>
-                                        }
+                                    @if (Model.List.Type == MediaType.Series)
+                                    {
+                                        <div>
+                                            <input type="radio" class="mt-toggle-input" name="Status" value="@ItemStatus.Partial"
+                                                   id="st_partial" autocomplete="off" checked="@(Model.Status == ItemStatus.Partial)" />
+                                            <label class="mt-toggle" for="st_partial">@Ui.Icon("clock")<span>@Model.PartialWord</span></label>
+                                        </div>
+                                    }
+                                    <div>
+                                        <input type="radio" class="mt-toggle-input" name="Status" value="@ItemStatus.Done"
+                                               id="st_done" autocomplete="off" checked="@(Model.Status == ItemStatus.Done)" />
+                                        <label class="mt-toggle" for="st_done">@Ui.Icon("check-circle")<span>@Model.DoneWord</span></label>
+                                    </div>
+                                    <div class="status-toggle__full">
+                                        <input type="radio" class="mt-toggle-input" name="Status" value="@ItemStatus.Abandoned"
+                                               id="st_abandon" autocomplete="off" checked="@(Model.Status == ItemStatus.Abandoned)" />
+                                        <label class="mt-toggle mt-toggle--danger" for="st_abandon">@Ui.Icon("x-circle")<span>Abgebrochen</span></label>
                                     </div>
                                 </div>
                             </div>
-                        }
 
-                        <hr class="my-3" />
+                            @* 2. Season picker — series with a known season count *@
+                            @if (Model.UsesSeasons)
+                            {
+                                var total = Model.Item.TotalSeasons!.Value;
+                                <div class="mat-field">
+                                    <span class="mat-label">Gesehene Staffeln</span>
+                                    <div class="season-picker" data-season-picker data-status-sync>
+                                        <div class="season-picker-actions">
+                                            <button type="button" class="mt-toggle" data-season-set="all">@Ui.Icon("check-square")<span>Alle</span></button>
+                                            <button type="button" class="mt-toggle" data-season-set="half">@Ui.Icon("clock")<span>Teilweise</span></button>
+                                            <button type="button" class="mt-toggle" data-season-set="none">@Ui.Icon("x")<span>Keine</span></button>
+                                        </div>
+                                        <div class="season-checks">
+                                            @for (var n = 1; n <= total; n++)
+                                            {
+                                                <div>
+                                                    <input class="mt-toggle-input" type="checkbox" name="Seasons" value="@n"
+                                                           id="season_@n" autocomplete="off" checked="@Model.Seasons.Contains(n)" />
+                                                    <label class="mt-toggle" for="season_@n">@Ui.Icon("tv")<span>Staffel @n</span></label>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
 
-                        @* 3. Verschieben nach *@
-                        <div class="mb-3">
-                            <label asp-for="MoveToListId" class="form-label">
-                                Verschieben nach <i class="bi bi-arrow-right-circle"></i>
-                            </label>
-                            <select asp-for="MoveToListId" class="form-select">
-                                <option value="0">– nicht verschieben –</option>
-                                @foreach (var target in Model.MoveTargets)
-                                {
-                                    <option value="@target.Id">@target.Name</option>
-                                }
-                            </select>
-                            <div class="form-text">Nur Listen vom Typ @Model.List.Type.</div>
+                            <hr />
+
+                            @* 3. Verschieben nach *@
+                            <div class="mat-field">
+                                <label asp-for="MoveToListId" class="mat-label">Verschieben nach</label>
+                                <select asp-for="MoveToListId" class="mat-select">
+                                    <option value="0">– nicht verschieben –</option>
+                                    @foreach (var target in Model.MoveTargets)
+                                    {
+                                        <option value="@target.Id">@target.Name</option>
+                                    }
+                                </select>
+                                <span class="mat-hint">Nur Listen vom Typ @Model.List.Type.</span>
+                            </div>
                         </div>
 
-                        <hr class="my-3" />
-                    </div>
+                        @* 4. Save, Back … Delete *@
+                        <partial name="_FormActionsBar" model="@(new FormActionsModel
+                        {
+                            BackUrl = $"/Lists/{Model.List.Id}",
+                            DeleteHandler = "Delete",
+                            DeleteConfirm = $"„{Model.Item.Title}“ wirklich löschen?",
+                        })" />
+                    </form>
 
-                    @* 4. Save, Back … Delete *@
-                    <partial name="_FormActionsBar" model="@(new FormActionsModel
+                    <partial name="_DeleteForm" model="@(new FormActionsModel
                     {
-                        BackUrl = $"/Lists/{Model.List.Id}",
                         DeleteHandler = "Delete",
-                        DeleteConfirm = $"„{Model.Item.Title}“ wirklich löschen?",
                     })" />
-                </form>
-
-                <partial name="_DeleteForm" model="@(new FormActionsModel
+                }
+                else
                 {
-                    DeleteHandler = "Delete",
-                })" />
-            }
-            else
-            {
-                <span class="badge @badge.Css me-2">
-                    <i class="bi @badge.Icon me-1"></i>@badge.Text
-                </span>
-                <div class="list-actions">
-                    <a href="/Lists/@Model.List.Id" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i>Zurück
-                    </a>
-                </div>
-            }
+                    <p><span class="mat-pill @StatusDisplay.PillClass(badge.Key)">@badge.Text</span></p>
+                    <div class="mat-actions">
+                        <a href="/Lists/@Model.List.Id" class="mat-btn mat-btn--secondary">@Ui.Icon("arrow-left")<span>Zurück</span></a>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
 
 @* Personal ratings — everyone with access can rate and see the others' ratings *@
-<div class="content-card p-3 mt-3" style="max-width: 720px;">
-    <h2 class="fs-5 mb-3"><i class="bi bi-star me-1"></i>Bewertungen</h2>
-
-    <form method="post" asp-page-handler="Rate" asp-route-listId="@Model.List.Id" asp-route-itemId="@Model.Item.Id">
-        <label class="form-label mb-1">Meine Bewertung</label>
-        <div class="star-rating mb-2" data-star-rating>
-            <input type="hidden" asp-for="MyStars" />
-            @for (var s = 1; s <= 5; s++)
-            {
-                <button type="button" class="star-btn @(s <= Model.MyStars ? "is-on" : null)" data-star="@s"
-                        aria-label="@s Sterne" title="@s Sterne">
-                    <i class="bi @(s <= Model.MyStars ? "bi-star-fill" : "bi-star")"></i>
-                </button>
-            }
-            <button type="button" class="star-clear" data-star="0" title="Bewertung entfernen" aria-label="Bewertung entfernen">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-        <div class="mb-2">
-            <textarea asp-for="MyComment" class="form-control" rows="2" maxlength="1000"
-                      placeholder="Optionaler Kommentar (z.B. „Anfang zäh, Ende top“)"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary btn-sm">
-            <i class="bi bi-check-lg me-1"></i>Bewertung speichern
-        </button>
-    </form>
-
-    @{
-        var others = Model.Ratings.Where(r => !r.IsMine).ToList();
-    }
-    @if (others.Count > 0)
-    {
-        <hr class="my-3" />
-        <div class="ratings-list">
-            @foreach (var r in others)
-            {
-                <div class="rating-row">
-                    <div class="rating-head">
-                        <span class="rating-name"><i class="bi bi-person-circle me-1"></i>@r.Name</span>
-                        <span class="rating-stars">
-                            @for (var s = 1; s <= 5; s++)
-                            {
-                                <i class="bi @(s <= r.Stars ? "bi-star-fill" : "bi-star")"></i>
-                            }
-                        </span>
-                    </div>
-                    @if (!string.IsNullOrWhiteSpace(r.Comment))
+<div class="mat-card">
+    <div class="mat-card__head">@Ui.Icon("star")<span class="mat-card__title">Bewertungen</span></div>
+    <div class="mat-card__body mat-form">
+        <form method="post" asp-page-handler="Rate" asp-route-listId="@Model.List.Id" asp-route-itemId="@Model.Item.Id" class="mat-form">
+            <div class="mat-field">
+                <span class="mat-label">Meine Bewertung</span>
+                <div class="star-rating" data-star-rating>
+                    <input type="hidden" asp-for="MyStars" />
+                    @for (var s = 1; s <= 5; s++)
                     {
-                        <div class="rating-comment">@r.Comment</div>
+                        <button type="button" class="star-btn @(s <= Model.MyStars ? "is-on" : null)" data-star="@s"
+                                aria-label="@s Sterne" title="@s Sterne">@Ui.Icon("star")</button>
                     }
+                    <button type="button" class="star-clear" data-star="0" title="Bewertung entfernen" aria-label="Bewertung entfernen">@Ui.Icon("x")</button>
                 </div>
-            }
-        </div>
-    }
+            </div>
+            <div class="mat-field">
+                <label asp-for="MyComment" class="mat-label mat-sr-only">Kommentar</label>
+                <textarea asp-for="MyComment" class="mat-textarea" rows="2" maxlength="1000"
+                          placeholder="Optionaler Kommentar (z.B. „Anfang zäh, Ende top“)"></textarea>
+            </div>
+            <div class="mat-actions">
+                <button type="submit" class="mat-btn mat-btn--primary mat-btn--sm">@Ui.Icon("check")<span>Bewertung speichern</span></button>
+            </div>
+        </form>
+
+        @{
+            var others = Model.Ratings.Where(r => !r.IsMine).ToList();
+        }
+        @if (others.Count > 0)
+        {
+            <hr />
+            <div class="ratings-list">
+                @foreach (var r in others)
+                {
+                    <div class="rating-row">
+                        <div class="rating-head">
+                            <span class="rating-name">@Ui.Icon("user-circle") @r.Name</span>
+                            <span class="star-static" title="@r.Stars/5">
+                                @for (var s = 1; s <= 5; s++)
+                                {
+                                    @Ui.Icon("star", s <= r.Stars ? null : "is-off")
+                                }
+                            </span>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(r.Comment))
+                        {
+                            <div class="rating-comment">@r.Comment</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>
