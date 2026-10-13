@@ -182,3 +182,6 @@
 .star-static .mat-icon:not(.is-off),
 .mt-tile__stars .mat-icon:not(.is-off),
 .mt-list-pin.is-on .mat-icon { fill: currentColor; }
+
+/* ---- Logo: the ring-and-play glyph inside the flat accent tile (.mat-logo of the toolkit) ---- */
+.mat-logo .mt-logo-glyph { width: 64%; height: 64%; }

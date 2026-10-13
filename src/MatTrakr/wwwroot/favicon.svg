@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MatTrakr">
+  <rect width="64" height="64" rx="14" fill="#6c5ce7"/>
+  <circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="6"/>
+  <circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="79 114" transform="rotate(-90 32 32)"/>
+  <polygon points="26.5,23 26.5,41 41.5,32" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>
