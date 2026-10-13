@@ -16,13 +16,17 @@
 
 @if (Model.TotalPages > 1)
 {
-    <nav aria-label="Seiten" class="table-pagination" id="@Model.Id">
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item @(Model.Page <= 1 ? "disabled" : null)">
-                <a class="page-link" href="@PageUrl(Model.Page - 1)" aria-label="Zurück">
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-            </li>
+    <nav class="mat-pager" aria-label="Seiten" id="@Model.Id">
+        <span class="mat-pager__info">@Model.TotalCount Einträge</span>
+        <div class="mat-pager__pages">
+            @if (Model.Page <= 1)
+            {
+                <span class="mat-pager__btn is-disabled" aria-hidden="true">@Ui.Icon("chevron-left")</span>
+            }
+            else
+            {
+                <a class="mat-pager__btn" href="@PageUrl(Model.Page - 1)" aria-label="Zurück">@Ui.Icon("chevron-left")</a>
+            }
 
             @{
                 var start = Math.Max(1, Model.Page - 2);
@@ -30,35 +34,40 @@
             }
             @if (start > 1)
             {
-                <li class="page-item"><a class="page-link" href="@PageUrl(1)">1</a></li>
+                <a class="mat-pager__btn" href="@PageUrl(1)">1</a>
                 @if (start > 2)
                 {
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                    <span class="mat-pager__gap">…</span>
                 }
             }
             @for (var p = start; p <= end; p++)
             {
-                <li class="page-item @(p == Model.Page ? "active" : null)">
-                    <a class="page-link" href="@PageUrl(p)">@p</a>
-                </li>
+                if (p == Model.Page)
+                {
+                    <span class="mat-pager__btn is-current" aria-current="page">@p</span>
+                }
+                else
+                {
+                    <a class="mat-pager__btn" href="@PageUrl(p)">@p</a>
+                }
             }
             @if (end < Model.TotalPages)
             {
                 @if (end < Model.TotalPages - 1)
                 {
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                    <span class="mat-pager__gap">…</span>
                 }
-                <li class="page-item"><a class="page-link" href="@PageUrl(Model.TotalPages)">@Model.TotalPages</a></li>
+                <a class="mat-pager__btn" href="@PageUrl(Model.TotalPages)">@Model.TotalPages</a>
             }
 
-            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : null)">
-                <a class="page-link" href="@PageUrl(Model.Page + 1)" aria-label="Weiter">
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-            </li>
-        </ul>
-        <span class="table-pagination-info text-muted small">
-            @Model.TotalCount Einträge
-        </span>
+            @if (Model.Page >= Model.TotalPages)
+            {
+                <span class="mat-pager__btn is-disabled" aria-hidden="true">@Ui.Icon("chevron-right")</span>
+            }
+            else
+            {
+                <a class="mat-pager__btn" href="@PageUrl(Model.Page + 1)" aria-label="Weiter">@Ui.Icon("chevron-right")</a>
+            }
+        </div>
     </nav>
 }

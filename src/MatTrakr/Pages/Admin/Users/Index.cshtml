@@ -3,10 +3,8 @@
 @using MatTrakr.ViewComponents
 @model MatTrakr.Pages.Admin.Users.IndexModel
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "Benutzer";
 }
-
-<h1 class="page-title"><i class="bi bi-people"></i>Users</h1>
 
 <partial name="_TableToolbar" model="@(new TableToolbarModel
 {
@@ -42,57 +40,61 @@
     SortValue = Model.Sort,
 })" />
 
-<div class="content-card">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
+@if (Model.Users.Count == 0)
+{
+    <div class="mat-empty">
+        <div class="mat-empty__icon">@Ui.Icon("users")</div>
+        <p class="mat-empty__title">Keine Benutzer gefunden.</p>
+    </div>
+}
+else
+{
+    <div class="mat-table-wrap">
+        <table class="mat-table">
             <thead>
                 <tr>
                     <th>Benutzername</th>
                     <th>Anzeigename</th>
                     <th>Rolle</th>
                     <th>Status</th>
-                    <th class="text-end">Aktion</th>
+                    <th><span class="mat-sr-only">Aktion</span></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model.Users)
                 {
-                    <tr>
-                        <td>@user.Username</td>
-                        <td>@user.DisplayName</td>
-                        <td>
-                            <span class="badge @(user.Role switch
-                                                 {
-                                                     UserRole.Admin => "text-bg-danger",
-                                                     UserRole.Verwalter => "text-bg-warning",
-                                                     _ => "text-bg-secondary",
-                                                 })">@user.Role</span>
+                    <tr data-row-href="/Admin/Users/Edit/@user.Id">
+                        <td data-label="Benutzername"><div class="mat-table__name"><a href="/Admin/Users/Edit/@user.Id">@user.Username</a></div></td>
+                        <td data-label="Anzeigename">@user.DisplayName</td>
+                        <td data-label="Rolle">
+                            <span class="mat-pill @(user.Role switch
+                                                    {
+                                                        UserRole.Admin => "mat-pill--error",
+                                                        UserRole.Verwalter => "mat-pill--warn",
+                                                        _ => "mat-pill--plain",
+                                                    })">@user.Role</span>
                         </td>
-                        <td>
+                        <td data-label="Status">
                             @if (user.IsActive)
                             {
-                                <span class="badge text-bg-success">Aktiv</span>
+                                <span class="mat-pill mat-pill--ok">Aktiv</span>
                             }
                             else
                             {
-                                <span class="badge text-bg-secondary">Inaktiv</span>
+                                <span class="mat-pill mat-pill--plain">Inaktiv</span>
                             }
                         </td>
-                        <td class="text-end">
-                            <a href="/Admin/Users/Edit/@user.Id" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                        <td class="mat-table__cell-actions">
+                            <div class="mat-table__actions">
+                                <a href="/Admin/Users/Edit/@user.Id" class="mat-btn mat-btn--ghost mat-btn--icon mat-btn--sm" title="Bearbeiten" aria-label="Bearbeiten">@Ui.Icon("edit")</a>
+                            </div>
                         </td>
                     </tr>
-                }
-                @if (Model.Users.Count == 0)
-                {
-                    <tr><td colspan="5" class="text-center text-muted py-4">Keine Benutzer gefunden.</td></tr>
                 }
             </tbody>
         </table>
     </div>
-</div>
+}
 
 <partial name="_Pagination" model="@(new PaginationModel
 {
@@ -109,8 +111,6 @@
     },
 })" />
 
-<div class="list-actions">
-    <a href="/Admin/Users/Edit" class="btn btn-primary">
-        <i class="bi bi-person-plus me-1"></i>Neuer Benutzer
-    </a>
+<div class="mat-actions">
+    <a href="/Admin/Users/Edit" class="mat-btn mat-btn--primary">@Ui.Icon("plus")<span>Neuer Benutzer</span></a>
 </div>

@@ -1,30 +1,31 @@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    var title = ViewData["Title"] as string;
+}
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-app="mattrakr" @Ui.ToolkitTexts>
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] · MatTrakr</title>
-    <partial name="_ThemeHead" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>@(string.IsNullOrEmpty(title) ? "MatTrakr" : title + " · MatTrakr")</title>
+    <script src="~/matui/matui.boot.js"></script>
+    <link rel="stylesheet" href="~/matui/matui.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <partial name="_PwaHead" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="auth-body">
-    <div class="theme-switch-floating">
-        <partial name="_ThemeSwitch" model="@("theme-switch--plain")" />
-    </div>
-    <main class="auth-shell">
-        <div class="auth-card">
-            <div class="auth-brand">
-                <i class="bi bi-collection-play"></i>
-                <span>MatTrakr</span>
+<body>
+    <a class="mat-skip" href="#main">Zum Inhalt springen</a>
+    @Ui.Sprite(Env.WebRootPath)
+    <main class="mat-auth" id="main">
+        <div class="mat-auth__card">
+            <div class="mat-auth__brand">
+                <span class="mat-logo mat-logo--lg" aria-hidden="true">@Ui.Icon("tv")</span>
+                <span class="mat-nav__name">MatTrakr</span>
             </div>
             @RenderBody()
         </div>
     </main>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <script src="~/matui/matui.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

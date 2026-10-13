@@ -3,12 +3,8 @@
 @model MatTrakr.Pages.Admin.Assignments.IndexModel
 @{
     ViewData["Title"] = "Listen-Zuweisungen";
+    ViewData["Description"] = "Weise Verwaltern fremde Listen zu, damit sie diese bearbeiten können.";
 }
-
-<h1 class="page-title"><i class="bi bi-person-check"></i>Listen-Zuweisungen</h1>
-<p class="text-muted">
-    Weise Verwaltern fremde Listen zu, damit sie diese bearbeiten können.
-</p>
 
 <partial name="_TableToolbar" model="@(new TableToolbarModel
 {
@@ -25,39 +21,45 @@
     SortValue = Model.Sort,
 })" />
 
-<div class="content-card">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
+@if (Model.Assignments.Count == 0)
+{
+    <div class="mat-empty">
+        <div class="mat-empty__icon">@Ui.Icon("users")</div>
+        <p class="mat-empty__title">Keine Zuweisungen vorhanden.</p>
+    </div>
+}
+else
+{
+    <div class="mat-table-wrap">
+        <table class="mat-table">
             <thead>
                 <tr>
                     <th>Liste</th>
                     <th>Eigentümer</th>
                     <th>Verwalter</th>
-                    <th class="text-end">Aktion</th>
+                    <th><span class="mat-sr-only">Aktion</span></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var a in Model.Assignments)
                 {
-                    <tr>
-                        <td>@a.List?.Name <span class="badge text-bg-light">@a.List?.Type</span></td>
-                        <td>@a.List?.Owner?.DisplayName</td>
-                        <td>@a.AssignedUser?.DisplayName</td>
-                        <td class="text-end">
-                            <a href="/Admin/Assignments/Edit/@a.Id" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                    <tr data-row-href="/Admin/Assignments/Edit/@a.Id">
+                        <td data-label="Liste">
+                            <div class="mat-table__name"><span><a href="/Admin/Assignments/Edit/@a.Id">@a.List?.Name</a> <span class="mat-tag">@a.List?.Type</span></span></div>
+                        </td>
+                        <td data-label="Eigentümer">@a.List?.Owner?.DisplayName</td>
+                        <td data-label="Verwalter">@a.AssignedUser?.DisplayName</td>
+                        <td class="mat-table__cell-actions">
+                            <div class="mat-table__actions">
+                                <a href="/Admin/Assignments/Edit/@a.Id" class="mat-btn mat-btn--ghost mat-btn--icon mat-btn--sm" title="Bearbeiten" aria-label="Bearbeiten">@Ui.Icon("edit")</a>
+                            </div>
                         </td>
                     </tr>
-                }
-                @if (Model.Assignments.Count == 0)
-                {
-                    <tr><td colspan="4" class="text-center text-muted py-4">Keine Zuweisungen vorhanden.</td></tr>
                 }
             </tbody>
         </table>
     </div>
-</div>
+}
 
 <partial name="_Pagination" model="@(new PaginationModel
 {
@@ -68,8 +70,6 @@
     Query = new Dictionary<string, string?> { ["q"] = Model.Q, ["sort"] = Model.Sort },
 })" />
 
-<div class="list-actions">
-    <a href="/Admin/Assignments/Edit" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i>Neue Zuweisung
-    </a>
+<div class="mat-actions">
+    <a href="/Admin/Assignments/Edit" class="mat-btn mat-btn--primary">@Ui.Icon("plus")<span>Neue Zuweisung</span></a>
 </div>

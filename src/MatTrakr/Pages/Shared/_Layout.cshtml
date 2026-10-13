@@ -1,45 +1,62 @@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    // A page may set: Title (the page heading and the last crumb), Description (one line under the title),
+    // NoHeading (the page draws its own head) and Width ("narrow" or "wide").
+    var title = ViewData["Title"] as string;
+    var description = ViewData["Description"] as string;
+    var showHeading = ViewData["NoHeading"] is not true && !string.IsNullOrEmpty(title);
+    var width = ViewData["Width"] as string;
+    var version = Environment.GetEnvironmentVariable("MATTRAKR_VERSION") ?? "local";
+}
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-app="mattrakr" @Ui.ToolkitTexts>
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] · MatTrakr</title>
-    <partial name="_ThemeHead" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>@(string.IsNullOrEmpty(title) ? "MatTrakr" : title + " · MatTrakr")</title>
+    <script src="~/matui/matui.boot.js"></script>
+    <link rel="stylesheet" href="~/matui/matui.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <partial name="_PwaHead" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="app-body">
-    <!-- Mobile top bar -->
-    <header class="app-topbar d-lg-none">
-        <button class="btn btn-link app-topbar-toggle" type="button"
-                data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar"
-                aria-label="Menü öffnen">
-            <i class="bi bi-list"></i>
-        </button>
-        <span class="app-topbar-title">@ViewData["Title"]</span>
-        <a href="/" class="app-topbar-home" aria-label="Startseite">
-            <i class="bi bi-collection-play"></i>
-        </a>
-    </header>
+<body>
+    <a class="mat-skip" href="#main">Zum Inhalt springen</a>
+    @Ui.Sprite(Env.WebRootPath)
 
-    <div class="app-shell">
-        <!-- Sidebar: static on desktop, offcanvas on mobile -->
-        <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar">
-            @await Component.InvokeAsync("Sidebar")
-        </aside>
+    <div class="mat-app">
+        @await Component.InvokeAsync("Sidebar")
 
-        <main class="app-main">
-            @RenderBody()
-        </main>
+        <div class="mat-main">
+            <header class="mat-topbar">
+                <button type="button" class="mat-burger" data-nav-toggle aria-label="Menü umschalten" aria-controls="mat-nav" aria-expanded="false">@Ui.Icon("menu")</button>
+                <nav class="mat-crumbs" aria-label="Brotkrumen">
+                    <ol>
+                        <li><a href="/" aria-label="Startseite">@Ui.Icon("home")</a></li>
+                        <li aria-current="page">@(string.IsNullOrEmpty(title) ? "MatTrakr" : title)</li>
+                    </ol>
+                </nav>
+            </header>
+
+            <main class="mat-page @(width == "narrow" ? "mat-page--narrow" : width == "wide" ? "mat-page--wide" : "")" id="main">
+                @if (showHeading)
+                {
+                    <div class="mat-page__head">
+                        <div class="mat-page__title">
+                            <h1>@title</h1>
+                            @if (!string.IsNullOrEmpty(description))
+                            {
+                                <p class="mat-page__sub">@description</p>
+                            }
+                        </div>
+                    </div>
+                }
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/matui/matui.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/theme.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

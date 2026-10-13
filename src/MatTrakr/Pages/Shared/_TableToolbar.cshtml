@@ -1,66 +1,64 @@
 @model MatTrakr.ViewComponents.TableToolbarModel
 @{
-    var panelId = $"{Model.Id}_panel";
+    var formId = Model.Id;
+    var filterDlg = $"{Model.Id}-filter";
+    var sortDlg = $"{Model.Id}-sort";
     var hasFilters = Model.Filters.Count > 0;
     var hasSort = Model.SortOptions.Count > 0;
     var activeFilters = Model.Filters.Count(f => !string.IsNullOrEmpty(f.Selected));
+    // The first option is the default sort; the button only lights up when another one is chosen.
+    var sortActive = hasSort && !string.IsNullOrEmpty(Model.SortValue) && Model.SortValue != Model.SortOptions[0].Value;
 }
 
-<form method="get" class="table-toolbar" id="@Model.Id">
+@* Toolbar above the list (LIST-02/03): the search is a field in the toolbar; Filter and Sort are
+   buttons at its right end that open a dialog. One GET form carries the whole state. *@
+<form method="get" class="mat-toolbar mt-toolbar" id="@formId" role="search" aria-label="Suche und Filter">
     @foreach (var kv in Model.Hidden)
     {
         <input type="hidden" name="@kv.Key" value="@kv.Value" />
     }
-
-    <div class="table-toolbar-search input-group">
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="search" class="form-control" name="@Model.SearchParam"
-               value="@Model.SearchValue" placeholder="@Model.SearchPlaceholder"
-               aria-label="Suchtext" />
+    <div class="mat-input-icon mat-toolbar__search">
+        @Ui.Icon("search")
+        <input class="mat-input" type="search" name="@Model.SearchParam" value="@Model.SearchValue"
+               placeholder="@Model.SearchPlaceholder" aria-label="Suchtext" autocomplete="off"
+               enterkeyhint="search" data-shortcut="/" />
     </div>
 
-    @* Mobile triggers — open the fullscreen filter/sort dialog *@
     @if (hasFilters || hasSort)
     {
-        <div class="table-toolbar-triggers d-md-none">
+        <div class="mat-toolbar__end">
             @if (hasFilters)
             {
-                <button type="button" class="btn btn-outline-secondary position-relative"
-                        data-bs-toggle="offcanvas" data-bs-target="#@panelId" aria-controls="@panelId"
-                        aria-label="Filter">
-                    <i class="bi bi-funnel"></i>
-                    @if (activeFilters > 0)
-                    {
-                        <span class="badge rounded-pill text-bg-primary table-toolbar-badge">@activeFilters</span>
-                    }
+                <button type="button" class="mat-btn mat-btn--ghost mat-toolbar__btn @(activeFilters > 0 ? "is-active" : "")"
+                        data-dialog-open="@filterDlg" aria-haspopup="dialog" aria-label="Filter">
+                    @Ui.Icon("filter")<span>Filter</span>@if (activeFilters > 0) { <span class="mat-badge">@activeFilters</span> }
                 </button>
             }
             @if (hasSort)
             {
-                <button type="button" class="btn btn-outline-secondary"
-                        data-bs-toggle="offcanvas" data-bs-target="#@panelId" aria-controls="@panelId"
-                        aria-label="Sortierung">
-                    <i class="bi bi-sort-down"></i>
+                <button type="button" class="mat-btn mat-btn--ghost mat-toolbar__btn @(sortActive ? "is-active" : "")"
+                        data-dialog-open="@sortDlg" aria-haspopup="dialog" aria-label="Sortierung">
+                    @Ui.Icon("sort")<span>Sortierung</span>
                 </button>
             }
         </div>
     }
+</form>
 
-    @* Controls: inline on desktop (offcanvas-md is static ≥md), fullscreen dialog on mobile *@
-    <div class="table-toolbar-controls offcanvas-md offcanvas-end" tabindex="-1"
-         id="@panelId" aria-labelledby="@(panelId)_label">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="@(panelId)_label">
-                <i class="bi bi-sliders me-1"></i>Filter &amp; Sortierung
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Schließen"></button>
+@if (hasFilters)
+{
+    <dialog class="mat-dialog mat-dialog--sm" id="@filterDlg">
+        <div class="mat-dialog__head">
+            @Ui.Icon("filter")
+            <h2 class="mat-dialog__title">Filter</h2>
+            <button type="button" class="mat-btn mat-btn--ghost mat-btn--icon mat-dialog__close" data-dialog-close aria-label="Schließen">@Ui.Icon("x")</button>
         </div>
-        <div class="offcanvas-body">
+        <div class="mat-dialog__body">
             @foreach (var filter in Model.Filters)
             {
-                <div class="table-toolbar-filter">
-                    <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_{filter.Name}")">@filter.Label</label>
-                    <select class="form-select" name="@filter.Name" id="@($"{Model.Id}_{filter.Name}")" data-toolbar-autosubmit>
+                <div class="mat-field">
+                    <label class="mat-label" for="@($"{Model.Id}_{filter.Name}")">@filter.Label</label>
+                    <select class="mat-select" name="@filter.Name" id="@($"{Model.Id}_{filter.Name}")" form="@formId">
                         @foreach (var (value, text) in filter.Options)
                         {
                             <option value="@value" selected="@(value == (filter.Selected ?? ""))">@text</option>
@@ -68,33 +66,41 @@
                     </select>
                 </div>
             }
-
-            @if (hasSort)
-            {
-                <div class="table-toolbar-filter">
-                    <label class="form-label mb-0 me-1 text-nowrap" for="@($"{Model.Id}_sort")">
-                        <i class="bi bi-sort-down"></i><span class="d-md-none ms-1">Sortierung</span>
-                    </label>
-                    <select class="form-select" name="@Model.SortParam" id="@($"{Model.Id}_sort")" data-toolbar-autosubmit>
-                        @foreach (var opt in Model.SortOptions)
-                        {
-                            <option value="@opt.Value" selected="@(opt.Value == (Model.SortValue ?? ""))">@opt.Text</option>
-                        }
-                    </select>
-                </div>
-            }
-
-            @* Dialog action row (mobile only) *@
-            <div class="table-toolbar-dialog-actions d-md-none">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-check-lg me-1"></i>Anwenden
-                </button>
+        </div>
+        <div class="mat-dialog__foot">
+            <div class="mat-btn-row">
+                <button type="submit" class="mat-btn mat-btn--primary" form="@formId">@Ui.Icon("check")<span>Anwenden</span></button>
+                <button type="button" class="mat-btn mat-btn--ghost" data-dialog-close>Abbrechen</button>
             </div>
         </div>
-    </div>
+    </dialog>
+}
 
-    @* Desktop apply button *@
-    <button type="submit" class="btn btn-outline-secondary d-none d-md-inline-flex">
-        <i class="bi bi-funnel me-1"></i>Anwenden
-    </button>
-</form>
+@if (hasSort)
+{
+    <dialog class="mat-dialog mat-dialog--sm" id="@sortDlg">
+        <div class="mat-dialog__head">
+            @Ui.Icon("sort")
+            <h2 class="mat-dialog__title">Sortierung</h2>
+            <button type="button" class="mat-btn mat-btn--ghost mat-btn--icon mat-dialog__close" data-dialog-close aria-label="Schließen">@Ui.Icon("x")</button>
+        </div>
+        <div class="mat-dialog__body">
+            <div class="mat-options">
+                @foreach (var opt in Model.SortOptions)
+                {
+                    <label class="mat-option">
+                        <input type="radio" name="@Model.SortParam" value="@opt.Value" form="@formId"
+                               checked="@(opt.Value == (Model.SortValue ?? ""))" />
+                        <span>@opt.Text</span>
+                    </label>
+                }
+            </div>
+        </div>
+        <div class="mat-dialog__foot">
+            <div class="mat-btn-row">
+                <button type="submit" class="mat-btn mat-btn--primary" form="@formId">@Ui.Icon("check")<span>Anwenden</span></button>
+                <button type="button" class="mat-btn mat-btn--ghost" data-dialog-close>Abbrechen</button>
+            </div>
+        </div>
+    </dialog>
+}

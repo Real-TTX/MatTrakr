@@ -5,105 +5,96 @@
 @functions {
     private static string TypeIcon(MediaType type) => type switch
     {
-        MediaType.Movies => "bi-film",
-        MediaType.Series => "bi-tv",
-        MediaType.Books => "bi-book",
-        _ => "bi-collection",
+        MediaType.Movies => "film",
+        MediaType.Series => "tv",
+        MediaType.Books => "book",
+        _ => "collection",
     };
 }
+@{
+    var path = ViewContext.HttpContext.Request.Path.Value ?? "";
+    bool Active(string prefix) => path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+    var version = Environment.GetEnvironmentVariable("MATTRAKR_VERSION") ?? "local";
+}
 
-<div class="sidebar-brand">
-    <a href="/" class="sidebar-brand-link">
-        <i class="bi bi-collection-play"></i>
-        <span>MatTrakr</span>
-    </a>
-</div>
-
-<nav class="sidebar-nav">
-    <div class="sidebar-section-title sidebar-section-title--row">
-        <span>Listen</span>
-        <a href="/Lists/Manage" class="sidebar-section-action @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Lists/Manage", StringComparison.OrdinalIgnoreCase) ? "active" : null)"
-           title="Listen verwalten" aria-label="Listen verwalten">
-            <i class="bi bi-gear"></i>
+<aside class="mat-nav" id="mat-nav">
+    <div class="mat-nav__brand">
+        <a href="/" aria-label="MatTrakr">
+            <span class="mat-logo" aria-hidden="true">@Ui.Icon("tv")</span>
+            <span class="mat-nav__name">MatTrakr</span>
         </a>
+        <button type="button" class="mat-btn mat-btn--ghost mat-btn--icon mat-nav__close" data-nav-close aria-label="Schließen">@Ui.Icon("x")</button>
     </div>
-    <ul class="sidebar-list">
-        @foreach (var item in Model.Lists)
-        {
-            var current = ViewContext.HttpContext.Request.Path.Value ?? "";
-            var href = $"/Lists/{item.List.Id}";
-            var active = current.StartsWith(href, StringComparison.OrdinalIgnoreCase);
-            <li>
-                <a href="@href" class="sidebar-link @(active ? "active" : null)">
-                    <i class="bi @TypeIcon(item.List.Type)"></i>
-                    <span class="sidebar-link-text">@item.List.Name</span>
-                    @if (item.Access == ListAccess.ReadOnly)
-                    {
-                        <i class="bi bi-eye sidebar-link-badge" title="Nur Lesen"></i>
-                    }
-                    else if (item.Access != ListAccess.Owner)
-                    {
-                        <i class="bi bi-pencil sidebar-link-badge" title="Bearbeiten (geteilt/zugewiesen)"></i>
-                    }
-                </a>
-            </li>
-        }
-    </ul>
 
-    @if (Model.IsAdmin)
-    {
-        <div class="sidebar-section-title">Administration</div>
-        <ul class="sidebar-list">
+    <nav class="mat-nav__scroll" aria-label="Hauptnavigation">
+        <ul class="mat-nav__list">
+            <li class="mat-nav__group" role="presentation">Listen</li>
+            @foreach (var item in Model.Lists)
+            {
+                var href = $"/Lists/{item.List.Id}";
+                <li>
+                    <a class="mat-nav__item @(Active(href) ? "is-active" : "")" href="@href" aria-current="@(Active(href) ? "page" : null)">
+                        @Ui.Icon(TypeIcon(item.List.Type))<span>@item.List.Name</span>
+                        @if (item.Access == ListAccess.ReadOnly)
+                        {
+                            <span class="mat-nav__badge mat-nav__badge--plain" title="Nur Lesen">@Ui.Icon("eye")</span>
+                        }
+                        else if (item.Access != ListAccess.Owner)
+                        {
+                            <span class="mat-nav__badge mat-nav__badge--plain" title="Bearbeiten (geteilt/zugewiesen)">@Ui.Icon("edit")</span>
+                        }
+                    </a>
+                </li>
+            }
             <li>
-                <a href="/Admin/Users" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Users", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
-                    <i class="bi bi-people"></i>
-                    <span class="sidebar-link-text">Users</span>
-                </a>
-            </li>
-            <li>
-                <a href="/Admin/Assignments" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Assignments", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
-                    <i class="bi bi-person-check"></i>
-                    <span class="sidebar-link-text">Listen-Zuweisungen</span>
-                </a>
-            </li>
-            <li>
-                <a href="/Admin/Settings" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Settings", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
-                    <i class="bi bi-gear"></i>
-                    <span class="sidebar-link-text">Einstellungen</span>
-                </a>
-            </li>
-            <li>
-                <a href="/Admin/Backup" class="sidebar-link @((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/Admin/Backup", StringComparison.OrdinalIgnoreCase) ? "active" : null)">
-                    <i class="bi bi-hdd-stack"></i>
-                    <span class="sidebar-link-text">Backup &amp; Restore</span>
+                <a class="mat-nav__item @(Active("/Lists/Manage") ? "is-active" : "")" href="/Lists/Manage" aria-current="@(Active("/Lists/Manage") ? "page" : null)">
+                    @Ui.Icon("settings")<span>Listen verwalten</span>
                 </a>
             </li>
         </ul>
-    }
-</nav>
 
-<div class="sidebar-footer">
-    <div class="sidebar-user">
-        <i class="bi bi-person-circle"></i>
-        <span class="sidebar-link-text">@Model.DisplayName</span>
+        @if (Model.IsAdmin)
+        {
+            <ul class="mat-nav__list">
+                <li class="mat-nav__group" role="presentation">Administration</li>
+                <li><a class="mat-nav__item @(Active("/Admin/Users") ? "is-active" : "")" href="/Admin/Users" aria-current="@(Active("/Admin/Users") ? "page" : null)">@Ui.Icon("users")<span>Benutzer</span></a></li>
+                <li><a class="mat-nav__item @(Active("/Admin/Assignments") ? "is-active" : "")" href="/Admin/Assignments" aria-current="@(Active("/Admin/Assignments") ? "page" : null)">@Ui.Icon("users")<span>Listen-Zuweisungen</span></a></li>
+                <li><a class="mat-nav__item @(Active("/Admin/Settings") ? "is-active" : "")" href="/Admin/Settings" aria-current="@(Active("/Admin/Settings") ? "page" : null)">@Ui.Icon("settings")<span>Einstellungen</span></a></li>
+                <li><a class="mat-nav__item @(Active("/Admin/Backup") ? "is-active" : "")" href="/Admin/Backup" aria-current="@(Active("/Admin/Backup") ? "page" : null)">@Ui.Icon("database")<span>Backup &amp; Restore</span></a></li>
+            </ul>
+        }
+    </nav>
+
+    <div class="mat-nav__foot">
+        <div class="mat-nav__account">
+            <button type="button" class="mat-user" data-menu-toggle="user-menu" aria-haspopup="menu" aria-expanded="false">
+                <span class="mat-avatar" aria-hidden="true">@Ui.Initials(Model.DisplayName)</span>
+                <span class="mat-user__text">
+                    <span class="mat-user__name">@Model.DisplayName</span>
+                    <span class="mat-user__role">@(Model.IsAdmin ? "Administrator" : "Benutzer")</span>
+                </span>
+                @Ui.Icon("chevron-up", "mat-user__chev")
+            </button>
+            <button type="button" class="mat-theme" data-theme-toggle data-theme-state="system" aria-label="Design umschalten" title="Design umschalten"
+                    data-theme-name-system="System" data-theme-name-light="Hell" data-theme-name-dark="Dunkel">
+                <svg class="mat-icon" data-theme-icon="system" aria-hidden="true" focusable="false"><use href="#mat-i-monitor"></use></svg>
+                <svg class="mat-icon" data-theme-icon="light" aria-hidden="true" focusable="false"><use href="#mat-i-sun"></use></svg>
+                <svg class="mat-icon" data-theme-icon="dark" aria-hidden="true" focusable="false"><use href="#mat-i-moon"></use></svg>
+            </button>
+        </div>
+        <div class="mat-nav__version">MatTrakr @version</div>
     </div>
-    <a href="/Profile" class="sidebar-link" title="Persönliche Einstellungen">
-        <i class="bi bi-sliders"></i>
-        <span class="sidebar-link-text">Einstellungen</span>
-    </a>
-    <a href="/Account/ChangePassword" class="sidebar-link" title="Passwort ändern">
-        <i class="bi bi-key"></i>
-        <span class="sidebar-link-text">Passwort</span>
-    </a>
+</aside>
+
+<div class="mat-menu" id="user-menu" role="menu" aria-label="@Model.DisplayName" hidden>
+    <div class="mat-menu__head">
+        <span class="mat-avatar" aria-hidden="true">@Ui.Initials(Model.DisplayName)</span>
+        <div><strong>@Model.DisplayName</strong><small>@(Model.IsAdmin ? "Administrator" : "Benutzer")</small></div>
+    </div>
+    <a class="mat-menu__item" role="menuitem" href="/Profile">@Ui.Icon("user-circle")<span>Mein Konto</span></a>
+    <div class="mat-menu__sep" role="separator"></div>
     <form method="post" action="/Account/Logout">
         @Html.AntiForgeryToken()
-        <button type="submit" class="sidebar-link sidebar-logout">
-            <i class="bi bi-box-arrow-right"></i>
-            <span class="sidebar-link-text">Abmelden</span>
-        </button>
+        <button type="submit" class="mat-menu__item mat-menu__item--danger" role="menuitem">@Ui.Icon("logout")<span>Abmelden</span></button>
     </form>
-    <div class="sidebar-theme">
-        <partial name="_ThemeSwitch" model="@((string?)null)" />
-    </div>
-    <div class="sidebar-version">@(Environment.GetEnvironmentVariable("MATTRAKR_VERSION") ?? "local")</div>
 </div>

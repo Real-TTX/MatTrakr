@@ -2,54 +2,57 @@
 @model MatTrakr.Pages.Admin.Backup.IndexModel
 @{
     ViewData["Title"] = "Backup & Restore";
+    ViewData["Width"] = "narrow";
 }
-
-<h1 class="page-title"><i class="bi bi-hdd-stack"></i>Backup &amp; Restore</h1>
 
 @if (!string.IsNullOrEmpty(Model.Error))
 {
-    <div class="alert alert-danger" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
-    </div>
+    <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.Error</span></div>
 }
 
-<div class="content-card p-3 mb-3" style="max-width: 720px;">
-    <h2 class="fs-5 mb-1"><i class="bi bi-download me-1"></i>Backup herunterladen</h2>
-    <p class="text-muted mb-2">
-        Lädt ein <code>.zip</code> mit der kompletten Datenbank (Listen, Einträge, hochgeladene
-        Cover, Benutzer) <strong>und der Konfiguration</strong> (<code>config/settings.json</code>).
-    </p>
-    <div class="alert alert-warning py-2" role="alert">
-        <i class="bi bi-key me-1"></i>Das Backup enthält die <strong>API-Keys</strong> (TMDb / Google Books)
-        im Klartext – entsprechend sicher aufbewahren.
+<div class="mat-card">
+    <div class="mat-card__head">@Ui.Icon("download")<span class="mat-card__title">Backup herunterladen</span></div>
+    <div class="mat-card__body mat-form">
+        <p class="mat-muted">
+            Lädt ein <code>.zip</code> mit der kompletten Datenbank (Listen, Einträge, hochgeladene
+            Cover, Benutzer) <strong>und der Konfiguration</strong> (<code>config/settings.json</code>).
+        </p>
+        <div class="mat-alert mat-alert--warning" role="alert">
+            @Ui.Icon("key")<span>Das Backup enthält die <strong>API-Keys</strong> (TMDb / Google Books)
+            im Klartext – entsprechend sicher aufbewahren.</span>
+        </div>
+        <div class="mat-actions">
+            <a href="/Admin/Backup?handler=Download" class="mat-btn mat-btn--primary">@Ui.Icon("download")<span>Backup herunterladen (.zip)</span></a>
+        </div>
     </div>
-    <a href="/Admin/Backup?handler=Download" class="btn btn-primary">
-        <i class="bi bi-download me-1"></i>Backup herunterladen (.zip)
-    </a>
 </div>
 
-<div class="content-card p-3" style="max-width: 720px;">
-    <h2 class="fs-5 mb-1"><i class="bi bi-upload me-1"></i>Wiederherstellen</h2>
-    <div class="alert alert-warning" role="alert">
-        <i class="bi bi-exclamation-triangle me-1"></i>
-        Achtung: Die aktuelle Datenbank wird <strong>vollständig ersetzt</strong>. Eine
-        automatische Sicherheitskopie der bisherigen Daten wird angelegt. Danach musst du
-        dich neu anmelden.
-    </div>
-
-    <form method="post" asp-page-handler="Restore" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="backupFile" class="form-label">Backup-Datei (.zip oder .db)</label>
-            <input type="file" name="file" id="backupFile" class="form-control"
-                   accept=".zip,application/zip,.db,application/x-sqlite3" required />
-            <div class="form-text">
-                Ein <code>.zip</code> stellt Datenbank <strong>und</strong> Konfiguration wieder her;
-                ältere <code>.db</code>-Backups werden weiterhin unterstützt (nur Datenbank).
+<div class="mat-card">
+    <div class="mat-card__head">@Ui.Icon("upload")<span class="mat-card__title">Wiederherstellen</span></div>
+    <div class="mat-card__body">
+        <form method="post" asp-page-handler="Restore" enctype="multipart/form-data" class="mat-form">
+            <div class="mat-alert mat-alert--warning" role="alert">
+                @Ui.Icon("alert")<span>Achtung: Die aktuelle Datenbank wird <strong>vollständig ersetzt</strong>. Eine
+                automatische Sicherheitskopie der bisherigen Daten wird angelegt. Danach musst du
+                dich neu anmelden.</span>
             </div>
-        </div>
-        <button type="submit" class="btn btn-outline-danger"
-                onclick="return confirm('Die aktuelle Datenbank wirklich durch das Backup ersetzen?');">
-            <i class="bi bi-upload me-1"></i>Datenbank wiederherstellen
-        </button>
-    </form>
+
+            <div class="mat-field">
+                <label for="backupFile" class="mat-label">Backup-Datei (.zip oder .db)</label>
+                <input type="file" name="file" id="backupFile" class="mat-input"
+                       accept=".zip,application/zip,.db,application/x-sqlite3" required />
+                <span class="mat-hint">
+                    Ein <code>.zip</code> stellt Datenbank <strong>und</strong> Konfiguration wieder her;
+                    ältere <code>.db</code>-Backups werden weiterhin unterstützt (nur Datenbank).
+                </span>
+            </div>
+
+            <div class="mat-actions">
+                <button type="submit" class="mat-btn mat-btn--danger"
+                        data-confirm="Die aktuelle Datenbank wirklich durch das Backup ersetzen?" data-confirm-ok="Wiederherstellen">
+                    @Ui.Icon("upload")<span>Datenbank wiederherstellen</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>

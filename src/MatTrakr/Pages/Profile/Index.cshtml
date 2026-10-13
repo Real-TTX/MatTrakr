@@ -2,49 +2,95 @@
 @using MatTrakr.Data
 @model MatTrakr.Pages.Profile.IndexModel
 @{
-    ViewData["Title"] = "Einstellungen";
+    ViewData["Title"] = "Mein Konto";
+    ViewData["Width"] = "narrow";
 }
 
-<h1 class="page-title"><i class="bi bi-sliders"></i>Persönliche Einstellungen</h1>
+@* --- Account & display --- *@
+<div class="mat-card">
+    <div class="mat-card__head">@Ui.Icon("user-circle")<span class="mat-card__title">Konto &amp; Anzeige</span></div>
+    <div class="mat-card__body">
+        @if (!string.IsNullOrEmpty(Model.Success))
+        {
+            <div class="mat-alert mat-alert--success" role="status">@Ui.Icon("check-circle")<span>@Model.Success</span></div>
+        }
+        @if (!string.IsNullOrEmpty(Model.Error))
+        {
+            <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.Error</span></div>
+        }
 
-@if (!string.IsNullOrEmpty(Model.Success))
-{
-    <div class="alert alert-success" role="alert">
-        <i class="bi bi-check-circle me-1"></i>@Model.Success
+        <form method="post" asp-page-handler="Account" class="mat-form">
+            <div class="mat-form__grid">
+                <div class="mat-field">
+                    <label asp-for="DisplayName" class="mat-label">Anzeigename</label>
+                    <input asp-for="DisplayName" class="mat-input" />
+                </div>
+                <div class="mat-field">
+                    <label class="mat-label" for="username">Benutzername</label>
+                    <input id="username" class="mat-input" value="@Model.Username" disabled />
+                    <span class="mat-hint">Rolle: @Model.RoleName</span>
+                </div>
+            </div>
+
+            <div class="mat-field">
+                <span class="mat-label">Status-Anzeige auf den Kacheln</span>
+                <div class="mat-form__grid">
+                    <label class="mat-option">
+                        <input type="radio" asp-for="CardStatusPosition" value="@CardStatusPosition.Above" id="posAbove" />
+                        <span>
+                            <strong>Über dem Cover</strong>
+                            <span class="mat-hint mat-d-block">Kompaktes Tag oberhalb des Covers.</span>
+                        </span>
+                    </label>
+                    <label class="mat-option">
+                        <input type="radio" asp-for="CardStatusPosition" value="@CardStatusPosition.Below" id="posBelow" />
+                        <span>
+                            <strong>Unter dem Cover</strong>
+                            <span class="mat-hint mat-d-block">Größer, über die volle Coverbreite.</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mat-btn-row">
+                <button type="submit" class="mat-btn mat-btn--primary">@Ui.Icon("check")<span>Speichern</span></button>
+                <a href="/" class="mat-btn mat-btn--secondary">@Ui.Icon("arrow-left")<span>Zurück</span></a>
+            </div>
+        </form>
     </div>
-}
+</div>
 
-<form method="post" class="content-card p-3" style="max-width: 640px;">
-    <h2 class="fs-5 mb-1"><i class="bi bi-tags me-1"></i>Status-Anzeige auf den Kacheln</h2>
-    <p class="text-muted">Wo der Status (z.B. Gesehen, Teilweise) auf einer Cover-Kachel erscheint.</p>
+@* --- Password --- *@
+<div class="mat-card">
+    <div class="mat-card__head">@Ui.Icon("key")<span class="mat-card__title">Passwort ändern</span></div>
+    <div class="mat-card__body">
+        @if (!string.IsNullOrEmpty(Model.PasswordSuccess))
+        {
+            <div class="mat-alert mat-alert--success" role="status">@Ui.Icon("check-circle")<span>@Model.PasswordSuccess</span></div>
+        }
+        @if (!string.IsNullOrEmpty(Model.PasswordError))
+        {
+            <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.PasswordError</span></div>
+        }
 
-    <div class="row g-3 mb-3">
-        <div class="col-12 col-sm-6">
-            <input class="btn-check" type="radio" asp-for="CardStatusPosition" value="@CardStatusPosition.Above"
-                   id="posAbove" autocomplete="off" />
-            <label class="btn btn-outline-primary w-100 text-start p-3" for="posAbove">
-                <i class="bi bi-align-top me-1"></i><strong>Über dem Cover</strong>
-                <span class="d-block small text-muted">Kompaktes Tag oberhalb des Covers.</span>
-            </label>
-        </div>
-        <div class="col-12 col-sm-6">
-            <input class="btn-check" type="radio" asp-for="CardStatusPosition" value="@CardStatusPosition.Below"
-                   id="posBelow" autocomplete="off" />
-            <label class="btn btn-outline-primary w-100 text-start p-3" for="posBelow">
-                <i class="bi bi-align-bottom me-1"></i><strong>Unter dem Cover</strong>
-                <span class="d-block small text-muted">Größer, über die volle Coverbreite.</span>
-            </label>
-        </div>
+        <form method="post" asp-page-handler="Password" class="mat-form">
+            <div class="mat-field">
+                <label asp-for="CurrentPassword" class="mat-label">Aktuelles Passwort</label>
+                <input asp-for="CurrentPassword" type="password" class="mat-input" autocomplete="current-password" />
+            </div>
+            <div class="mat-form__grid">
+                <div class="mat-field">
+                    <label asp-for="NewPassword" class="mat-label">Neues Passwort</label>
+                    <input asp-for="NewPassword" type="password" class="mat-input" autocomplete="new-password" />
+                </div>
+                <div class="mat-field">
+                    <label asp-for="ConfirmPassword" class="mat-label">Bestätigen</label>
+                    <input asp-for="ConfirmPassword" type="password" class="mat-input" autocomplete="new-password" />
+                </div>
+            </div>
+            <div class="mat-btn-row">
+                <button type="submit" class="mat-btn mat-btn--primary">@Ui.Icon("check")<span>Passwort ändern</span></button>
+            </div>
+        </form>
     </div>
-
-    <div class="form-actions">
-        <div class="form-actions-main">
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-check-lg me-1"></i>Speichern
-            </button>
-            <a href="/" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Zurück
-            </a>
-        </div>
-    </div>
-</form>
+</div>

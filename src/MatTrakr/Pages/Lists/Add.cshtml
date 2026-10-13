@@ -2,7 +2,7 @@
 @using MatTrakr.Data
 @model MatTrakr.Pages.Lists.AddModel
 @{
-    ViewData["Title"] = $"Hinzufügen · {Model.List.Name}";
+    ViewData["Title"] = $"Hinzufügen zu „{Model.List.Name}“";
     var searchPlaceholder = Model.List.Type switch
     {
         MediaType.Movies => "Film suchen …",
@@ -12,33 +12,25 @@
     };
 }
 
-<h1 class="page-title"><i class="bi bi-plus-circle"></i>Hinzufügen zu „@Model.List.Name“</h1>
-
 @if (!string.IsNullOrEmpty(Model.Warning))
 {
-    <div class="alert alert-warning" role="alert">
-        <i class="bi bi-exclamation-triangle me-1"></i>@Model.Warning
-    </div>
+    <div class="mat-alert mat-alert--warning" role="alert">@Ui.Icon("alert")<span>@Model.Warning</span></div>
 }
 
-<div class="input-group input-group-lg mb-3">
-    <span class="input-group-text"><i class="bi bi-search"></i></span>
-    <input type="search" class="form-control" id="mediaSearchInput"
+<div class="mat-input-icon">
+    @Ui.Icon("search")
+    <input type="search" class="mat-input mat-input--lg" id="mediaSearchInput"
            placeholder="@searchPlaceholder" autocomplete="off" autofocus
            value="@Model.InitialQuery"
            @(Model.SearchAvailable ? null : "disabled") />
 </div>
 
-<div id="searchStatus" class="text-muted small mb-2 d-none"></div>
+<div id="searchStatus" class="mat-muted mat-d-none"></div>
 <div id="searchResults" class="search-results"></div>
 
-<div class="list-actions">
-    <a href="/Lists/@Model.List.Id/AddManual" class="btn btn-outline-primary">
-        <i class="bi bi-pencil-square me-1"></i>Eigenen Eintrag anlegen
-    </a>
-    <a href="/Lists/@Model.List.Id" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Zurück zur Liste
-    </a>
+<div class="mat-actions">
+    <a href="/Lists/@Model.List.Id/AddManual" class="mat-btn mat-btn--secondary">@Ui.Icon("edit")<span>Eigenen Eintrag anlegen</span></a>
+    <a href="/Lists/@Model.List.Id" class="mat-btn mat-btn--secondary">@Ui.Icon("arrow-left")<span>Zurück zur Liste</span></a>
 </div>
 
 @section Scripts {
@@ -50,6 +42,8 @@
     const listId = @Model.List.Id;
     const token = '@Html.Raw(Xsrf.GetAndStoreTokens(HttpContext).RequestToken)';
 
+    const icon = (name) => `<svg class="mat-icon" aria-hidden="true" focusable="false"><use href="#mat-i-${name}"></use></svg>`;
+
     let timer = null;
     let controller = null;
 
@@ -58,13 +52,12 @@
         const q = input.value.trim();
         if (q.length < 2) {
             resultsEl.innerHTML = '';
-            statusEl.classList.add('d-none');
+            statusEl.classList.add('mat-d-none');
             return;
         }
         timer = setTimeout(() => search(q), 350);
     });
 
-    // Pre-filled term (e.g. handed over from an empty list search): run it now.
     const initialQuery = input.value.trim();
     if (initialQuery.length >= 2) {
         input.focus();
@@ -76,7 +69,7 @@
         controller = new AbortController();
 
         statusEl.textContent = 'Suche läuft …';
-        statusEl.classList.remove('d-none');
+        statusEl.classList.remove('mat-d-none');
 
         try {
             const res = await fetch(`/Lists/${listId}/Add?handler=Search&q=${encodeURIComponent(q)}`,
@@ -100,12 +93,12 @@
 
             const cover = hit.coverUrl
                 ? `<img src="${escapeHtml(hit.coverUrl)}" alt="" class="search-hit-cover" loading="lazy">`
-                : `<div class="search-hit-cover search-hit-cover-placeholder"><i class="bi bi-image"></i></div>`;
+                : `<div class="search-hit-cover search-hit-cover-placeholder">${icon('image')}</div>`;
 
             card.innerHTML = `
                 ${cover}
                 <div class="search-hit-body">
-                    <div class="search-hit-title">${escapeHtml(hit.title)}${hit.year ? ` <span class="text-muted">(${hit.year})</span>` : ''}</div>
+                    <div class="search-hit-title">${escapeHtml(hit.title)}${hit.year ? ` <span class="mat-muted">(${hit.year})</span>` : ''}</div>
                     ${hit.subtitle ? `<div class="search-hit-subtitle">${escapeHtml(hit.subtitle)}</div>` : ''}
                     ${hit.overview ? `<div class="search-hit-overview">${escapeHtml(hit.overview)}</div>` : ''}
                 </div>
@@ -116,21 +109,20 @@
         }
     }
 
-    // Renders the action area: "Hinzufügen", or (when in the list) "Öffnen" + "Entfernen".
     function renderAction(action, hit) {
         action.innerHTML = '';
         if (hit.alreadyAdded) {
             const open = document.createElement('a');
-            open.className = 'btn btn-outline-secondary btn-sm search-hit-open';
+            open.className = 'mat-btn mat-btn--secondary mat-btn--sm';
             open.href = `/Lists/${listId}/Items/${hit.itemId}`;
             open.title = 'Öffnen';
             open.setAttribute('aria-label', 'Öffnen');
-            open.innerHTML = '<i class="bi bi-box-arrow-up-right"></i>';
+            open.innerHTML = icon('external');
 
             const rm = document.createElement('button');
             rm.type = 'button';
-            rm.className = 'btn btn-outline-danger btn-sm';
-            rm.innerHTML = '<i class="bi bi-trash me-1"></i>Entfernen';
+            rm.className = 'mat-btn mat-btn--danger mat-btn--sm';
+            rm.innerHTML = icon('trash') + '<span>Entfernen</span>';
             rm.addEventListener('click', () => remove(hit, action, rm));
 
             action.appendChild(open);
@@ -138,8 +130,8 @@
         } else {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'btn btn-primary btn-sm';
-            btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Hinzufügen';
+            btn.className = 'mat-btn mat-btn--primary mat-btn--sm';
+            btn.innerHTML = icon('plus') + '<span>Hinzufügen</span>';
             btn.addEventListener('click', () => add(hit, action, btn));
             action.appendChild(btn);
         }
@@ -147,7 +139,7 @@
 
     async function add(hit, action, btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.classList.add('is-loading');
 
         const form = new URLSearchParams();
         form.set('externalId', hit.externalId);
@@ -174,14 +166,14 @@
             renderAction(action, hit);
         } catch {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Hinzufügen';
-            alert('Hinzufügen fehlgeschlagen.');
+            btn.classList.remove('is-loading');
+            MatUi.toast('Hinzufügen fehlgeschlagen.', { tone: 'danger' });
         }
     }
 
     async function remove(hit, action, rm) {
         rm.disabled = true;
-        rm.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        rm.classList.add('is-loading');
 
         const form = new URLSearchParams();
         form.set('externalId', hit.externalId);
@@ -202,8 +194,8 @@
             renderAction(action, hit);
         } catch {
             rm.disabled = false;
-            rm.innerHTML = '<i class="bi bi-trash me-1"></i>Entfernen';
-            alert('Entfernen fehlgeschlagen.');
+            rm.classList.remove('is-loading');
+            MatUi.toast('Entfernen fehlgeschlagen.', { tone: 'danger' });
         }
     }
 

@@ -14,112 +14,107 @@
     };
 }
 
-<h1 class="page-title"><i class="bi bi-pencil-square"></i>Eigenen @kind hinzufügen</h1>
-
 @if (!string.IsNullOrEmpty(Model.Error))
 {
-    <div class="alert alert-danger" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.Error
-    </div>
+    <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.Error</span></div>
 }
 
-<div class="content-card p-3" style="max-width: 720px;">
-    <form method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label asp-for="Title" class="form-label">Titel *</label>
-            <input asp-for="Title" class="form-control" autofocus />
-        </div>
-
-        <div class="row g-3">
-            <div class="col-12 col-sm-8">
-                <label asp-for="Subtitle" class="form-label">@subtitleLabel</label>
-                <input asp-for="Subtitle" class="form-control" />
-            </div>
-            <div class="col-12 col-sm-4">
-                <label asp-for="Year" class="form-label">Jahr</label>
-                <input asp-for="Year" type="number" class="form-control" min="0" max="2999" />
-            </div>
-        </div>
-
-        @if (Model.List.Type == MediaType.Series)
-        {
-            <div class="mb-3 mt-3" style="max-width: 220px;">
-                <label asp-for="TotalSeasons" class="form-label">Anzahl Staffeln</label>
-                <input asp-for="TotalSeasons" type="number" class="form-control" min="0" max="100" />
-                <div class="form-text">Für die Staffel-Auswahl. Leer lassen, wenn unbekannt.</div>
-            </div>
-        }
-
-        <div class="mb-3 mt-3">
-            <label asp-for="Overview" class="form-label">Beschreibung</label>
-            <textarea asp-for="Overview" class="form-control" rows="3"></textarea>
-        </div>
-
-        <hr class="my-3" />
-
-        <label class="form-label d-block">Cover</label>
-        <div class="cover-editor">
-            <div class="cover-editor-preview">
-                <img id="coverPreview" alt="Cover-Vorschau" hidden />
-                <div id="coverPlaceholder" class="cover-ph"><i class="bi bi-image"></i></div>
+<div class="mat-card">
+    <div class="mat-card__body">
+        <form method="post" enctype="multipart/form-data" class="mat-form">
+            <div class="mat-field">
+                <label asp-for="Title" class="mat-label">Titel <span class="mat-req">*</span></label>
+                <input asp-for="Title" class="mat-input" autofocus />
+                <span asp-validation-for="Title" class="mat-error"></span>
             </div>
 
-            <div class="cover-editor-controls">
-                @if (Model.CoverSearchAvailable)
-                {
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" id="coverSearchInput" class="form-control"
-                               placeholder="Cover suchen (Titel) …" autocomplete="off" />
-                        <button type="button" id="coverSearchBtn" class="btn btn-outline-secondary">Suchen</button>
+            <div class="mat-form__grid">
+                <div class="mat-field">
+                    <label asp-for="Subtitle" class="mat-label">@subtitleLabel</label>
+                    <input asp-for="Subtitle" class="mat-input" />
+                </div>
+                <div class="mat-field">
+                    <label asp-for="Year" class="mat-label">Jahr</label>
+                    <input asp-for="Year" type="number" class="mat-input" min="0" max="2999" />
+                </div>
+            </div>
+
+            @if (Model.List.Type == MediaType.Series)
+            {
+                <div class="mat-field">
+                    <label asp-for="TotalSeasons" class="mat-label">Anzahl Staffeln</label>
+                    <input asp-for="TotalSeasons" type="number" class="mat-input" min="0" max="100" />
+                    <span class="mat-hint">Für die Staffel-Auswahl. Leer lassen, wenn unbekannt.</span>
+                </div>
+            }
+
+            <div class="mat-field">
+                <label asp-for="Overview" class="mat-label">Beschreibung</label>
+                <textarea asp-for="Overview" class="mat-textarea" rows="3"></textarea>
+            </div>
+
+            <hr />
+
+            <div class="mat-field">
+                <span class="mat-label">Cover</span>
+                <div class="cover-editor">
+                    <div class="cover-editor-preview">
+                        <img id="coverPreview" alt="Cover-Vorschau" hidden />
+                        <div id="coverPlaceholder" class="cover-ph">@Ui.Icon("image")</div>
                     </div>
-                    <div id="coverSearchStatus" class="form-text"></div>
-                    <div id="coverSearchResults" class="cover-search-results"></div>
-                }
-                else
-                {
-                    <div class="form-text mb-2">
-                        <i class="bi bi-info-circle me-1"></i>Cover-Suche für Movies/Series braucht einen TMDb-Key
-                        (Administration → Einstellungen). Du kannst trotzdem ein Bild hochladen oder eine URL einfügen.
+
+                    <div class="cover-editor-controls">
+                        @if (Model.CoverSearchAvailable)
+                        {
+                            <div class="mat-input-group">
+                                <span class="mat-input-addon">@Ui.Icon("search")</span>
+                                <input type="text" id="coverSearchInput" class="mat-input"
+                                       placeholder="Cover suchen (Titel) …" autocomplete="off" />
+                                <button type="button" id="coverSearchBtn" class="mat-btn mat-btn--secondary">Suchen</button>
+                            </div>
+                            <div id="coverSearchStatus" class="mat-hint"></div>
+                            <div id="coverSearchResults" class="cover-search-results"></div>
+                        }
+                        else
+                        {
+                            <p class="mat-hint">@Ui.Icon("info") Cover-Suche für Movies/Series braucht einen TMDb-Key
+                                (Administration → Einstellungen). Du kannst trotzdem ein Bild hochladen oder eine URL einfügen.</p>
+                        }
+
+                        <label for="coverFileInput" class="mat-label mat-mt-3">… oder Bild hochladen (zuschneidbar)</label>
+                        <input asp-for="CoverFile" type="file" id="coverFileInput" class="mat-input" accept="image/*" />
+
+                        <details class="mat-mt-2">
+                            <summary class="mat-muted">Bild-URL einfügen</summary>
+                            <input asp-for="CoverUrl" id="coverUrlInput" class="mat-input mat-mt-2" placeholder="https://…" />
+                        </details>
+
+                        <input asp-for="CroppedImage" id="CroppedImage" type="hidden" />
                     </div>
-                }
-
-                <label for="coverFileInput" class="form-label mt-3">… oder Bild hochladen (zuschneidbar)</label>
-                <input asp-for="CoverFile" type="file" id="coverFileInput" class="form-control" accept="image/*" />
-
-                <details class="mt-2">
-                    <summary class="small text-muted">Bild-URL einfügen</summary>
-                    <input asp-for="CoverUrl" id="coverUrlInput" class="form-control mt-2" placeholder="https://…" />
-                </details>
-
-                <input asp-for="CroppedImage" id="CroppedImage" type="hidden" />
+                </div>
             </div>
-        </div>
 
-        <partial name="_FormActionsBar" model="@(new FormActionsModel
-        {
-            SaveText = "Hinzufügen",
-            SaveIcon = "bi-plus-lg",
-            BackUrl = $"/Lists/{Model.List.Id}",
-        })" />
-    </form>
+            <partial name="_FormActionsBar" model="@(new FormActionsModel
+            {
+                SaveText = "Hinzufügen",
+                SaveIcon = "plus",
+                BackUrl = $"/Lists/{Model.List.Id}",
+            })" />
+        </form>
+    </div>
 </div>
 
 @* Crop dialog *@
 <div id="cropOverlay" class="crop-overlay" hidden>
     <div class="crop-box">
-        <h2 class="fs-6 mb-2">Cover zuschneiden</h2>
+        <h2 class="mat-mb-2">Cover zuschneiden</h2>
         <canvas id="cropCanvas" width="240" height="360"></canvas>
-        <label class="form-label small mt-2 mb-0"><i class="bi bi-zoom-in me-1"></i>Zoom</label>
-        <input type="range" id="cropZoom" class="form-range" min="1" max="3" step="0.01" value="1" />
-        <div class="form-text">Ziehen zum Verschieben, Regler zum Zoomen.</div>
-        <div class="d-flex gap-2 mt-2">
-            <button type="button" id="cropApply" class="btn btn-primary btn-sm">
-                <i class="bi bi-check-lg me-1"></i>Übernehmen
-            </button>
-            <button type="button" id="cropCancel" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-x-lg me-1"></i>Abbrechen
-            </button>
+        <label class="mat-label mat-mt-2" for="cropZoom">@Ui.Icon("search") Zoom</label>
+        <input type="range" id="cropZoom" class="mat-range" min="1" max="3" step="0.01" value="1" />
+        <p class="mat-hint">Ziehen zum Verschieben, Regler zum Zoomen.</p>
+        <div class="mat-actions mat-mt-2">
+            <button type="button" id="cropApply" class="mat-btn mat-btn--primary mat-btn--sm">@Ui.Icon("check")<span>Übernehmen</span></button>
+            <button type="button" id="cropCancel" class="mat-btn mat-btn--secondary mat-btn--sm">@Ui.Icon("x")<span>Abbrechen</span></button>
         </div>
     </div>
 </div>
