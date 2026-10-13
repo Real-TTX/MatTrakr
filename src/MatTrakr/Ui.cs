@@ -84,6 +84,18 @@ public static class Ui
         "data-dlg-confirm=\"Bitte bestätigen\" data-dlg-notice=\"Hinweis\" data-dlg-input=\"Eingabe\" " +
         "data-copied=\"Kopiert\"");
 
+    /// <summary>
+    /// The glyph of the MatTrakr logo: a progress ring with a play triangle. It goes inside a <c>.mat-logo</c> tile
+    /// (the flat accent square) and follows the tile's text colour, so it is right in light and dark. The same
+    /// drawing is <c>wwwroot/favicon.svg</c> (with the tile), which the PWA icons are rendered from.
+    /// </summary>
+    public static IHtmlContent Logo { get; } = new HtmlString(
+        "<svg class=\"mt-logo-glyph\" viewBox=\"11 11 42 42\" aria-hidden=\"true\" focusable=\"false\">" +
+        "<circle cx=\"32\" cy=\"32\" r=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\".3\" stroke-width=\"6\"/>" +
+        "<circle cx=\"32\" cy=\"32\" r=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"6\" stroke-linecap=\"round\" stroke-dasharray=\"79 114\" transform=\"rotate(-90 32 32)\"/>" +
+        "<polygon points=\"26.5,23 26.5,41 41.5,32\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/>" +
+        "</svg>");
+
     private static string? _sprite;
 
     /// <summary>The icon sprite, read once and placed inline at the top of the body so every <see cref="Icon"/> can reference it.</summary>
