@@ -28,7 +28,12 @@
 
     <nav class="mat-nav__scroll" aria-label="Hauptnavigation">
         <ul class="mat-nav__list">
-            <li class="mat-nav__group" role="presentation">Listen</li>
+            @* "Listen verwalten" is not an item among the lists: it is the gear at the end of the heading. *@
+            <li class="mat-nav__group mt-nav-group">
+                <span>Listen</span>
+                <a class="mt-nav-group__action @(Active("/Lists/Manage") ? "is-active" : "")" href="/Lists/Manage"
+                   title="Listen verwalten" aria-label="Listen verwalten" aria-current="@(Active("/Lists/Manage") ? "page" : null)">@Ui.Icon("settings")</a>
+            </li>
             @foreach (var item in Model.Lists)
             {
                 var href = $"/Lists/{item.List.Id}";
@@ -46,11 +51,6 @@
                     </a>
                 </li>
             }
-            <li>
-                <a class="mat-nav__item @(Active("/Lists/Manage") ? "is-active" : "")" href="/Lists/Manage" aria-current="@(Active("/Lists/Manage") ? "page" : null)">
-                    @Ui.Icon("settings")<span>Listen verwalten</span>
-                </a>
-            </li>
         </ul>
 
         @if (Model.IsAdmin)
