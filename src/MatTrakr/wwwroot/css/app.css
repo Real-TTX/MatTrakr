@@ -193,3 +193,17 @@
    a rounded-corner or safe-area sliver blends in instead of showing another colour (same approach as MatPaper). */
 html { background: var(--mat-bg); touch-action: manipulation; }
 .mat-app { position: fixed; inset: 0; height: auto; }
+
+/* ---- Phone: the title is in the breadcrumb of the top bar, so the page head does not repeat it ----
+   MatUi (SHELL-09) draws both; the owner wants the title once on a phone. The h1 stays in the page for screen
+   readers (visually hidden like .mat-sr-only: one h1 per page), a head without a description leaves no gap, and a
+   head with a description keeps that line. Only inside the shell: the public page has no top bar and keeps its heading. */
+@media (max-width: 600px) {
+  .mat-main .mat-page__title > h1,
+  .mat-main .mat-page__head:not(:has(.mat-page__sub)) {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+  /* Less empty room under the last element: the home indicator needs its inset, not 48 px more. */
+  .mat-page { padding-bottom: max(var(--mat-space-6), var(--mat-safe-bottom)); }
+}
