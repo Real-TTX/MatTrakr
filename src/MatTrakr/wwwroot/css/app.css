@@ -190,7 +190,9 @@
    100vh / 100dvh come out too short in an installed iOS app and leave a dead strip at the bottom
    (the menu column ends early and the page colour shows below it, and the home indicator sits on it).
    position: fixed with inset: 0 always spans the real screen; the root takes the page colour so that
-   a rounded-corner or safe-area sliver blends in instead of showing another colour (same approach as MatPaper). */
+   a rounded-corner or safe-area sliver blends in instead of showing another colour (same approach as MatPaper).
+   The viewport meta of the three layouts has NO viewport-fit=cover on purpose: with it iOS 26 gave the installed app
+   a height that stops above the bottom edge. Before the MatUi migration it was not set either, and the bottom fitted. */
 html { background: var(--mat-bg); touch-action: manipulation; }
 .mat-app { position: fixed; inset: 0; height: auto; }
 
