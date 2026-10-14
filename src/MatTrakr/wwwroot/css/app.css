@@ -193,20 +193,3 @@
    a rounded-corner or safe-area sliver blends in instead of showing another colour (same approach as MatPaper). */
 html { background: var(--mat-bg); touch-action: manipulation; }
 .mat-app { position: fixed; inset: 0; height: auto; }
-
-/* ---- Menu: the "Listen" heading carries the manage-lists gear at its right end ----
-   (not a menu item among the lists). The button is larger than it looks: the negative margins keep the
-   row as high as a plain heading, and on a phone the target grows to 44 px. */
-.mat-nav__group.mt-nav-group { display: flex; align-items: center; justify-content: space-between; }
-.mt-nav-group__action {
-  display: inline-grid; place-items: center;
-  width: 32px; height: 32px; margin: -8px calc(var(--mat-space-2) * -1) -8px 0;
-  border-radius: var(--mat-radius);
-  color: var(--mat-text-muted); text-decoration: none;
-}
-.mt-nav-group__action:hover { background: var(--mat-surface-3); color: var(--mat-text); text-decoration: none; }
-.mt-nav-group__action.is-active { background: var(--mat-accent-soft-strong); color: var(--mat-accent-text); }
-.mt-nav-group__action .mat-icon { font-size: 1.15rem; }
-@media (max-width: 900px) {
-  .mt-nav-group__action { width: 44px; height: 44px; margin-block: -14px; }
-}

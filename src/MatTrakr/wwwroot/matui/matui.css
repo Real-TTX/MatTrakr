@@ -1,6 +1,4 @@
-/* MatUi — bundled for MatTrakr from: matui.tokens.css matui.base.css matui.shell.css matui.controls.css matui.forms.css matui.pickers.css matui.lists.css matui.dialogs.css matui.layout.css matui.apps.css */
-
-/* ===== matui.tokens.css ===== */
+/* MatUi 0.1.0 (ebd5cee7f5) - build local-20261014 - bundled from matui.tokens.css, matui.base.css, matui.shell.css, matui.controls.css, matui.forms.css, matui.pickers.css, matui.lists.css, matui.dialogs.css, matui.layout.css, matui.apps.css */
 /* ==========================================================================
    MatUi · tokens
    The single source of the look of every Mat app. Components use only these custom properties, never a raw colour.
@@ -428,7 +426,6 @@
   }
 }
 
-/* ===== matui.base.css ===== */
 /* ==========================================================================
    MatUi · base
    Reset, typography, focus, selection, scrollbars and the few utilities every page may use.
@@ -563,7 +560,6 @@ kbd {
   }
 }
 
-/* ===== matui.shell.css ===== */
 /* ==========================================================================
    MatUi · shell
    The frame of every Mat app (rules SHELL-01 .. SHELL-12):
@@ -641,6 +637,21 @@ kbd {
   font-weight: 600;
   color: var(--mat-text-muted);
 }
+/* A group heading with one small icon action at its right end (SHELL-02): the title takes the room, the action is a compact square that adds no height to the row
+   (a touch screen gets 44 px by a negative margin, the row stays as it is). */
+.mat-nav__group--action { display: flex; align-items: center; gap: var(--mat-space-2); padding-right: var(--mat-space-1); }
+.mat-nav__group-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mat-nav__group-action {
+  flex: none; display: inline-grid; place-items: center;
+  width: 1.75rem; height: 1.75rem; margin-block: -.25rem;
+  padding: 0; border: 0; border-radius: var(--mat-radius-sm);
+  background: transparent; color: var(--mat-text-muted); cursor: pointer; text-decoration: none;
+  transition: background var(--mat-dur-fast) var(--mat-ease), color var(--mat-dur-fast) var(--mat-ease);
+}
+.mat-nav__group-action .mat-icon { font-size: 1.1rem; }
+.mat-nav__group-action:hover, .mat-nav__group-action[aria-expanded="true"] { background: var(--mat-surface-3); color: var(--mat-text); text-decoration: none; }
+.mat-nav__group-action:focus-visible { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mat-accent) 70%, transparent); }
+@media (pointer: coarse) { .mat-nav__group-action { width: 2.75rem; height: 2.75rem; margin-block: -.75rem; } }
 .mat-nav__item {
   position: relative;
   display: flex;
@@ -783,6 +794,8 @@ button.mat-nav__item:hover { background: var(--mat-surface-3); }
 .mat-menu__parent[aria-expanded="true"] .mat-menu__chev { transform: rotate(180deg); }
 .mat-menu__parent[aria-expanded="true"] .mat-nav__badge--sum { display: none; }
 .mat-menu__sub { margin: 2px 0 var(--mat-space-1) calc(var(--mat-space-3) + .6rem); padding-left: var(--mat-space-2); border-left: 1px solid var(--mat-border-strong); }
+/* A choice in the popup of the switcher (the tenant) is a button of a small form: the form takes no room of its own, the button is the entry. */
+.mat-menu__form { display: contents; }
 .mat-menu .mat-menu__item--sub { min-height: var(--mat-control-h-sm); font-size: var(--mat-fs-sm); }
 
 /* ---- The foot of the menu: theme button + user (context menu) + version ---- */
@@ -912,8 +925,9 @@ button.mat-nav__item:hover { background: var(--mat-surface-3); }
   margin-right: calc(var(--mat-space-2) * -1);
 }
 .mat-topbar__actions .mat-btn { position: relative; }
-/* A main action of the app (scan, add) is highlighted: a filled accent button instead of a ghost one. A filled button needs room around it and lines up with the edge of the content. */
-.mat-topbar__actions:has(> .mat-btn--primary) { gap: var(--mat-space-2); margin-right: 0; }
+/* The main action of the app (scan, add) is highlighted: a filled accent button instead of a ghost one, at the right end; a second action that should be seen but is not the main
+   one is a secondary icon button (a surface with a line), so that one icon only has the accent colour. A button with a fill or a line needs room around it and lines up with the edge of the content. */
+.mat-topbar__actions:has(> .mat-btn--primary, > .mat-btn--secondary) { gap: var(--mat-space-2); margin-right: 0; }
 .mat-topbar__badge {
   position: absolute; top: 3px; right: 3px;
   min-width: 16px; height: 16px;
@@ -1036,7 +1050,6 @@ html.mat-lock { overflow: hidden; }
 .mat-auth__brand { display: flex; flex-direction: column; align-items: center; gap: var(--mat-space-3); text-align: center; }
 .mat-auth__brand .mat-logo { width: 56px; height: 56px; }
 
-/* ===== matui.controls.css ===== */
 /* ==========================================================================
    MatUi · controls
    Buttons, button row, form fields, cards, badges and pills, alerts, toasts and the small building blocks.
@@ -1449,7 +1462,6 @@ a.mat-listgroup__item:hover, button.mat-listgroup__item:hover { background: var(
 .mat-skeleton--w-50 { width: 50%; }
 .mat-skeleton--w-75 { width: 75%; }
 
-/* ===== matui.forms.css ===== */
 /* ==========================================================================
    MatUi · forms
    Fields, inputs, choices, switches, ranges, input groups, layouts and validation. Labels above, hints below, errors at the field and as a summary.
@@ -1884,7 +1896,6 @@ input[type="file"].mat-input { padding: 6px; }
   .mat-slider__track, .mat-slider__bubble { border: 1px solid CanvasText; }
 }
 
-/* ===== matui.pickers.css ===== */
 /* ==========================================================================
    MatUi · pickers (FORM-15)
    A picker is a field that is filled in a panel: a select with pictures, descriptions and tags, a date or a period, a time or a time range,
@@ -2236,7 +2247,6 @@ input[type="file"].mat-input { padding: 6px; }
 .mat-slots__summary { flex: 1 1 100%; margin: 0; font-weight: 650; }
 .mat-slots__summary.is-empty { font-weight: 400; color: var(--mat-text-muted); }
 
-/* ===== matui.lists.css ===== */
 /* ==========================================================================
    MatUi · lists
    The list block (toolbar -> applied filters -> table or gallery -> empty state -> pagination -> actions), tabs and the
@@ -2946,7 +2956,6 @@ select.mat-item__input { width: calc(100% + 4px); margin-left: -4px; cursor: poi
 .mat-schedule__hint { margin: 0; padding: var(--mat-space-2) var(--mat-space-4) var(--mat-space-3); color: var(--mat-text-muted); font-size: var(--mat-fs-sm); }
 @media (prefers-reduced-motion: reduce) { .mat-schedule__body.is-from-next > *, .mat-schedule__body.is-from-prev > * { animation: none; } .mat-schedule__event { transition: none; } }
 
-/* ===== matui.dialogs.css ===== */
 /* ==========================================================================
    MatUi · dialogs
    Every question, message and input is a dialog (never window.confirm / alert / prompt), and the search, filter and
@@ -3040,7 +3049,6 @@ dialog.mat-dialog--start[open] { animation-name: mat-panel-in-start; }
 }
 @keyframes mat-sheet-in { from { transform: translateY(24px); opacity: 0; } }
 
-/* ===== matui.layout.css ===== */
 /* ==========================================================================
    MatUi · layout
    Containers, the grid of twelve columns and the utility classes. They come after every component so that a utility wins over the value of a
@@ -3508,7 +3516,6 @@ dialog.mat-dialog--start[open] { animation-name: mat-panel-in-start; }
 .mat-overflow-x-auto { overflow-x: auto; }
 .mat-pointer { cursor: pointer; }
 
-/* ===== matui.apps.css ===== */
 /* ==========================================================================
    MatUi · apps
    The colour of each Mat app: ONE custom property on <html data-app="...">. Everything else is derived (see matui.tokens.css).
