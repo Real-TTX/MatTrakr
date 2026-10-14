@@ -28,11 +28,11 @@
 
     <nav class="mat-nav__scroll" aria-label="Hauptnavigation">
         <ul class="mat-nav__list">
-            @* "Listen verwalten" is not an item among the lists: it is the gear at the end of the heading. *@
-            <li class="mat-nav__group mt-nav-group">
-                <span>Listen</span>
-                <a class="mt-nav-group__action @(Active("/Lists/Manage") ? "is-active" : "")" href="/Lists/Manage"
-                   title="Listen verwalten" aria-label="Listen verwalten" aria-current="@(Active("/Lists/Manage") ? "page" : null)">@Ui.Icon("settings")</a>
+            @* "Listen verwalten" is not an item among the lists: it is the icon action at the end of the heading (SHELL-02). *@
+            <li class="mat-nav__group mat-nav__group--action" role="presentation">
+                <span class="mat-nav__group-title">Listen</span>
+                <a class="mat-nav__group-action" href="/Lists/Manage" title="Listen verwalten" aria-label="Listen verwalten"
+                   aria-current="@(Active("/Lists/Manage") ? "page" : null)">@Ui.Icon("settings")</a>
             </li>
             @foreach (var item in Model.Lists)
             {
