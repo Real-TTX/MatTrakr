@@ -1,4 +1,4 @@
-/* MatUi 0.1.0 (ebd5cee7f5) - build local-20261014 - bundled from matui.tokens.css, matui.base.css, matui.shell.css, matui.controls.css, matui.forms.css, matui.pickers.css, matui.lists.css, matui.dialogs.css, matui.layout.css, matui.apps.css */
+/* MatUi 0.1.0 (a92d42d139) - build local-20261014 - bundled from matui.tokens.css, matui.base.css, matui.shell.css, matui.controls.css, matui.forms.css, matui.pickers.css, matui.lists.css, matui.dialogs.css, matui.layout.css, matui.apps.css */
 /* ==========================================================================
    MatUi · tokens
    The single source of the look of every Mat app. Components use only these custom properties, never a raw colour.
@@ -650,6 +650,8 @@ kbd {
 }
 .mat-nav__group-action .mat-icon { font-size: 1.1rem; }
 .mat-nav__group-action:hover, .mat-nav__group-action[aria-expanded="true"] { background: var(--mat-surface-3); color: var(--mat-text); text-decoration: none; }
+/* An action that is a link to the current page is marked like a current item: a tint of the accent behind it and the accent on its icon (SHELL-02, COLOR-08). After the hover rule, so it wins. */
+.mat-nav__group-action.is-active, .mat-nav__group-action[aria-current="page"] { background: var(--mat-accent-soft-strong); color: var(--mat-accent-text); }
 .mat-nav__group-action:focus-visible { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mat-accent) 70%, transparent); }
 @media (pointer: coarse) { .mat-nav__group-action { width: 2.75rem; height: 2.75rem; margin-block: -.75rem; } }
 .mat-nav__item {
