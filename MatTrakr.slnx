@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/MatTrakr/MatTrakr.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MatTrakr.Tests/MatTrakr.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -1,0 +1,201 @@
+{
+  "contract": 1,
+  "app": {
+    "id": "mattrakr",
+    "name": "MatTrakr",
+    "description": "Keep track of what you have watched and read",
+    "version": "<version>",
+    "icon": "/favicon.svg",
+    "accent": "#6c5ce7",
+    "home": "/"
+  },
+  "auth": {
+    "apiKey": true
+  },
+  "pages": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "icon": "dashboard",
+      "sections": [
+        {
+          "kind": "tiles",
+          "items": [
+            "users",
+            "lists",
+            "items",
+            "itemsDone",
+            "ratings",
+            "sharedLists",
+            "covers",
+            "database",
+            "lastActivity",
+            "tmdb"
+          ]
+        },
+        {
+          "kind": "actions",
+          "items": [
+            "openAdmin",
+            "openSettings",
+            "openBackup",
+            "testTmdb",
+            "cleanupSessions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "icon": "settings",
+      "sections": [
+        {
+          "kind": "form",
+          "items": [
+            "tmdbApiKey",
+            "googleBooksApiKey"
+          ],
+          "label": "Cover search"
+        }
+      ]
+    }
+  ],
+  "state": [
+    {
+      "key": "users",
+      "label": "Active users",
+      "widget": "number",
+      "icon": "users"
+    },
+    {
+      "key": "lists",
+      "label": "Lists",
+      "widget": "number",
+      "icon": "list"
+    },
+    {
+      "key": "items",
+      "label": "Entries",
+      "widget": "number",
+      "icon": "layers"
+    },
+    {
+      "key": "itemsDone",
+      "label": "Watched or read",
+      "widget": "number",
+      "icon": "check-circle"
+    },
+    {
+      "key": "ratings",
+      "label": "Ratings",
+      "widget": "number",
+      "icon": "star"
+    },
+    {
+      "key": "sharedLists",
+      "label": "Shared lists",
+      "widget": "number",
+      "icon": "link"
+    },
+    {
+      "key": "covers",
+      "label": "Uploaded covers",
+      "widget": "number",
+      "icon": "image",
+      "unit": "bytes"
+    },
+    {
+      "key": "database",
+      "label": "Database",
+      "widget": "number",
+      "icon": "database",
+      "unit": "bytes"
+    },
+    {
+      "key": "lastActivity",
+      "label": "Last change",
+      "widget": "time",
+      "icon": "clock"
+    },
+    {
+      "key": "tmdb",
+      "label": "Movie and series search",
+      "widget": "status",
+      "icon": "search"
+    }
+  ],
+  "configure": [
+    {
+      "key": "tmdbApiKey",
+      "label": "TMDb API key",
+      "type": "secret",
+      "max": 200,
+      "hint": "Needed to search movies and series (free at themoviedb.org). Takes effect at once."
+    },
+    {
+      "key": "googleBooksApiKey",
+      "label": "Google Books API key",
+      "type": "secret",
+      "max": 200,
+      "hint": "Optional: book search works without it, a key only raises the daily quota."
+    }
+  ],
+  "actions": [
+    {
+      "id": "openAdmin",
+      "label": "Open admin",
+      "icon": "external",
+      "kind": "link",
+      "url": "/Admin/Users"
+    },
+    {
+      "id": "openSettings",
+      "label": "All settings",
+      "icon": "settings",
+      "kind": "link",
+      "url": "/Admin/Settings"
+    },
+    {
+      "id": "openBackup",
+      "label": "Backup",
+      "icon": "archive",
+      "kind": "link",
+      "url": "/Admin/Backup"
+    },
+    {
+      "id": "testTmdb",
+      "label": "Test the TMDb key",
+      "icon": "plug",
+      "kind": "post"
+    },
+    {
+      "id": "cleanupSessions",
+      "label": "Remove expired sessions",
+      "icon": "broom",
+      "kind": "post"
+    }
+  ],
+  "provides": [],
+  "consumes": [],
+  "roles": [
+    {
+      "key": "admin",
+      "label": "Administrator"
+    },
+    {
+      "key": "verwalter",
+      "label": "Manager"
+    },
+    {
+      "key": "user",
+      "label": "User"
+    }
+  ],
+  "endpoints": [
+    "/api/health",
+    "/api/state",
+    "/api/configure",
+    "/api/actions"
+  ]
+}

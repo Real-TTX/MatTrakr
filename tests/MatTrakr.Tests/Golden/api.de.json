@@ -1,0 +1,201 @@
+{
+  "contract": 1,
+  "app": {
+    "id": "mattrakr",
+    "name": "MatTrakr",
+    "description": "Gesehene Filme, Serien und gelesene Bücher festhalten",
+    "version": "<version>",
+    "icon": "/favicon.svg",
+    "accent": "#6c5ce7",
+    "home": "/"
+  },
+  "auth": {
+    "apiKey": true
+  },
+  "pages": [
+    {
+      "id": "overview",
+      "label": "Übersicht",
+      "icon": "dashboard",
+      "sections": [
+        {
+          "kind": "tiles",
+          "items": [
+            "users",
+            "lists",
+            "items",
+            "itemsDone",
+            "ratings",
+            "sharedLists",
+            "covers",
+            "database",
+            "lastActivity",
+            "tmdb"
+          ]
+        },
+        {
+          "kind": "actions",
+          "items": [
+            "openAdmin",
+            "openSettings",
+            "openBackup",
+            "testTmdb",
+            "cleanupSessions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "label": "Einstellungen",
+      "icon": "settings",
+      "sections": [
+        {
+          "kind": "form",
+          "items": [
+            "tmdbApiKey",
+            "googleBooksApiKey"
+          ],
+          "label": "Cover-Suche"
+        }
+      ]
+    }
+  ],
+  "state": [
+    {
+      "key": "users",
+      "label": "Aktive Benutzer",
+      "widget": "number",
+      "icon": "users"
+    },
+    {
+      "key": "lists",
+      "label": "Listen",
+      "widget": "number",
+      "icon": "list"
+    },
+    {
+      "key": "items",
+      "label": "Einträge",
+      "widget": "number",
+      "icon": "layers"
+    },
+    {
+      "key": "itemsDone",
+      "label": "Gesehen oder gelesen",
+      "widget": "number",
+      "icon": "check-circle"
+    },
+    {
+      "key": "ratings",
+      "label": "Bewertungen",
+      "widget": "number",
+      "icon": "star"
+    },
+    {
+      "key": "sharedLists",
+      "label": "Geteilte Listen",
+      "widget": "number",
+      "icon": "link"
+    },
+    {
+      "key": "covers",
+      "label": "Hochgeladene Cover",
+      "widget": "number",
+      "icon": "image",
+      "unit": "bytes"
+    },
+    {
+      "key": "database",
+      "label": "Datenbank",
+      "widget": "number",
+      "icon": "database",
+      "unit": "bytes"
+    },
+    {
+      "key": "lastActivity",
+      "label": "Letzte Änderung",
+      "widget": "time",
+      "icon": "clock"
+    },
+    {
+      "key": "tmdb",
+      "label": "Film- und Seriensuche",
+      "widget": "status",
+      "icon": "search"
+    }
+  ],
+  "configure": [
+    {
+      "key": "tmdbApiKey",
+      "label": "TMDb-API-Key",
+      "type": "secret",
+      "max": 200,
+      "hint": "Nötig für die Suche nach Filmen und Serien (kostenlos auf themoviedb.org). Wirkt sofort."
+    },
+    {
+      "key": "googleBooksApiKey",
+      "label": "Google-Books-API-Key",
+      "type": "secret",
+      "max": 200,
+      "hint": "Optional: die Büchersuche geht auch ohne, ein Key erhöht nur das Tageskontingent."
+    }
+  ],
+  "actions": [
+    {
+      "id": "openAdmin",
+      "label": "Administration öffnen",
+      "icon": "external",
+      "kind": "link",
+      "url": "/Admin/Users"
+    },
+    {
+      "id": "openSettings",
+      "label": "Alle Einstellungen",
+      "icon": "settings",
+      "kind": "link",
+      "url": "/Admin/Settings"
+    },
+    {
+      "id": "openBackup",
+      "label": "Sicherung",
+      "icon": "archive",
+      "kind": "link",
+      "url": "/Admin/Backup"
+    },
+    {
+      "id": "testTmdb",
+      "label": "TMDb-Key prüfen",
+      "icon": "plug",
+      "kind": "post"
+    },
+    {
+      "id": "cleanupSessions",
+      "label": "Abgelaufene Sitzungen löschen",
+      "icon": "broom",
+      "kind": "post"
+    }
+  ],
+  "provides": [],
+  "consumes": [],
+  "roles": [
+    {
+      "key": "admin",
+      "label": "Administrator"
+    },
+    {
+      "key": "verwalter",
+      "label": "Verwalter"
+    },
+    {
+      "key": "user",
+      "label": "Benutzer"
+    }
+  ],
+  "endpoints": [
+    "/api/health",
+    "/api/state",
+    "/api/configure",
+    "/api/actions"
+  ]
+}

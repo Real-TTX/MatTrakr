@@ -1,0 +1,12 @@
+{
+  "status": "<string>",
+  "app": "<string>",
+  "version": "<string>",
+  "time": "<string>",
+  "checks": [
+    {
+      "name": "<string>",
+      "status": "<string>"
+    }
+  ]
+}

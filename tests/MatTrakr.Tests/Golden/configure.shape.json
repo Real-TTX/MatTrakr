@@ -1,0 +1,10 @@
+{
+  "values": {
+    "tmdbApiKey": {
+      "isSet": "<bool>"
+    },
+    "googleBooksApiKey": {
+      "isSet": "<bool>"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "time": "<string>",
+  "values": {
+    "users": {
+      "value": "<number>"
+    },
+    "lists": {
+      "value": "<number>"
+    },
+    "items": {
+      "value": "<number>"
+    },
+    "itemsDone": {
+      "value": "<number>"
+    },
+    "ratings": {
+      "value": "<number>"
+    },
+    "sharedLists": {
+      "value": "<number>"
+    },
+    "covers": {
+      "value": "<number>"
+    },
+    "database": {
+      "value": "<number>"
+    },
+    "lastActivity": {
+      "value": "<null>"
+    },
+    "tmdb": {
+      "value": "<string>",
+      "level": "<string>",
+      "text": "<string>"
+    }
+  }
+}
