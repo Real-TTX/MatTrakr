@@ -13,6 +13,18 @@
     <div id="login-sso-error" class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>Die Anmeldung über MatIdentity ist fehlgeschlagen oder MatIdentity ist gerade nicht erreichbar. Versuche es erneut oder melde dich hier mit deinem lokalen Konto an.</span></div>
 }
 
+@if (Model.PendingLink is { } link)
+{
+    <div id="login-link" class="mat-alert mat-alert--info" role="status">@Ui.Icon("link")<span>Hier gibt es schon ein Konto mit dem Benutzernamen <strong>@link.Email</strong>. Melde dich einmal mit dessen Passwort an, um es mit MatIdentity zu verbinden. Danach kommst du über MatIdentity direkt in dieses Konto.</span></div>
+    <form method="post" asp-page-handler="CancelLink" id="login-link-cancel" class="mt-auth-sub">
+        <button type="submit" class="mat-btn mat-btn--ghost mat-btn--block">@Ui.Icon("x")<span>Nicht verbinden</span></button>
+    </form>
+}
+else if (Model.LinkRequested)
+{
+    <div id="login-link-expired" class="mat-alert mat-alert--warning" role="status">@Ui.Icon("alert")<span>Die Verbindung mit MatIdentity ist abgelaufen. Melde dich erneut über MatIdentity an, um sie neu zu beginnen.</span></div>
+}
+
 @if (Model.IdentityEnabled)
 {
     @if (Model.SignedOut)

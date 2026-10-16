@@ -60,18 +60,44 @@ public sealed class ExternalSignInTests(TrakrFactory site) : IClassFixture<Trakr
     }
 
     [Fact]
-    public async Task A_local_user_named_like_the_email_address_is_linked()
+    public async Task A_local_user_named_like_the_email_address_is_not_linked_by_the_name_alone()
     {
         var local = await WithScopeAsync(sp => sp.GetRequiredService<UserService>()
             .CreateUserAsync("anna@example.com", "Anna", UserRole.User, "secret-password", mustChangePassword: false));
+        var count = await WithScopeAsync(sp => sp.GetRequiredService<AppDbContext>().Users.CountAsync());
 
-        var result = await SignInAsync(new ExternalIdentity("sub-anna", "ANNA@example.com", "Anna Example", "anna", null));
+        var result = await SignInAsync(new ExternalIdentity("sub-anna", "ANNA@example.com", "Anna Example", "anna", "admin"));
 
-        Assert.Equal(local.Id, result.User!.Id);
+        Assert.False(result.Succeeded);
+        Assert.Equal(local.Id, result.PendingLink!.Id);
+        Assert.Null((await UserAsync(local.Id)).ExternalSubject);
+        Assert.Equal(count, await WithScopeAsync(sp => sp.GetRequiredService<AppDbContext>().Users.CountAsync()));
+
+        // After its password (the login page) the account is linked and follows the role claim.
+        var linked = await WithScopeAsync(sp => sp.GetRequiredService<UserService>()
+            .LinkExternalAsync(local.Id, new ExternalIdentity("sub-anna", "ANNA@example.com", "Anna Example", "anna", "verwalter")));
+        Assert.Equal(local.Id, linked!.Id);
         var user = await UserAsync(local.Id);
         Assert.Equal("sub-anna", user.ExternalSubject);
         Assert.Equal("Anna", user.DisplayName);
-        Assert.Equal(UserRole.User, user.Role);
+        Assert.Equal(UserRole.Verwalter, user.Role);
+
+        // Once linked it is found by sub; a second link is refused.
+        Assert.Equal(local.Id, (await SignInAsync(new ExternalIdentity("sub-anna", "anna@example.com", null, null, null))).User!.Id);
+        Assert.Null(await WithScopeAsync(sp => sp.GetRequiredService<UserService>()
+            .LinkExternalAsync(local.Id, new ExternalIdentity("sub-other", "anna@example.com", null, null, null))));
+    }
+
+    [Fact]
+    public async Task A_link_is_refused_when_the_account_was_renamed_or_the_subject_is_taken()
+    {
+        var users = (Func<IServiceProvider, UserService>)(sp => sp.GetRequiredService<UserService>());
+        var renamed = await WithScopeAsync(sp => users(sp).CreateUserAsync("ren@example.com", "Ren", UserRole.User, "secret-password", mustChangePassword: false));
+        Assert.Null(await WithScopeAsync(sp => users(sp).LinkExternalAsync(renamed.Id, new ExternalIdentity("sub-ren", "other@example.com", null, null, null))));
+
+        await SignInAsync(new ExternalIdentity("sub-taken", null, "T", "taken", null));
+        Assert.Null(await WithScopeAsync(sp => users(sp).LinkExternalAsync(renamed.Id, new ExternalIdentity("sub-taken", "ren@example.com", null, null, null))));
+        Assert.Null((await UserAsync(renamed.Id)).ExternalSubject);
     }
 
     [Fact]

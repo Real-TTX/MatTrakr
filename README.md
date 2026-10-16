@@ -194,8 +194,14 @@ the administrator when MatIdentity is down; it is also shown when MatIdentity ca
 
 - Register MatTrakr in MatIdentity with the redirect address `https://<mattrakr>/signin-oidc` and the signed-out address
   `https://<mattrakr>/signout-callback-oidc`.
-- The person is found by the claim `sub`; at the first sign-in an existing user whose **user name is the e-mail
-  address** is linked, otherwise a new user (with the three default lists and no local password) is created.
+- The person is found by the claim `sub`; at the first sign-in a new user (with the three default lists and no local
+  password) is created.
+- An existing user whose **user name is the e-mail address** is **not** linked by the name alone (anyone can register or
+  rename an account to someone else's address). The person lands on `/Account/Login?local=1&link=1` ("Hier gibt es schon
+  ein Konto ..."), and the account is linked only when exactly that account signs in there once with its password (then it
+  follows the role claim and keeps the ID token for the sign-out, and the log says so). Another account signing in links
+  nothing; *Nicht verbinden* cancels. The pending link is a protected cookie of MatTrakr that lasts 10 minutes. A deactivated
+  match is refused; a match without any password, or several, get a new user beside them.
 - When MatIdentity sends the claim `role` (`admin`, `verwalter`, `user`), MatTrakr follows it at every sign-in (the last
   active administrator is never demoted); without it, the roles stay as set in *Administration → Benutzer*.
   Deactivated users are refused.

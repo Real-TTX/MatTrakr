@@ -1,3 +1,4 @@
+using System.Globalization;
 using MatPlatform;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -10,17 +11,20 @@ namespace MatTrakr.Pages.Account;
 /// Local sign-in with user name and password. With MatIdentity configured (MATIDENTITY_AUTHORITY) a visit goes straight on
 /// to MatIdentity; the local form stays reachable with <c>?local=1</c> (a way in for the administrator when MatIdentity is
 /// down), <c>?signedOut=1</c> (back from the sign-out there) and <c>?ssoError=1</c> (the sign-in there failed) stop the
-/// automatic sign-in.
+/// automatic sign-in. <c>?link=1</c>: MatIdentity signed in a person whose e-mail address is the user name of an unlinked account;
+/// the account is linked when it signs in here with its password (<see cref="MatIdentityPendingLink"/>), or the person cancels.
 /// </summary>
 public class LoginModel : PageModel
 {
     private readonly AuthService _auth;
+    private readonly UserService _users;
     private readonly MatPlatformSettings _platform;
     private readonly ILogger<LoginModel> _log;
 
-    public LoginModel(AuthService auth, MatPlatformSettings platform, ILogger<LoginModel> log)
+    public LoginModel(AuthService auth, UserService users, MatPlatformSettings platform, ILogger<LoginModel> log)
     {
         _auth = auth;
+        _users = users;
         _platform = platform;
         _log = log;
     }
@@ -46,6 +50,12 @@ public class LoginModel : PageModel
     /// <summary><c>?ssoError=1</c>: the sign-in at MatIdentity failed or MatIdentity is not reachable.</summary>
     public bool SsoError { get; private set; }
 
+    /// <summary><c>?link=1</c>: the page was opened to link an account with MatIdentity.</summary>
+    public bool LinkRequested { get; private set; }
+
+    /// <summary>The pending link of this browser (shown with <c>?link=1</c>), null when there is none or it has expired.</summary>
+    public MatIdentityPendingLink? PendingLink { get; private set; }
+
     /// <summary>True when the sign-in through MatIdentity is configured.</summary>
     public bool IdentityEnabled => _platform.IdentityEnabled;
 
@@ -69,6 +79,9 @@ public class LoginModel : PageModel
 
         ReturnUrl = returnUrl;
         ReadFlags();
+
+        if (PendingLink is not null && string.IsNullOrEmpty(Username))
+            Username = PendingLink.Email ?? string.Empty;
 
         // Auto login: straight on to MatIdentity, no local form in the way.
         if (IdentityEnabled && !Local && !SignedOut && !SsoError)
@@ -112,7 +125,19 @@ public class LoginModel : PageModel
             return Page();
         }
 
-        await _auth.SignInAsync(HttpContext, user, RememberMe);
+        // A pending link of MatIdentity is taken by exactly the account it was made for (and deleted for any other).
+        var identityToken = (string?)null;
+        if (MatIdentityPendingLink.TakeFor(HttpContext, user.Id.ToString(CultureInfo.InvariantCulture)) is { } link)
+        {
+            var linked = await _users.LinkExternalAsync(user.Id, new ExternalIdentity(link.Subject, link.Email, link.Name, link.PreferredUserName, link.Role), HttpContext.RequestAborted);
+            if (linked is not null)
+            {
+                user = linked;
+                identityToken = link.IdToken;
+            }
+        }
+
+        await _auth.SignInAsync(HttpContext, user, RememberMe, identityToken);
 
         if (user.MustChangePassword)
             return Redirect("/Account/ChangePassword");
@@ -120,11 +145,20 @@ public class LoginModel : PageModel
         return Redirect(SafeReturnUrl(returnUrl));
     }
 
+    /// <summary>Cancels a pending link: nothing is linked, the local form stays.</summary>
+    public IActionResult OnPostCancelLink()
+    {
+        MatIdentityPendingLink.Clear(HttpContext);
+        return Redirect("/Account/Login?local=1");
+    }
+
     private void ReadFlags()
     {
         Local = QueryFlag("local");
         SignedOut = QueryFlag("signedOut");
         SsoError = QueryFlag("ssoError");
+        LinkRequested = QueryFlag("link");
+        PendingLink = LinkRequested ? MatIdentityPendingLink.Peek(HttpContext) : null;
     }
 
     /// <summary>A flag in the query: <c>1</c> or <c>true</c>.</summary>
