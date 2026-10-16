@@ -85,6 +85,12 @@ public class User : AuditableEntity
     /// <summary>Personal preference: status tag above (small) or below (large) the cover.</summary>
     public CardStatusPosition CardStatusPosition { get; set; } = CardStatusPosition.Above;
 
+    /// <summary>
+    /// The claim <c>sub</c> of MatIdentity once the user has signed in there (null = local user only).
+    /// Set at the first sign-in through MatIdentity; matched first at every later one.
+    /// </summary>
+    public string? ExternalSubject { get; set; }
+
     public ICollection<TrackList> OwnedLists { get; set; } = new List<TrackList>();
     public ICollection<UserSession> Sessions { get; set; } = new List<UserSession>();
 }
@@ -98,6 +104,12 @@ public class UserSession : AuditableEntity
     public long UserId { get; set; }
     public string Token { get; set; } = string.Empty; // uuid — security key
     public DateTime? ExpiresDate { get; set; }
+
+    /// <summary>
+    /// The ID token of MatIdentity when the session was started there (null for a local sign-in); the sign-out hands it
+    /// to MatIdentity's end-session endpoint as <c>id_token_hint</c>.
+    /// </summary>
+    public string? IdentityToken { get; set; }
 
     public User? User { get; set; }
 }

@@ -62,5 +62,8 @@ public class SettingsService
 
         Directory.CreateDirectory(Path.GetDirectoryName(_settingsFile)!);
         await File.WriteAllTextAsync(_settingsFile, root.ToJsonString(WriteOpts));
+
+        // The file watcher reloads a moment later; reading right after saving must already see the new values.
+        if (_config is IConfigurationRoot configRoot) configRoot.Reload();
     }
 }

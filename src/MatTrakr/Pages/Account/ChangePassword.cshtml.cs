@@ -67,8 +67,9 @@ public class ChangePasswordModel : PageModel
         await _auth.SetPasswordAsync(user, NewPassword);
 
         // Refresh the principal so the MustChangePassword claim clears immediately.
-        await _auth.SignOutAsync(HttpContext);
-        await _auth.SignInAsync(HttpContext, user, persistent: true);
+        // A session from MatIdentity keeps its ID token, so the sign-out still ends there too.
+        var identityToken = await _auth.SignOutAsync(HttpContext);
+        await _auth.SignInAsync(HttpContext, user, persistent: true, identityToken);
 
         return Redirect("/");
     }

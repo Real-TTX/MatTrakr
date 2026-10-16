@@ -312,6 +312,10 @@ namespace MatTrakr.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ExternalSubject")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
@@ -340,6 +344,10 @@ namespace MatTrakr.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ExternalSubject")
+                        .IsUnique()
+                        .HasFilter("[ExternalSubject] IS NOT NULL");
+
                     b.HasIndex("Username")
                         .IsUnique();
 
@@ -359,6 +367,10 @@ namespace MatTrakr.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("ExpiresDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IdentityToken")
+                        .HasMaxLength(8000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Token")

@@ -34,6 +34,9 @@ public class AppDbContext : DbContext
             e.Property(x => x.DisplayName).HasMaxLength(150);
             e.Property(x => x.Role).HasConversion<string>().HasMaxLength(20);
             e.Property(x => x.CardStatusPosition).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.ExternalSubject).HasMaxLength(200);
+            // One local user per MatIdentity person; only for the subjects that are set.
+            e.HasIndex(x => x.ExternalSubject).IsUnique().HasFilter("[ExternalSubject] IS NOT NULL");
         });
 
         b.Entity<UserSession>(e =>
@@ -41,6 +44,7 @@ public class AppDbContext : DbContext
             e.ToTable("UserSessions");
             e.HasIndex(x => x.Token).IsUnique();
             e.Property(x => x.Token).HasMaxLength(64).IsRequired();
+            e.Property(x => x.IdentityToken).HasMaxLength(8000);
             e.HasOne(x => x.User).WithMany(u => u.Sessions)
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
