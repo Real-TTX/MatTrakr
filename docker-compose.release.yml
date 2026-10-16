@@ -6,6 +6,13 @@ services:
     container_name: mattrakr
     ports:
       - "9242:9242"
+    # None of these is required. The Mat platform (MatDesign docs/PLATFORM.md); Mattiverse sets them when it installs the app.
+    # environment:
+      # MAT_API_KEY: ""                    # the key of /api/state, /api/configure, /api/actions (X-Api-Key)
+      # MATIDENTITY_AUTHORITY: ""          # https://id.example.com: sign-in through MatIdentity
+      # MATIDENTITY_CLIENT_ID: "mattrakr"
+      # MATIDENTITY_CLIENT_SECRET: ""
+      # MATIDENTITY_INTERNAL_URL: ""       # http://matidentity:2300 inside Docker
     volumes:
       - mattrakr-data:/app/data
     restart: unless-stopped

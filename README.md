@@ -148,6 +148,7 @@ Locally without Docker:
 
 ```bash
 dotnet run --project src/MatTrakr
+dotnet test                                                  # the tests (xunit, the app in memory, no Docker)
 ```
 
 ### Settings that matter
@@ -159,6 +160,46 @@ dotnet run --project src/MatTrakr
 | `MATTRAKR_ADMIN_PASSWORD` | `admin` | Initial password for `admin` on first start |
 | `Tmdb__ApiKey` | – | TMDb key for movie/series search (or set it in the UI) |
 | `GoogleBooks__ApiKey` | – | Optional Google Books key (higher quota) |
+| `MAT_API_KEY` | – | Key for the platform API (`X-Api-Key` on `/api/state`, `/api/configure`, `/api/actions`); unset = only a MatIdentity token is accepted |
+| `MATIDENTITY_AUTHORITY` | – | Address of MatIdentity (`https://id.example.com`); set = sign-in through MatIdentity |
+| `MATIDENTITY_CLIENT_ID` | `mattrakr` | The client of MatTrakr in MatIdentity (also the audience of the tokens accepted on `/api`) |
+| `MATIDENTITY_CLIENT_SECRET` | – | Its secret |
+| `MATIDENTITY_INTERNAL_URL` | – | Optional: where MatTrakr reaches MatIdentity from inside Docker (`http://matidentity:2300`); the browser keeps using `MATIDENTITY_AUTHORITY` |
+
+None of the `MAT_*` / `MATIDENTITY_*` variables is required; without them MatTrakr behaves exactly as before.
+[Mattiverse](https://github.com/Real-TTX/Mattiverse) sets them when it installs the app.
+
+### Platform API
+
+MatTrakr follows the platform contract of the Mat apps
+([MatDesign docs/PLATFORM.md](https://github.com/Real-TTX/MatDesign/blob/dev/docs/PLATFORM.md)), through the shared
+package MatPlatform (copied into [`src/MatTrakr/MatPlatform`](src/MatTrakr/MatPlatform), never edited there), so that
+Mattiverse can show, watch and set it up:
+
+| Endpoint | What | Access |
+|---|---|---|
+| `GET /api` | the description of the app: pages, tiles, settings, actions, roles (German or English by `Accept-Language`) | anonymous |
+| `GET /api/health` | `ok` / `degraded` / `down` with the checks `database` and `administrators` (503 for `down`; the Docker `HEALTHCHECK` calls it) | anonymous |
+| `GET /api/state`, `GET /api/state/{key}` | the tiles: active users, lists, entries, watched or read, ratings, shared lists, uploaded covers (bytes), database size (bytes), last change, TMDb search ready | key or token |
+| `GET` / `PUT /api/configure` | the two API keys of *Administration → Einstellungen* (`tmdbApiKey`, `googleBooksApiKey`); secrets, only ever sent back as `{"isSet": true\|false}`; `""` clears one | key or token |
+| `POST /api/actions/{id}` | `testTmdb` (checks the TMDb key), `cleanupSessions` (deletes expired sessions); the links `openAdmin`, `openSettings`, `openBackup` open the admin pages | key or token |
+
+The roles offered to MatIdentity are `admin`, `verwalter` and `user` (Administrator, Verwalter, User).
+
+### Sign-in through MatIdentity
+
+With `MATIDENTITY_AUTHORITY` set, a visitor who is not signed in goes straight to MatIdentity (OpenID Connect, code
+with PKCE) and comes back signed in. The local sign-in stays reachable at **`/Account/Login?local=1`** (the way in for
+the administrator when MatIdentity is down; it is also shown when MatIdentity cannot be reached).
+
+- Register MatTrakr in MatIdentity with the redirect address `https://<mattrakr>/signin-oidc` and the signed-out address
+  `https://<mattrakr>/signout-callback-oidc`.
+- The person is found by the claim `sub`; at the first sign-in an existing user whose **user name is the e-mail
+  address** is linked, otherwise a new user (with the three default lists and no local password) is created.
+- When MatIdentity sends the claim `role` (`admin`, `verwalter`, `user`), MatTrakr follows it at every sign-in (the last
+  active administrator is never demoted); without it, the roles stay as set in *Administration → Benutzer*.
+  Deactivated users are refused.
+- Signing out ends the session in MatTrakr and at MatIdentity.
 
 ### The `/app/data` volume
 

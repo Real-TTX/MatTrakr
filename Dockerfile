@@ -11,6 +11,12 @@ RUN dotnet publish src/MatTrakr/MatTrakr.csproj -c Release -o /app/publish /p:Us
 
 # ---------- Runtime stage ----------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+
+# curl is required for the container HEALTHCHECK (the aspnet image ships without it).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 ARG APP_VERSION=local
@@ -22,5 +28,9 @@ COPY --from=build /app/publish .
 
 EXPOSE 9242
 VOLUME ["/app/data"]
+
+# The platform health (MatDesign docs/PLATFORM.md): 200 for ok and degraded, 503 for down (a degraded app is not restarted).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:9242/api/health || exit 1
 
 ENTRYPOINT ["dotnet", "MatTrakr.dll"]
