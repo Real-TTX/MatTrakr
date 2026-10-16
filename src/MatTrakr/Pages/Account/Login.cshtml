@@ -8,12 +8,32 @@
 <h1 class="mt-auth-title">Anmelden</h1>
 <p class="mt-auth-sub">Melde dich an, um deine Listen zu verwalten.</p>
 
+@if (Model.SsoError)
+{
+    <div id="login-sso-error" class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>Die Anmeldung über MatIdentity ist fehlgeschlagen oder MatIdentity ist gerade nicht erreichbar. Versuche es erneut oder melde dich hier mit deinem lokalen Konto an.</span></div>
+}
+
+@if (Model.IdentityEnabled)
+{
+    @if (Model.SignedOut)
+    {
+        <p class="mt-auth-sub">Du bist abgemeldet – hier und bei MatIdentity.</p>
+    }
+    <a id="login-sso" href="@Model.IdentitySignInUrl" class="mat-btn mat-btn--primary mat-btn--block">@Ui.Icon("login")<span>Mit MatIdentity anmelden</span></a>
+    @if (!Model.ShowLocalForm)
+    {
+        <p class="mt-auth-sub"><a href="@Model.LocalSignInUrl">Mit lokalem Konto anmelden</a></p>
+    }
+}
+
 @if (!string.IsNullOrEmpty(Model.Error))
 {
     <div class="mat-alert mat-alert--danger" role="alert">@Ui.Icon("alert")<span>@Model.Error</span></div>
 }
 
-<form method="post" class="mt-auth-form">
+@if (Model.ShowLocalForm)
+{
+<form method="post" class="mt-auth-form" id="login-form">
     <input type="hidden" asp-for="ReturnUrl" value="@Model.ReturnUrl" />
 
     <div class="mat-field">
@@ -39,5 +59,6 @@
         <span class="mat-check__text">Angemeldet bleiben</span>
     </label>
 
-    <button type="submit" class="mat-btn mat-btn--primary mat-btn--block">@Ui.Icon("login")<span>Anmelden</span></button>
+    <button type="submit" class="mat-btn @(Model.IdentityEnabled ? "mat-btn--secondary" : "mat-btn--primary") mat-btn--block">@Ui.Icon("login")<span>Anmelden</span></button>
 </form>
+}

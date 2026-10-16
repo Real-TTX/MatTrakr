@@ -30,6 +30,8 @@ public class CurrentUser : ICurrentUser
 public static class AuthConstants
 {
     public const string Scheme = "MatTrakrCookie";
+    /// <summary>The scheme the OpenID Connect handler of MatIdentity signs in with (never used for a session; see Program.cs).</summary>
+    public const string ExternalScheme = "MatTrakrExternal";
     public const string UserIdClaim = "mt_uid";
     public const string SessionTokenClaim = "mt_token";
     public const string RoleClaim = "mt_role";

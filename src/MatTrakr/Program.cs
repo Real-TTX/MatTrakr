@@ -1,8 +1,11 @@
+using MatPlatform;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using MatTrakr.Data;
+using MatTrakr.Platform;
 using MatTrakr.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +48,12 @@ builder.Services.AddScoped(sp => new BackupService(
     dbPath, dataPath,
     sp.GetRequiredService<IServiceScopeFactory>(),
     sp.GetRequiredService<ILogger<BackupService>>()));
+builder.Services.AddScoped(sp => new InstanceStatusService(sp.GetRequiredService<AppDbContext>(), dbPath));
+
+// The Mat platform contract (MatDesign docs/PLATFORM.md): /api, /api/health, /api/state, /api/configure, /api/actions,
+// MAT_API_KEY and the optional MATIDENTITY_* variables. The package MatPlatform (a copy in MatPlatform/) serves the
+// endpoints; TrakrPlatform describes MatTrakr and supplies the values.
+var platform = builder.AddMatPlatform<TrakrPlatform>(TrakrPlatform.Describe);
 
 builder.Services.AddHttpClient("TMDb", c =>
 {
@@ -63,9 +72,34 @@ builder.Services.AddHttpClient("OpenLibrary", c =>
     c.DefaultRequestHeaders.UserAgent.ParseAdd("MatTrakr/1.0");
 });
 
-builder.Services
+var authentication = builder.Services
     .AddAuthentication(AuthConstants.Scheme)
     .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(AuthConstants.Scheme, _ => { });
+
+// Sign-in through MatIdentity, only when MATIDENTITY_AUTHORITY is set (nothing changes without it). The person is signed
+// in with MatTrakr's own DB-backed session by TrakrIdentityUsers; the OpenID Connect handler still needs a scheme that
+// can sign in and out, which is this cookie (it never carries a sign-in of its own).
+if (platform.IdentityEnabled)
+{
+    authentication.AddCookie(AuthConstants.ExternalScheme, o => o.Cookie.Name = "MatTrakr.External");
+}
+authentication.AddMatIdentitySignIn<TrakrIdentityUsers>(platform, o =>
+{
+    o.CookieScheme = AuthConstants.ExternalScheme;
+    o.LoginPath = "/Account/Login";
+    o.AccessDeniedPath = "/Account/AccessDenied";
+});
+
+if (platform.IdentityEnabled)
+{
+    // Behind a reverse proxy the address MatIdentity sends the browser back to (/signin-oidc) must be the public https one.
+    builder.Services.Configure<ForwardedHeadersOptions>(o =>
+    {
+        o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+        o.KnownIPNetworks.Clear();
+        o.KnownProxies.Clear();
+    });
+}
 
 builder.Services.AddAuthorization(options =>
 {
@@ -94,6 +128,11 @@ using (var scope = app.Services.CreateScope())
 await DbSeeder.SeedAsync(app.Services);
 
 // --- Pipeline ----------------------------------------------------------------
+if (platform.IdentityEnabled)
+{
+    app.UseForwardedHeaders();
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -106,6 +145,7 @@ contentTypes.Mappings[".webmanifest"] = "application/manifest+json";
 app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
 
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -113,6 +153,7 @@ app.UseAuthorization();
 app.UseMiddleware<MustChangePasswordMiddleware>();
 
 app.MapRazorPages();
+app.MapMatPlatform();
 
 // Serves locally-stored cover images (manual entries). Public like other covers.
 app.MapGet("/media/cover/{id:long}", async (long id, AppDbContext db) =>

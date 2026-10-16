@@ -1,0 +1,29 @@
+using MatPlatform;
+using MatTrakr.Services;
+
+namespace MatTrakr.Platform;
+
+/// <summary>
+/// MatTrakr's side of the sign-in through MatIdentity (MatPlatform <see cref="IMatIdentityUsers"/>): the person is mapped to a
+/// local user by <see cref="UserService.SignInExternalAsync"/> (by <c>sub</c>, else the user named like the e-mail address, else a
+/// new user; the claim <c>role</c> when it is there) and then signed in with MatTrakr's own DB-backed session, like a local sign-in,
+/// keeping the ID token with the session for the sign-out at MatIdentity.
+/// </summary>
+public sealed class TrakrIdentityUsers(UserService users, AuthService auth, ILogger<TrakrIdentityUsers> log) : IMatIdentityUsers
+{
+    public async Task<MatIdentitySignInResult> SignInAsync(MatIdentityPerson person, HttpContext http, CancellationToken ct)
+    {
+        var identity = new ExternalIdentity(person.Subject, person.Email, person.Name, person.PreferredUserName, person.Role);
+
+        var result = await users.SignInExternalAsync(identity, ct);
+        if (result.User is not { } user)
+        {
+            return MatIdentitySignInResult.Refused(result.Error ?? "refused");
+        }
+
+        await auth.SignInAsync(http, user, persistent: true, person.IdToken);
+        log.LogInformation("User {UserId} ({Username}) signed in through MatIdentity", user.Id, user.Username);
+
+        return MatIdentitySignInResult.Success();
+    }
+}
