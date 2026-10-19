@@ -126,7 +126,12 @@ public class BackupService
             }
 
             using (var scope = _scopeFactory.CreateScope())
-                await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync(ct);
+            {
+                // A copy taken while MatTrakr migrated carries its lock; nothing else migrates this file now.
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                await MigrationLock.ReleaseStaleAsync(db.Database, ct);
+                await db.Database.MigrateAsync(ct);
+            }
 
             var cfgNote = cfgRestored ? " inkl. Konfiguration (API-Keys)" : "";
             return (true, $"Wiederhergestellt{cfgNote}. Sicherheitskopie der vorherigen Daten: {Path.GetFileName(safety)}.");

@@ -123,7 +123,10 @@ var app = builder.Build();
 // --- Migrate + seed on startup ----------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
-    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    if (await MigrationLock.ReleaseStaleAsync(db.Database))
+        app.Logger.LogWarning("Removed a migration lock left behind by a process that was stopped while it migrated the database.");
+    await db.Database.MigrateAsync();
 }
 await DbSeeder.SeedAsync(app.Services);
 
