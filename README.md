@@ -192,8 +192,8 @@ With `MATIDENTITY_AUTHORITY` set, a visitor who is not signed in goes straight t
 with PKCE) and comes back signed in. The local sign-in stays reachable at **`/Account/Login?local=1`** (the way in for
 the administrator when MatIdentity is down; it is also shown when MatIdentity cannot be reached).
 
-- Register MatTrakr in MatIdentity with the redirect address `https://<mattrakr>/signin-oidc` and the signed-out address
-  `https://<mattrakr>/signout-callback-oidc`.
+- Register MatTrakr in MatIdentity with the redirect address `https://<mattrakr>/signin-oidc`, the signed-out address
+  `https://<mattrakr>/signout-callback-oidc` and the back-channel logout address `https://<mattrakr>/signout-backchannel`.
 - The person is found by the claim `sub`; at the first sign-in a new user (with the three default lists and no local
   password) is created.
 - An existing user whose **user name is the e-mail address** is **not** linked by the name alone (anyone can register or
@@ -206,6 +206,10 @@ the administrator when MatIdentity is down; it is also shown when MatIdentity ca
   active administrator is never demoted); without it, the roles stay as set in *Administration → Benutzer*.
   Deactivated users are refused.
 - Signing out ends the session in MatTrakr and at MatIdentity.
+- Signing out at MatIdentity (or an administrator ending the person's sessions there) ends them in MatTrakr too: MatIdentity
+  posts a signed logout token to `POST /signout-backchannel` (MatPlatform 1.4.0, only with `MATIDENTITY_AUTHORITY`). A token
+  with a `sid` deletes the sessions started with that MatIdentity session, one with `sub` alone every session of the linked
+  user; the browser of a deleted session is signed out at its next request.
 
 ### The `/app/data` volume
 

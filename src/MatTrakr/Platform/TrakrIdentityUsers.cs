@@ -10,8 +10,9 @@ namespace MatTrakr.Platform;
 /// and then signed in with MatTrakr's own DB-backed session, like a local sign-in, keeping the ID token with the session for the
 /// sign-out at MatIdentity. An unlinked user named like the e-mail address is not entered: MatPlatform keeps a pending link and the
 /// local sign-in links it after its password (<see cref="Pages.Account.LoginModel"/>).
+/// The back-channel logout (<see cref="IMatIdentitySessions"/>) deletes the session rows (<see cref="AuthService.EndIdentitySessionsAsync"/>).
 /// </summary>
-public sealed class TrakrIdentityUsers(UserService users, AuthService auth, ILogger<TrakrIdentityUsers> log) : IMatIdentityUsers
+public sealed class TrakrIdentityUsers(UserService users, AuthService auth, ILogger<TrakrIdentityUsers> log) : IMatIdentityUsers, IMatIdentitySessions
 {
     public async Task<MatIdentitySignInResult> SignInAsync(MatIdentityPerson person, HttpContext http, CancellationToken ct)
     {
@@ -29,9 +30,15 @@ public sealed class TrakrIdentityUsers(UserService users, AuthService auth, ILog
             return MatIdentitySignInResult.Refused(result.Error ?? "refused");
         }
 
-        await auth.SignInAsync(http, user, persistent: true, person.IdToken);
+        await auth.SignInAsync(http, user, persistent: true, person.IdToken, person.SessionId);
         log.LogInformation("User {UserId} ({Username}) signed in through MatIdentity", user.Id, user.Username);
 
         return MatIdentitySignInResult.Success();
+    }
+
+    public async Task EndSessionsAsync(string? subject, string? sessionId, CancellationToken ct)
+    {
+        var ended = await auth.EndIdentitySessionsAsync(subject, sessionId, ct);
+        log.LogInformation("MatIdentity signed out {Subject} (sid {SessionId}): {Count} session(s) ended", subject, sessionId, ended);
     }
 }

@@ -45,6 +45,8 @@ public class AppDbContext : DbContext
             e.HasIndex(x => x.Token).IsUnique();
             e.Property(x => x.Token).HasMaxLength(64).IsRequired();
             e.Property(x => x.IdentityToken).HasMaxLength(8000);
+            e.Property(x => x.IdentitySessionId).HasMaxLength(200);
+            e.HasIndex(x => x.IdentitySessionId);
             e.HasOne(x => x.User).WithMany(u => u.Sessions)
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });

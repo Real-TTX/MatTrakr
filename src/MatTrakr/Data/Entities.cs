@@ -111,6 +111,12 @@ public class UserSession : AuditableEntity
     /// </summary>
     public string? IdentityToken { get; set; }
 
+    /// <summary>
+    /// The session at MatIdentity this session belongs to (the claim <c>sid</c>; null for a local sign-in or when MatIdentity sent none):
+    /// a back-channel logout that names it deletes this row.
+    /// </summary>
+    public string? IdentitySessionId { get; set; }
+
     public User? User { get; set; }
 }
 

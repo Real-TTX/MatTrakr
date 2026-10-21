@@ -63,6 +63,7 @@ public sealed class PendingLinkTests(IdentityFactory site) : IClassFixture<Ident
         var session = await WithDbAsync(db => db.UserSessions.AsNoTracking().SingleAsync(s => s.Token == browser.Get(AuthConstants.CookieName)));
         Assert.Equal(owner.Id, session.UserId);
         Assert.Equal("id-token-" + email, session.IdentityToken);
+        Assert.Equal("sid-" + email, session.IdentitySessionId);
 
         // From now on MatIdentity finds the account by sub.
         var (target, _) = await MatIdentitySignInAsync(Person(email));
@@ -190,7 +191,7 @@ public sealed class PendingLinkTests(IdentityFactory site) : IClassFixture<Ident
     }
 
     private static MatIdentityPerson Person(string email, string? role = null)
-        => new("sub-" + email, email.ToUpperInvariant(), "Someone", "someone", role, "id-token-" + email, new ClaimsPrincipal());
+        => new("sub-" + email, email.ToUpperInvariant(), "Someone", "someone", role, "id-token-" + email, new ClaimsPrincipal()) { SessionId = "sid-" + email };
 
     private async Task<(User User, string Name)> CreateUserAsync(string password)
     {

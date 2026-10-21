@@ -39,9 +39,10 @@ public class AuthService
 
     /// <summary>
     /// Creates a session row and writes the token cookie. <paramref name="identityToken"/> is the ID token of MatIdentity
-    /// for a sign-in there (kept with the session for the sign-out at MatIdentity), null for a local sign-in.
+    /// for a sign-in there (kept with the session for the sign-out at MatIdentity), null for a local sign-in; <paramref name="identitySessionId"/>
+    /// is its session there (the claim <c>sid</c>), for the back-channel logout (<see cref="EndIdentitySessionsAsync"/>).
     /// </summary>
-    public async Task SignInAsync(HttpContext ctx, User user, bool persistent, string? identityToken = null)
+    public async Task SignInAsync(HttpContext ctx, User user, bool persistent, string? identityToken = null, string? identitySessionId = null)
     {
         var session = new UserSession
         {
@@ -49,6 +50,7 @@ public class AuthService
             Token = Guid.NewGuid().ToString("N"),
             ExpiresDate = DateTime.UtcNow.Add(SessionLifetime),
             IdentityToken = string.IsNullOrEmpty(identityToken) ? null : identityToken,
+            IdentitySessionId = string.IsNullOrEmpty(identitySessionId) ? null : identitySessionId,
         };
         _db.UserSessions.Add(session);
         await _db.SaveChangesAsync();
@@ -83,6 +85,26 @@ public class AuthService
         }
         ctx.Response.Cookies.Delete(AuthConstants.CookieName, new CookieOptions { Path = "/" });
         return identityToken;
+    }
+
+    /// <summary>
+    /// The back-channel logout of MatIdentity: with <paramref name="identitySessionId"/> deletes the sessions started with that <c>sid</c>,
+    /// with <paramref name="subject"/> alone every session of the local user linked to it (its local ones too). The cookie of a deleted
+    /// session is no longer signed in at its next request. Unknown: nothing is deleted. Returns how many sessions ended.
+    /// </summary>
+    public Task<int> EndIdentitySessionsAsync(string? subject, string? identitySessionId, CancellationToken ct = default)
+    {
+        if (!string.IsNullOrEmpty(identitySessionId))
+        {
+            return _db.UserSessions.Where(s => s.IdentitySessionId == identitySessionId).ExecuteDeleteAsync(ct);
+        }
+
+        if (!string.IsNullOrEmpty(subject))
+        {
+            return _db.UserSessions.Where(s => s.User!.ExternalSubject == subject).ExecuteDeleteAsync(ct);
+        }
+
+        return Task.FromResult(0);
     }
 
     /// <summary>Deletes the sessions that have expired; returns how many.</summary>

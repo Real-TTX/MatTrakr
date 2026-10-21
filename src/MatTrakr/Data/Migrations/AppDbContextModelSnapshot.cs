@@ -369,6 +369,10 @@ namespace MatTrakr.Data.Migrations
                     b.Property<DateTime?>("ExpiresDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("IdentitySessionId")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("IdentityToken")
                         .HasMaxLength(8000)
                         .HasColumnType("TEXT");
@@ -388,6 +392,8 @@ namespace MatTrakr.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdentitySessionId");
 
                     b.HasIndex("Token")
                         .IsUnique();

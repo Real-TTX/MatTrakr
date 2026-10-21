@@ -127,6 +127,7 @@ public class LoginModel : PageModel
 
         // A pending link of MatIdentity is taken by exactly the account it was made for (and deleted for any other).
         var identityToken = (string?)null;
+        var identitySessionId = (string?)null;
         if (MatIdentityPendingLink.TakeFor(HttpContext, user.Id.ToString(CultureInfo.InvariantCulture)) is { } link)
         {
             var linked = await _users.LinkExternalAsync(user.Id, new ExternalIdentity(link.Subject, link.Email, link.Name, link.PreferredUserName, link.Role), HttpContext.RequestAborted);
@@ -134,10 +135,11 @@ public class LoginModel : PageModel
             {
                 user = linked;
                 identityToken = link.IdToken;
+                identitySessionId = link.SessionId;
             }
         }
 
-        await _auth.SignInAsync(HttpContext, user, RememberMe, identityToken);
+        await _auth.SignInAsync(HttpContext, user, RememberMe, identityToken, identitySessionId);
 
         if (user.MustChangePassword)
             return Redirect("/Account/ChangePassword");

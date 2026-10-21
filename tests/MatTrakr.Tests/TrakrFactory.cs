@@ -8,6 +8,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 
 // The factories hand their settings to Program through environment variables (Program reads them before the host is built),
 // so the test classes run one after another.
@@ -23,6 +25,10 @@ namespace MatTrakr.Tests;
 public class TrakrFactory : WebApplicationFactory<Program>
 {
     public const string ApiKey = "test-key-0123456789";
+
+    /// <summary>The key MatIdentity signs with in the tests (made here, no network); it is in the fixed configuration's keys.</summary>
+    public static readonly SigningCredentials SigningCredentials
+        = new(new RsaSecurityKey(RSA.Create(2048)) { KeyId = "test-key" }, SecurityAlgorithms.RsaSha256);
 
     private readonly string _data = Path.Combine(Path.GetTempPath(), "mattrakr-tests-" + Guid.NewGuid().ToString("N"));
     private readonly string? _authority;
@@ -63,6 +69,7 @@ public class TrakrFactory : WebApplicationFactory<Program>
                 TokenEndpoint = _authority + "/connect/token",
                 EndSessionEndpoint = _authority + "/connect/logout",
             };
+            configuration.SigningKeys.Add(SigningCredentials.Key);
 
             builder.ConfigureTestServices(services =>
             {
